@@ -14,7 +14,7 @@ DS Style is a custom kernel for the **EZ-FLASH OMEGA Definitive Edition**. It is
 - Title and box-art thumbnail modes
 - Favourite and recent game support
 - Multi-language launcher text
-- Safer UI sound handling
+- UI sound
 - Runtime settings stored in readable `SYSTEM/SETTINGS.TXT`
 
 ## Building
@@ -50,6 +50,7 @@ For normal users, the recommended route is **DS Style Customiser**, which create
 ## Credits
 
 - Original kernel source by EZ-FLASH
+- SimpleLight custom kernel by Sterophonick
 - DS Style custom kernel by FrankieT19
 - FatFs by ChaN, as used by the upstream kernel
 
