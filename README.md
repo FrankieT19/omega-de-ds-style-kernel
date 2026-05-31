@@ -1,6 +1,6 @@
 # DS Style Kernel for EZ-FLASH OMEGA Definitive Edition
 
-DS Style is a custom kernel for the **EZ-FLASH OMEGA Definitive Edition**. It is based on the official EZ-FLASH OMEGA DE kernel source and replaces the stock launcher with a Nintendo DS-inspired interface, theme system, thumbnail views, language options, and related quality-of-life changes.
+DS Style is a custom kernel for the **EZ-FLASH OMEGA Definitive Edition**. It is based on the official EZ-FLASH OMEGA DE kernel source and Sterophonick's SimpleLight custom kernel and replaces the stock launcher with a Nintendo DS-inspired interface, theme system, thumbnail views, language options, and related quality-of-life changes.
 
 > [!WARNING]
 > This repository is for the **EZ-FLASH OMEGA Definitive Edition only**. Do not flash this build to the original EZ-FLASH OMEGA.
@@ -14,7 +14,7 @@ DS Style is a custom kernel for the **EZ-FLASH OMEGA Definitive Edition**. It is
 - Title and box-art thumbnail modes
 - Favourite and recent game support
 - Multi-language launcher text
-- UI sound
+- UI sounds
 - Runtime settings stored in readable `SYSTEM/SETTINGS.TXT`
 
 ## Building
