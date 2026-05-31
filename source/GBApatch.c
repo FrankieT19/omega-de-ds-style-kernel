@@ -64,12 +64,31 @@ void Write(u32 romaddress, const u8* buffer, u32 size)
 		SetPSRampage(page);
 		
 		for(x=0;x<size/2;x++)
-			((vu16*)(PSRAMBase_S98 + Address))[x] = ((vu16*)buffer)[x];//todo »¹Òª´¦Àípsram page
+			((vu16*)(PSRAMBase_S98 + Address))[x] = ((vu16*)buffer)[x];//todo ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½psram page
 						
 		//DEBUG_printf("address{%x}:%x %x %x %x", romaddress,page,Address,size ,((vu32*)buffer)[0]);
 		SetPSRampage(0);
 	}
 }
+//------------------------------------------------------------------
+void Patch_somegame(u32 *Data)
+{
+	u32 size = 0x7FF0;
+	if( *(u32*)GAMECODE == 0x50424732 )
+	{
+		for(u32 ii=0;ii<0x100;ii++)
+		{
+			if(0x3000000==Data[ii])
+			{
+				if(0x8000 ==Data[ii+1] )
+				{
+					Write((ii+1)*4,(u8*)&size,4 );
+				}
+			}
+		}
+	}
+}
+
 //------------------------------------------------------------------
 bool IWRAM_CODE PatchDragonBallZ(u32 *Data)
 {
@@ -253,14 +272,14 @@ void IWRAM_CODE PatchInternal(u32* Data,int iSize,u32 offset)
     {
       case 0x3007FFC: // IRQ handler
         {
-          Add2(ii, 0x3007FF4);//0x3007FFCµÄÎ»ÖÃ
+          Add2(ii, 0x3007FF4);//0x3007FFCï¿½ï¿½Î»ï¿½ï¿½
         }
         break;
-      case 0x3FFFFFC: // IRQ handler
-        {
-          Add2(ii, 0x3007FF4);
-        }
-        break; 
+	  case 0x3FFFFFC: // IRQ handler
+	  {
+		  Add2(ii, 0x3007FF4);
+	  }
+	  break;
     }
   }
 }
@@ -391,7 +410,7 @@ void Patch_Reset_Sleep(u32 *Data)
   u32 Return_address_offset = p_patch_Return_address_L-p_patch_start;
 
   dmaCopy((void*)p_patch_start,patchbuffer, p_patch_end-p_patch_start);
-  *(vu32*)(patchbuffer+Return_address_offset) = Return_address;//ÐÞ¸Ägba_sleep_patch_binÀïÃæµÄ·µ»ØµØÖ·
+  *(vu32*)(patchbuffer+Return_address_offset) = Return_address;//ï¿½Þ¸ï¿½gba_sleep_patch_binï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½Øµï¿½Ö·
 
 	u16 read5 = Read_SET_info(assress_edit_sleephotkey_0); 
 	u16 read6 = Read_SET_info(assress_edit_sleephotkey_1); 
@@ -604,6 +623,7 @@ void GBApatch_PSRAM(u32* address,int filesize)//Only once
 	CheckNes(address);
 	PatchNes(address);
 	PatchDragonBallZ(address);
+	//Check_Fire_Emblem();
 	Patch_somegame(address);
 	
 	if( (gl_rts_on==1) && (gl_cheat_on == 0)  && (gl_reset_on == 0)  && (gl_sleep_on == 0)  ) {
@@ -648,7 +668,7 @@ void GBApatch_NOR(u32* address,int filesize,u32 offset)
 		B_install_handler = 0xEA000000|((iTrimSize-8)/4);
 		Write(0,(u8*)&B_install_handler , 4); //B
 		spend_address = Get_spend_address(address);
-		
+
 		Patch_somegame(address);
   }
 	PatchNes(address);
@@ -726,7 +746,7 @@ u32 Check_pat(TCHAR* gamefilename)
 	
 	TCHAR patnamebuf[100];	
 	make_pat_name(patnamebuf,gamefilename);
-	res=f_chdir("/PATCH");
+	res=f_chdir("/SYSTEM/PATCH");
 	if(res == FR_OK)
 	{
 		res = f_open(&gfile,patnamebuf, FA_READ);
@@ -773,8 +793,8 @@ void Make_pat_file(TCHAR* gamefilename)
 	u32 written;
 	u32 w_buffer[16];
 	
-	res = f_mkdir("/PATCH");
-	res=f_chdir("/PATCH");
+	res = f_mkdir("/SYSTEM/PATCH");
+	res=f_chdir("/SYSTEM/PATCH");
 	
 	memset(w_buffer, 0x00, sizeof(w_buffer));
 
@@ -827,7 +847,7 @@ u8 Check_mde_file(TCHAR* gamefilename)
 	TCHAR mdenamebuf[100];	
 	make_mde_name(mdenamebuf,gamefilename);
 	
-	res=f_chdir("/SAVER");
+	res=f_chdir("/SYSTEM/SAVER");
 	if(res == FR_OK)
 	{
 		res = f_open(&gfile,mdenamebuf, FA_OPEN_EXISTING);
@@ -912,8 +932,8 @@ u32 Check_RTS(TCHAR* gamefilename)
 	rtsnamebuf[len-2] = 't';
 	rtsnamebuf[len-1] = 's';	
 	
-	res = f_mkdir("/RTS");
-	res=f_chdir("/RTS");
+	res = f_mkdir("/SYSTEM/RTS");
+	res=f_chdir("/SYSTEM/RTS");
 	if(res != FR_OK){
 		return 0;
 	}
@@ -972,13 +992,13 @@ u32 use_internal_engine(u8 gamecode[])
 		count0x3007FFC = ((vu32*)pReadCache)[i+1];				
 
 		if( ((vu32*)pReadCache)[i] == *(vu32*)gamecode )
-		{	
-			result =1;			
+		{				
+			result = 1;
 			break;
 		}
 		i += (count0x3007FFC+1);
 	}	
-	if(result==0)	return 0;
+	if(result == 0) return 0;
 		
 	#ifdef DEBUG
 		//DEBUG_printf("%d: %X VS %X %x",i,((vu32*)pReadCache)[i],*(vu32*)gamecode,count0x3007FFC);
@@ -1416,21 +1436,3 @@ void Patch_SpecialROM_TrimSize(void)
 	}	
 }
 */
-//------------------------------------------------------------------
-void Patch_somegame(u32 *Data)
-{
-	u32 size = 0x7FF0;
-	if( *(u32*)GAMECODE == 0x50424732 )
-	{
-  	for(u32 ii=0;ii<0x100;ii++)
-  	{
-   	 if(0x3000000==Data[ii])
-    	{
-    		if(0x8000 ==Data[ii+1] )
-    		{
-    			Write((ii+1)*4,(u8*)&size,4 );
-    		}
-    	}
-		}
-	}
-}

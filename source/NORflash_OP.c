@@ -118,7 +118,7 @@ void Chip_Erase()
 void FormatNor()
 {
 	char msg[128];
-	sprintf(msg,"%s",gl_formatnor_info);
+	sprintf(msg,"%s",gl_formatnor_info1);
 
 	DrawHZText12(msg,0,60,90+13,gl_color_text,1);
 
@@ -198,6 +198,7 @@ void IWRAM_CODE WriteFlash_with32word(u32 address,u8 *buffer,u32 size)
 			*((vu16 *)(FlashBase_S98+address+loopwrite*32 +2*i )) = buf[loopwrite*16+i];
 		}	
 		*((vu16 *)(FlashBase_S98+address+loopwrite*32)) = 0x29;
+		
 		delay(40);
 		do
 		{
@@ -295,12 +296,12 @@ u32 Loadfile2NOR(TCHAR *filename, u32 NORaddress,u16 have_patch,u8 SAVEMODE)
 		dmaCopy(&tmpNorFS,&pNorFS[game_total_NOR], sizeof(FM_NOR_FS));
  
 		Clear(60,160-15,120,15,gl_color_cheat_black,1);	
-		DrawHZText12(gl_writing,0,70,160-15,gl_color_text,1);	
+		DrawHZText12(gl_writing,0,70,160-15,0x7fff,1);	
 		for(blocknum=0;blocknum<filesize;blocknum+=0x20000)
 		{		
 			sprintf(msg,"%luMb/%luMb",(blocknum)/0x20000,filesize/0x20000);
 			Clear(70+54,160-15,100,15,gl_color_cheat_black,1);
-			DrawHZText12(msg,0,70+54,160-15,gl_color_text,1);
+			DrawHZText12(msg,0,70+54,160-15,0x7fff,1);
 			Block_Erase(blocknum+NORaddress);
 
 			f_lseek(&gfile, blocknum);

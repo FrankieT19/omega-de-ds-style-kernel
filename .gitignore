@@ -1,0 +1,12 @@
+build/
+*.elf
+*.gba
+*.bin
+*.map
+*.o
+*.d
+*.lst
+*.bak
+*.tmp
+Thumbs.db
+desktop.ini

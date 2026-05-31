@@ -32,7 +32,7 @@ typedef enum {
 	SD_list=0,
 	NOR_list=1,
 	SET_win=2,
-	SET2_win=3,
+	START_win=3,
 	HELP=4,
 }PAGE_NUM ;
 //----------------------------
@@ -49,7 +49,6 @@ extern u16 gl_rts_on;
 extern u16 gl_sleep_on;
 extern u16 gl_cheat_on;
 
-/*
 extern u16 gl_color_selected;
 extern u16 gl_color_text;
 extern u16 gl_color_selectBG_sd;
@@ -59,7 +58,6 @@ extern u16 gl_color_cheat_count;
 extern u16 gl_color_cheat_black;
 extern u16 gl_color_NORFULL;
 extern u16 gl_color_btn_clean;
-*/
 
 u32 Setting_window(void);
 u32 Setting_window2(void);
