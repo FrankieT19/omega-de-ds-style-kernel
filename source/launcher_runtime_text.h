@@ -115,8 +115,8 @@ typedef enum {
 } LauncherTextId;
 typedef struct { const char *name; u16 stored; const char *text[LTXT_TOTAL]; } LauncherLanguagePack;
 static const LauncherLanguagePack launcher_language_packs[] = {
-    { "English", 0xE1E1, {
-        "English",
+    { "English (UK)", 0xE1E1, {
+        "English (UK)",
         "No recent game",
         "SD Card",
         "NOR Flash",

@@ -35,6 +35,58 @@ extern void UIAudio_PlayBackExport(void);
 extern void UIAudio_UpdateExport(void);
 extern void UIAudio_WaitForCurrentClipExport(u32 max_frames);
 extern void UIAudio_CutOffTrailingClipExport(void);
+
+static u32 cheat_use_chinese_folder = 0;
+
+static u32 CheatTextLooksGB2312(const char *str)
+{
+	u32 i;
+	u32 l = strlen(str);
+
+	for(i=0;i+1<l;i++)
+	{
+		u8 c1 = (u8)str[i];
+		u8 c2 = (u8)str[i+1];
+		if((c1 >= 0xA1) && (c1 <= 0xF7) && (c2 >= 0xA1) && (c2 <= 0xFE))
+		{
+			if((c1 >= 0xE0) && (i+2<l) && (((u8)str[i+1] & 0xC0) == 0x80) && (((u8)str[i+2] & 0xC0) == 0x80))
+				continue;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static u32 CheatTextVisibleColumns(const char *str)
+{
+	u32 i = 0;
+	u32 shown = 0;
+	u32 l = strlen(str);
+
+	while(i<l)
+	{
+		u8 c1 = (u8)str[i++];
+		if(c1 < 0x80)
+			shown++;
+		else if((i<l) && (c1 >= 0xA1) && (c1 <= 0xF7) && ((u8)str[i] >= 0xA1) && ((u8)str[i] <= 0xFE))
+		{
+			i++;
+			shown += 2;
+		}
+		else
+			shown++;
+	}
+	return shown;
+}
+
+static void DrawCheatText12(char *str, u16 len, u16 x, u16 y, u16 c, u8 isDrawDirect)
+{
+	u16 old_lang = gl_select_lang;
+	if((old_lang != 0xE2E2) && CheatTextLooksGB2312(str))
+		gl_select_lang = 0xE2E2;
+	DrawHZText12(str, len, x, y, c, isDrawDirect);
+	gl_select_lang = old_lang;
+}
 //------------------------------------------------------------------
 //------------------------------------------------------------------
 void Trim(char s[])
@@ -471,73 +523,70 @@ u32 Get_all_Section_val(FIL* file)
 	return Line;
 }
 //------------------------------------------------------------------
+static void Show_KEY_line(u32 line,u32 Select,u32 showoffset)
+{
+	char msg[256];
+	u32 X_offset=15;
+	u32 Y_offset=20;
+	u32 line_x = 14;
+	u16 name_color;
+	u32 row_y = Y_offset+line*line_x;
+	u32 msg_len;
+	u32 highlight_w;
+	u8 select;
+
+	ClearWithBG((u16*)gImage_SD, X_offset, row_y, 220, 13, 1);
+	if(line== Select)
+		name_color = gl_color_selected;
+	else
+		name_color = gl_color_text;
+
+	select = ((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].select;
+
+	if( ((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].is_section==1)
+	{
+		Clear(X_offset+3, row_y+4, 4, 4, name_color, 1);//section flag
+		sprintf(msg,"%s",((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname);
+		if(line== Select)
+		{
+			msg_len = CheatTextVisibleColumns(msg);
+			if(msg_len > 30) msg_len = 30;
+			highlight_w = msg_len * 6 + 8;
+			if(highlight_w < 24) highlight_w = 24;
+			Clear(X_offset+10, row_y, highlight_w, 13, gl_color_selectBG_sd, 1);
+		}
+		DrawCheatText12(msg,30,X_offset+13,row_y, name_color,1);
+	}
+	else
+	{
+		Draw_select_icon(X_offset+13,row_y,select);
+		sprintf(msg,"%s",((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname);
+		if(line== Select)
+		{
+			msg_len = CheatTextVisibleColumns(msg);
+			if(msg_len > 30) msg_len = 30;
+			highlight_w = 18 + msg_len * 6 + 8;
+			if(highlight_w < 36) highlight_w = 36;
+			if(highlight_w > 205) highlight_w = 205;
+			Clear(X_offset+10, row_y, highlight_w, 13, gl_color_selectBG_sd, 1);
+			Draw_select_icon(X_offset+13,row_y,select);
+		}
+		DrawCheatText12(msg,30,X_offset+15+13,row_y,name_color,1);
+	}
+}
+
 void Show_KEY_val(u32 total,u32 Select,u32 showoffset)
 {
 	u32 need_show;	
 	u32 line;
-	//char buffer_temp[128]={0};
-	
-	char msg[256];
-	
-	u32 X_offset=15;
-	u32 Y_offset=20;
-	u32 line_x = 14;
-	//u32 str_len;
-	u16 name_color;
-	
+
 	if(total<10)
 		need_show = total;
 	else
 		need_show = 10;
-		
+
 	for(line=0;line<need_show;line++)
-	{
-		if(line== Select)
-			name_color = gl_color_selected;
-		else
-			name_color = gl_color_text;
-			
-		u8 select	= ((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].select;
-		
-		if( ((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].is_section==1)
-		{
-			Clear(X_offset+3, Y_offset+line*line_x+4, 4, 4, gl_color_text, 1);//section flag
-			
-			sprintf(msg,"%s",((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname);		
-			
-			//int res = utf8_check(((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname,strlen(((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname));
-			//DEBUG_printf(" %x",res);
-		
-			//DEBUG_printf(" %x %x %x %x ",((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname[0],((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname[1],((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname[2],((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname[3]);
-	
-			//if(res==1)
-			//{
-				//Utf8ToGb2312(((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname,strlen(((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname),buffer_temp);
-				//sprintf(msg,"%s ",buffer_temp);
-			//}
-			
-			DrawHZText12(msg,30,X_offset+13,Y_offset+line*line_x, name_color,1);					
-		}
-		else
-		{
-			VBlankIntrWait();	
-			Draw_select_icon(X_offset+13,Y_offset+line*line_x,select)	;
-				
-			sprintf(msg,"%s",((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname);	
-			
-			/*int res = utf8_check(((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname,strlen(((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname));
-			if(res==1)
-			{
-				Utf8ToGb2312(((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname,strlen(((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname),buffer_temp);
-				sprintf(msg,"%s ",buffer_temp);
-			}*/
-			
-			DrawHZText12(msg,30,X_offset+15+13,Y_offset+line*line_x,name_color,1);	
-			//sprintf(msg,"%s",((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].KEY_val);	
-			//DrawHZText12(msg,20,X_offset+15+13+60,Y_offset+line*line_x,name_color,1);				
-		}
-			
-	}		
+		Show_KEY_line(line, Select, showoffset);
 }
 //------------------------------------------------------------------
 unsigned long str2hex( char*str)
@@ -743,7 +792,7 @@ u32 Change2cht_folder(u32 chtname)
 	}						
 	
 	
-	if(gl_select_lang == 0xE1E1)//english
+	if(!cheat_use_chinese_folder)
 	{
 		sprintf(currentpath,"/SYSTEM/CHEAT/Eng/%s",folder_name);
 	}
@@ -762,6 +811,7 @@ u32 Check_cheat_file(TCHAR *gamefilename)
 	u32 filesize;
 	u32 GAMEID=0;
 	u32 i;
+	cheat_use_chinese_folder = (gl_select_lang == 0xE2E2);
 
 	res = f_open(&gfile, gamefilename, FA_READ);
 	if(res == FR_OK)
@@ -810,7 +860,13 @@ u32 Check_cheat_file(TCHAR *gamefilename)
 					
 					u32 chtname= ((u32*)tempbuff)[i+1];
 
+					cheat_use_chinese_folder = (gl_select_lang == 0xE2E2);
 					res=Change2cht_folder(chtname);
+					if(res!=0)
+					{
+						cheat_use_chinese_folder = !cheat_use_chinese_folder;
+						res=Change2cht_folder(chtname);
+					}
 					if(res!=0)return 0;
 					memset(chtnamebuf,0x00,100);
 					sprintf(chtnamebuf,"%d%d%d%d.cht",HexToChar(((u8*)&chtname)[0]),HexToChar(((u8*)&chtname)[1]),HexToChar(((u8*)&chtname)[2]),HexToChar(  ((u8*)&chtname)[3] )  );			
@@ -876,12 +932,14 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 		Get_KEY_val(&gfile,"GameInfo","Name",buffer);
 		sprintf(msg,"%s ",buffer);
 		
-		DrawHZText12(msg,30,2,4, gl_color_text,1);
+		DrawCheatText12(msg,30,2,4, gl_color_text,1);
 		
 		u32 all_count = Get_all_Section_val(&gfile);
 		u32 Select = 1;
 		u32 showoffset = 0;
 		u32 re_show = 2;
+		u32 old_select = 1;
+		u32 old_showoffset = 0;
 			
 		if(all_count)
 		{
@@ -897,9 +955,19 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 					if(re_show>1)
 					{
 						ClearWithBG((u16*)gImage_SD, 0, 19, 240, 160-19, 1);
+						Show_KEY_val(all_count,Select,showoffset);
 					}
-					Show_KEY_val(all_count,Select,showoffset);
+					else if(old_showoffset == showoffset)
+					{
+						Show_KEY_line(old_select, Select, showoffset);
+						if(old_select != Select)
+							Show_KEY_line(Select, Select, showoffset);
+					}
+					else
+						Show_KEY_val(all_count,Select,showoffset);
 					Show_num(all_count,Select+showoffset+1);
+					old_select = Select;
+					old_showoffset = showoffset;
 					re_show = 0;
 				}								
 				scanKeys();
