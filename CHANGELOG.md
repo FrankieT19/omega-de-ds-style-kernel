@@ -2,8 +2,9 @@
 
 ## DS Style v6.6
 
-- Added exact-name custom thumbnail artwork for ROM hacks, homebrew, translations, prototypes, and other games that do not suit the normal game-code lookup.
-- Added exact-name custom thumbnail artwork for folders.
+- Added custom thumbnail support for folders and all files. Improved thumbnail scraper integration.
+- Each CUSTOM folder supports up to 256 images due to the GBA's RAM limitations.
+- Replaced the hardcoded GBA-folder preview with an editable CUSTOM artwork example.
 - Cached the available custom artwork names so normal file browsing remains responsive.
 - Added support for both 120 x 80 title thumbnails and 80 x 80 box thumbnails in the CUSTOM folders.
 

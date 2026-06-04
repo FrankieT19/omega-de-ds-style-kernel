@@ -4058,20 +4058,43 @@ static u32 Launcher_LoadCustomThumbnailByName(const char *name, u8 *dst)
 	return (res == FR_OK) && (rett == read_size);
 }
 
+static void Launcher_CustomThumbFileName(const char *filename, char *name, u32 name_size)
+{
+	const char *base;
+	const char *slash;
+	const char *backslash;
+	char *dot;
+
+	if(!name || !name_size)
+		return;
+	name[0] = '\0';
+	if(!filename)
+		return;
+
+	base = filename;
+	slash = strrchr(filename, '/');
+	backslash = strrchr(filename, '\\');
+	if(slash && (!backslash || (slash > backslash)))
+		base = slash + 1;
+	else if(backslash)
+		base = backslash + 1;
+
+	strncpy(name, base, name_size - 1);
+	name[name_size - 1] = '\0';
+	dot = strrchr(name, '.');
+	if(dot)
+		*dot = '\0';
+}
+
 u32 Load_ThumbnailEx(TCHAR *pfilename_pic, u8 *dst)
 {
   u32 rett;
   u32 res;
   TCHAR picpath[160];
   TCHAR custom_name[104];
-  char *dot;
   u32 read_size = Launcher_ThumbnailReadSize();
 
-	memset(custom_name, 0, sizeof(custom_name));
-	strncpy(custom_name, pfilename_pic, sizeof(custom_name) - 1);
-	dot = strrchr(custom_name, '.');
-	if(dot)
-		*dot = '\0';
+	Launcher_CustomThumbFileName(pfilename_pic, custom_name, sizeof(custom_name));
 
 	if(Launcher_LoadCustomThumbnailByName(custom_name, dst))
 		return 1;
@@ -5261,6 +5284,7 @@ static void Launcher_ResetThumbCache(void)
 static void Launcher_LoadThumbCacheForIndex(LauncherThumbCache *cache, u32 absolute_index)
 {
 	TCHAR *name = 0;
+	TCHAR custom_name[104];
 
 	if(!cache)
 		return;
@@ -5294,8 +5318,11 @@ static void Launcher_LoadThumbCacheForIndex(LauncherThumbCache *cache, u32 absol
 	if(name)
 	{
 		u32 len = strlen(name);
-		if(((len >= 3) && !strcasecmp(&(name[len - 3]), "gba")) ||
-		   ((len >= 3) && !strcasecmp(&(name[len - 3]), "agb")))
+		Launcher_CustomThumbFileName(name, custom_name, sizeof(custom_name));
+		cache->has_thumbnail = Launcher_LoadCustomThumbnailByName(custom_name, cache->thumb_data - LAUNCHER_THUMB_BMP_HEADER);
+		if(!cache->has_thumbnail &&
+		   (((len >= 3) && !strcasecmp(&(name[len - 3]), "gba")) ||
+		    ((len >= 3) && !strcasecmp(&(name[len - 3]), "agb"))))
 			cache->has_thumbnail = Load_ThumbnailEx(name, cache->thumb_data - LAUNCHER_THUMB_BMP_HEADER);
 	}
 }
@@ -5320,13 +5347,6 @@ static u32 Launcher_IsGBAFile(const TCHAR *name)
 	return !strcasecmp(&(name[len - 3]), "gba") || ((len >= 3) && !strcasecmp(&(name[len - 3]), "agb"));
 }
 
-static u32 Launcher_IsGBAFolderPlaceholder(const LauncherEntryInfo *info)
-{
-	if(!info || !info->name || !info->is_folder || Launcher_IsNORPage())
-		return 0;
-	return !strcasecmp(info->name, "GBA");
-}
-
 static u32 Launcher_ShouldUsePreviewPanel(const LauncherEntryInfo *info)
 {
 	if(!info || !info->name || Launcher_IsNORPage())
@@ -5334,7 +5354,7 @@ static u32 Launcher_ShouldUsePreviewPanel(const LauncherEntryInfo *info)
 	if(info->has_thumbnail)
 		return 1;
 	if(info->is_folder)
-		return Launcher_IsGBAFolderPlaceholder(info);
+		return 0;
 	return Launcher_IsGBAFile(info->name);
 }
 
@@ -5344,8 +5364,6 @@ static const u16 *Launcher_GetPreviewSourceForEntry(const LauncherEntryInfo *inf
 		return 0;
 	if(info->has_thumbnail)
 		return (const u16*)info->thumb_data;
-	if(Launcher_IsGBAFolderPlaceholder(info))
-		return Launcher_NotFoundImage();
 	if(!info->is_folder && Launcher_IsGBAFile(info->name))
 		return Launcher_NotFoundImage();
 	return 0;
