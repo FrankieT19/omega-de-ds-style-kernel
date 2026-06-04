@@ -111,6 +111,7 @@ static u32 launcher_start_title_scroll_frame = 0;
 #define LAUNCHER_THUMB_STYLE_TITLE 0
 #define LAUNCHER_THUMB_STYLE_BOX 1
 #define LAUNCHER_THUMB_BMP_HEADER 0x36
+#define LAUNCHER_CUSTOM_THUMB_MANIFEST_MAX 256
 #define LAUNCHER_SYSTEM_NAME_DISPLAY_MAX 11
 #define LAUNCHER_THEME_MODE_LIGHT 0
 #define LAUNCHER_THEME_MODE_DARK 1
@@ -121,6 +122,10 @@ static char launcher_start_preview_path[LAUNCHER_START_PREVIEW_CACHE_COUNT][LAUN
 static u8 launcher_start_preview_valid[LAUNCHER_START_PREVIEW_CACHE_COUNT];
 static u8 launcher_start_preview_mode[LAUNCHER_START_PREVIEW_CACHE_COUNT];
 static u32 launcher_start_preview_index[LAUNCHER_START_PREVIEW_CACHE_COUNT];
+static u8 launcher_custom_thumb_manifest_loaded[2];
+static u8 launcher_custom_thumb_manifest_present[2];
+static u16 launcher_custom_thumb_manifest_count[2];
+static u32 launcher_custom_thumb_manifest_hash[2][LAUNCHER_CUSTOM_THUMB_MANIFEST_MAX]EWRAM_BSS;
 
 static void Launcher_SaveSDState(void);
 static void Launcher_RestoreSDState(void);
@@ -3923,13 +3928,154 @@ void Sort_file(u32 game_total_SD)
 	}	
 }	
 //---------------------------------------------------------------------------------
+static u32 Launcher_CustomThumbHash(const char *name)
+{
+	u32 hash = 2166136261U;
+	char ch;
+
+	if(!name)
+		return 0;
+	while(*name)
+	{
+		ch = *name++;
+		if((ch >= 'A') && (ch <= 'Z'))
+			ch += ('a' - 'A');
+		hash ^= (u8)ch;
+		hash *= 16777619U;
+	}
+	return hash ? hash : 1;
+}
+
+static void Launcher_CustomThumbStripLine(char *line)
+{
+	char *src;
+	char *dst;
+	char *end;
+
+	if(!line)
+		return;
+	src = line;
+	while((*src == ' ') || (*src == '\t'))
+		src++;
+	if(src != line)
+		memmove(line, src, strlen(src) + 1);
+	end = line + strlen(line);
+	while((end > line) && ((end[-1] == '\r') || (end[-1] == '\n') || (end[-1] == ' ') || (end[-1] == '\t')))
+		*--end = '\0';
+	end = strrchr(line, '.');
+	if(end && !strcasecmp(end, ".bmp"))
+		*end = '\0';
+	dst = strchr(line, '/');
+	if(!dst)
+		dst = strchr(line, '\\');
+	if(dst)
+	{
+		src = dst + 1;
+		memmove(line, src, strlen(src) + 1);
+	}
+}
+
+static void Launcher_LoadCustomThumbManifest(u32 style)
+{
+	char path[32];
+	char name[112];
+	DIR custom_dir;
+	FILINFO custom_info;
+	u32 hash;
+
+	if(style > LAUNCHER_THUMB_STYLE_BOX)
+		style = LAUNCHER_THUMB_STYLE_TITLE;
+	if(launcher_custom_thumb_manifest_loaded[style])
+		return;
+
+	launcher_custom_thumb_manifest_loaded[style] = 1;
+	launcher_custom_thumb_manifest_present[style] = 0;
+	launcher_custom_thumb_manifest_count[style] = 0;
+	sprintf(path, "%s/CUSTOM", Launcher_ThumbnailFolder());
+	if(f_opendir(&custom_dir, path) != FR_OK)
+		return;
+
+	launcher_custom_thumb_manifest_present[style] = 1;
+	while(launcher_custom_thumb_manifest_count[style] < LAUNCHER_CUSTOM_THUMB_MANIFEST_MAX)
+	{
+		if((f_readdir(&custom_dir, &custom_info) != FR_OK) || !custom_info.fname[0])
+			break;
+		if(custom_info.fattrib & AM_DIR)
+			continue;
+		memset(name, 0, sizeof(name));
+		strncpy(name, custom_info.fname, sizeof(name) - 1);
+		Launcher_CustomThumbStripLine(name);
+		if(!name[0])
+			continue;
+		hash = Launcher_CustomThumbHash(name);
+		if(hash)
+			launcher_custom_thumb_manifest_hash[style][launcher_custom_thumb_manifest_count[style]++] = hash;
+	}
+	f_closedir(&custom_dir);
+}
+
+static u32 Launcher_ShouldTryCustomThumbnail(const char *name)
+{
+	u32 style = launcher_thumbnail_style;
+	u32 hash;
+	u32 i;
+
+	if(style > LAUNCHER_THUMB_STYLE_BOX)
+		style = LAUNCHER_THUMB_STYLE_TITLE;
+	if(!name || !name[0])
+		return 0;
+	Launcher_LoadCustomThumbManifest(style);
+	if(!launcher_custom_thumb_manifest_present[style])
+		return 0;
+	hash = Launcher_CustomThumbHash(name);
+	for(i = 0; i < launcher_custom_thumb_manifest_count[style]; i++)
+	{
+		if(launcher_custom_thumb_manifest_hash[style][i] == hash)
+			return 1;
+	}
+	return 0;
+}
+
+static u32 Launcher_LoadCustomThumbnailByName(const char *name, u8 *dst)
+{
+	u32 rett;
+	u32 res;
+	TCHAR picpath[160];
+	u32 read_size = Launcher_ThumbnailReadSize();
+
+	if(!dst || !Launcher_ShouldTryCustomThumbnail(name))
+		return 0;
+
+	memset(picpath, 0, sizeof(picpath));
+	sprintf(picpath, "%s/CUSTOM/%s.bmp", Launcher_ThumbnailFolder(), name);
+	res = f_open(&gfile, picpath, FA_READ);
+	if(res != FR_OK)
+		return 0;
+
+	UIAudio_StopForSharedBufferUse();
+	res = f_read(&gfile, dst, read_size, (UINT*)&rett);
+	f_close(&gfile);
+	return (res == FR_OK) && (rett == read_size);
+}
+
 u32 Load_ThumbnailEx(TCHAR *pfilename_pic, u8 *dst)
 {
   u32 rett;
   u32 res;
-  TCHAR picpath[36];
+  TCHAR picpath[160];
+  TCHAR custom_name[104];
+  char *dot;
   u32 read_size = Launcher_ThumbnailReadSize();
-	
+
+	memset(custom_name, 0, sizeof(custom_name));
+	strncpy(custom_name, pfilename_pic, sizeof(custom_name) - 1);
+	dot = strrchr(custom_name, '.');
+	if(dot)
+		*dot = '\0';
+
+	if(Launcher_LoadCustomThumbnailByName(custom_name, dst))
+		return 1;
+
 	res = f_open(&gfile, pfilename_pic, FA_READ);
 	if(res == FR_OK)
 	{
@@ -5134,7 +5280,12 @@ static void Launcher_LoadThumbCacheForIndex(LauncherThumbCache *cache, u32 absol
 		return;
 
 	if(absolute_index < folder_total)
+	{
+		name = pFolder[absolute_index].filename;
+		if(name)
+			cache->has_thumbnail = Launcher_LoadCustomThumbnailByName(name, cache->thumb_data - LAUNCHER_THUMB_BMP_HEADER);
 		return;
+	}
 
 	if(recents_view_active)
 		name = p_recently_play[absolute_index - folder_total];

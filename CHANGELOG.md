@@ -1,5 +1,12 @@
 # Changelog
 
+## DS Style v6.6
+
+- Added exact-name custom thumbnail artwork for ROM hacks, homebrew, translations, prototypes, and other games that do not suit the normal game-code lookup.
+- Added exact-name custom thumbnail artwork for folders.
+- Cached the available custom artwork names so normal file browsing remains responsive.
+- Added support for both 120 x 80 title thumbnails and 80 x 80 box thumbnails in the CUSTOM folders.
+
 ## DS Style v6.5
 
 - Added an Off option for the Start screen source, allowing startup to go straight to the SD browser.
