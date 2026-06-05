@@ -138,6 +138,9 @@ static const char *Launcher_AutoStartText(void);
 static void Launcher_CycleAutoStartKey(int dir);
 static const char *Launcher_StartSourceText(void);
 static void Launcher_CycleStartSource(void);
+static void Launcher_CycleStartEnabled(void);
+static const char *Launcher_OnOffText(u16 value);
+static void Launcher_LoadFavourites(void);
 static u32 Read_last_played_entry(TCHAR *out_path, u32 out_path_size, TCHAR *out_name, u32 out_name_size);
 static void Launcher_GetSDDisplayNameWithFavourite(u32 file_index, char *out, u32 out_size);
 static u32 Launcher_IsFavouriteSDIndex(u32 absolute_index);
@@ -380,6 +383,7 @@ TCHAR currentpath_temp[MAX_path_len];
 TCHAR current_filename[200];
 
 static u32 recents_view_active = 0;
+static u32 recents_view_favourites = 0;
 static TCHAR recents_return_path[MAX_path_len];
 static u32 recents_return_show_offset = 0;
 static u32 recents_return_file_select = 0;
@@ -387,6 +391,7 @@ static u32 recents_return_folder_select = 1;
 static u32 recents_saved_show_offset = 0;
 static u32 recents_saved_file_select = 0;
 static const char recents_virtual_path[] = "/Recently Played";
+static const char favourites_virtual_path[] = "/Favourites";
 
 TCHAR plugin[100]; //pogoshell plugin
 
@@ -2288,7 +2293,13 @@ static u32 Recent_GetPathAt(u32 index, TCHAR *out_path, u32 out_path_size, TCHAR
 		return 0;
 	out_path[0] = '\0';
 	out_name[0] = '\0';
-	if(index >= get_count())
+	if(recents_view_active && recents_view_favourites)
+	{
+		Launcher_LoadFavourites();
+		if(index >= launcher_favourite_count)
+			return 0;
+	}
+	else if(index >= get_count())
 		return 0;
 	p = strrchr(p_recently_play[index], '/');
 	if(!p)
@@ -2535,6 +2546,14 @@ static void Launcher_ReadStartSource(void)
 	char buf[32];
 	launcher_start_uses_favourites = 0;
 	launcher_start_screen_off = 0;
+
+	memset(buf, 0, sizeof(buf));
+	if(Launcher_SettingsReadValue("Start screen", buf, sizeof(buf)))
+	{
+		if((buf[0] == '0') || !strcasecmp(buf, "Off"))
+			launcher_start_screen_off = 1;
+	}
+
 	memset(buf, 0, sizeof(buf));
 	if(Launcher_SettingsReadValue("Start screen source", buf, sizeof(buf)))
 	{
@@ -2563,28 +2582,35 @@ static void Launcher_SaveStartSource(void)
 	Launcher_SaveUnifiedSettings();
 }
 
+static const char *Launcher_StartEnabledText(void)
+{
+	return Launcher_OnOffText(!launcher_start_screen_off);
+}
+
+static const char *Launcher_StartEnabledSettingName(void)
+{
+	return launcher_start_screen_off ? "Off" : "On";
+}
+
 static const char *Launcher_StartSourceText(void)
 {
-	if(launcher_start_screen_off)
-		return DSTEXT_OFF;
 	return launcher_start_uses_favourites ? DSTEXT_FAVOURITES : DSTEXT_LAST_PLAYED;
 }
 
 static const char *Launcher_StartSourceSettingName(void)
 {
-	if(launcher_start_screen_off)
-		return "Off";
 	return launcher_start_uses_favourites ? "Favourites" : "Last played";
+}
+
+static void Launcher_CycleStartEnabled(void)
+{
+	launcher_start_screen_off ^= 1;
+	Launcher_SaveStartSource();
 }
 
 static void Launcher_CycleStartSource(void)
 {
-	u32 mode = launcher_start_screen_off ? 2 : (launcher_start_uses_favourites ? 1 : 0);
-	mode++;
-	if(mode > 2)
-		mode = 0;
-	launcher_start_uses_favourites = (mode == 1);
-	launcher_start_screen_off = (mode == 2);
+	launcher_start_uses_favourites ^= 1;
 	Launcher_SaveStartSource();
 }
 
@@ -2748,6 +2774,44 @@ static void Launcher_DrawFavouriteHeart(int x, int y, u16 colour)
 	Launcher_ClearClip(x + 1, y + 3, 5, 1, colour);
 	Launcher_ClearClip(x + 2, y + 4, 3, 1, colour);
 	Launcher_ClearClip(x + 3, y + 5, 1, 1, colour);
+}
+
+static u32 Build_favourites_virtual_list(void)
+{
+	u32 count = 0;
+	u32 i;
+	TCHAR path_part[MAX_path_len];
+	TCHAR name[200];
+	u32 size = 0;
+
+	Launcher_LoadFavourites();
+	memset(pFilename_buffer, 0x00, sizeof(FM_FILE_FS) * MAX_files);
+	memset(p_recently_play, 0x00, sizeof(p_recently_play));
+	for(i = 0; (i < launcher_favourite_count) && (count < MAX_files); i++)
+	{
+		if(!Launcher_SplitFullPath(Launcher_FavouritesBuffer()[i], path_part, sizeof(path_part), name, sizeof(name)))
+			continue;
+		strncpy(p_recently_play[count], Launcher_FavouritesBuffer()[i], sizeof(p_recently_play[count]) - 1);
+		p_recently_play[count][sizeof(p_recently_play[count]) - 1] = '\0';
+		strncpy(pFilename_buffer[count].filename, name, sizeof(pFilename_buffer[count].filename) - 1);
+		pFilename_buffer[count].filename[sizeof(pFilename_buffer[count].filename) - 1] = '\0';
+		if(Get_file_size_path(Launcher_FavouritesBuffer()[i], &size))
+			pFilename_buffer[count].filesize = size;
+		else
+			pFilename_buffer[count].filesize = 0;
+		count++;
+	}
+	return count;
+}
+
+static void Launcher_SetRecentVirtualMode(u32 favourites)
+{
+	recents_view_favourites = favourites ? 1 : 0;
+	recents_saved_show_offset = 0;
+	recents_saved_file_select = 0;
+	strncpy(currentpath, recents_view_favourites ? favourites_virtual_path : recents_virtual_path, sizeof(currentpath) - 1);
+	currentpath[sizeof(currentpath) - 1] = '\0';
+	folder_select = 0;
 }
 
 static u32 Build_recent_virtual_list(void)
@@ -3576,7 +3640,7 @@ void ShowTime(u32 page_num ,u32 page_mode)
 	char msgtime[50];
 	char folder_title[64];
 	char folder_shown[24];
-	const char *recent_title = DSTEXT_RECENTLY_PLAYED;
+	const char *recent_title = recents_view_favourites ? DSTEXT_FAVOURITES : DSTEXT_RECENTLY_PLAYED;
 	//get time
 	rtc_enable();
 	rtc_gettime(datetime);
@@ -3621,6 +3685,7 @@ void ShowTime(u32 page_num ,u32 page_mode)
 
 		if(show_recent_title)
 		{
+			Launcher_ClearWithThemeBG(Launcher_GetTopbarBG(page_num), 66, 3, 118, 13);
 			Launcher_DrawTopbarTitle(page_num, recent_title);
 		}
 		else if(show_folder_title)
@@ -6116,14 +6181,12 @@ static void Launcher_CycleViewModeAndRedraw(u32 page_num, u32 show_offset, u32 f
 		*updata = 1;
 }
 
-static void Launcher_FavouritePrompt(u32 show_offset, u32 file_select)
+static void Launcher_FavouritePromptFullPath(const char *full)
 {
-	char full[512];
 	char msg2[80];
 	s32 fav_index;
-	u32 absolute_index = show_offset + file_select;
 
-	if(!Launcher_GetSDFileFullPath(absolute_index, full, sizeof(full)))
+	if(!full || !full[0])
 		return;
 
 	Launcher_LoadFavourites();
@@ -6188,6 +6251,16 @@ static void Launcher_FavouritePrompt(u32 show_offset, u32 file_select)
 			}
 		}
 	}
+}
+
+static void Launcher_FavouritePrompt(u32 show_offset, u32 file_select)
+{
+	char full[512];
+	u32 absolute_index = show_offset + file_select;
+
+	if(!Launcher_GetSDFileFullPath(absolute_index, full, sizeof(full)))
+		return;
+	Launcher_FavouritePromptFullPath(full);
 }
 
 //---------------------------------------------------------------------------------
@@ -6733,6 +6806,7 @@ typedef enum
     SETTINGS_BOOT_ENGINE,
     SETTINGS_AUTO_SAVE,
     SETTINGS_RESUME_LAST,
+    SETTINGS_START_ENABLED,
     SETTINGS_START_SOURCE,
     SETTINGS_AUTO_START,
     SETTINGS_ADDON_SETTINGS,
@@ -6768,6 +6842,7 @@ static void Launcher_SettingsGetLine(u32 item, char *out, u32 out_size)
         case SETTINGS_BOOT_ENGINE: label = DSTEXT_SETTINGS_BOOT_ENGINE; value = Launcher_EngineText(); break;
         case SETTINGS_AUTO_SAVE: label = DSTEXT_SETTINGS_AUTO_SAVE; value = Launcher_OnOffText(gl_auto_save_sel); break;
         case SETTINGS_RESUME_LAST: label = DSTEXT_SETTINGS_RESUME_LAST; value = Launcher_OnOffText(gl_resume_last_on); break;
+        case SETTINGS_START_ENABLED: label = DSTEXT_SETTINGS_START_SCREEN; value = Launcher_StartEnabledText(); break;
         case SETTINGS_START_SOURCE: label = DSTEXT_SETTINGS_START_SCREEN; value = Launcher_StartSourceText(); break;
         case SETTINGS_AUTO_START: label = DSTEXT_SETTINGS_QUICK_START; value = Launcher_AutoStartText(); break;
         case SETTINGS_ADDON_SETTINGS: label = DSTEXT_SETTINGS_ADDON; value = ">"; break;
@@ -7309,7 +7384,9 @@ static void Launcher_SaveUnifiedSettings(void)
         f_printf(&f, "\n");
         f_printf(&f, "# Colour controls the top bar, icons, and selection colour.\n");
         f_printf(&f, "Colour = %s\n", Launcher_ThemeName());
-        f_printf(&f, "\n# Options: Last played, Favourites, Off\n");
+        f_printf(&f, "\n# Options: On, Off\n");
+        f_printf(&f, "Start screen = %s\n", Launcher_StartEnabledSettingName());
+        f_printf(&f, "\n# Options: Last played, Favourites\n");
         f_printf(&f, "Start screen source = %s\n", Launcher_StartSourceSettingName());
         f_printf(&f, "\n# Options: Title, Box\n");
         f_printf(&f, "# Title uses /SYSTEM/IMGS thumbnails. Box uses /SYSTEM/IMGS2 thumbnails.\n");
@@ -7820,6 +7897,9 @@ static void Launcher_SettingsToggle(u32 item, int dir)
         case SETTINGS_RESUME_LAST:
             gl_resume_last_on ^= 1;
             Launcher_SaveSettingsInfo();
+            break;
+        case SETTINGS_START_ENABLED:
+            Launcher_CycleStartEnabled();
             break;
         case SETTINGS_START_SOURCE:
             Launcher_CycleStartSource();
@@ -9402,7 +9482,7 @@ refind_file:
 
 		if(recents_view_active)
 		{
-			game_total_SD = Build_recent_virtual_list();
+			game_total_SD = recents_view_favourites ? Build_favourites_virtual_list() : Build_recent_virtual_list();
 			game_folder_total = game_total_SD;
 		}
 		else
@@ -9999,6 +10079,18 @@ re_showfile:
 						launcher_vertical_folder_label_dirty = 1;
 						goto refind_file;
 					}
+					else if((page_num == SD_list) && recents_view_active && recents_view_favourites && ((show_offset + file_select) < game_total_SD))
+					{
+						UIAudio_PlaySfx(UI_SFX_MENU);
+						Launcher_FavouritePromptFullPath(p_recently_play[show_offset + file_select]);
+						Launcher_WaitForMenuKeyRelease(KEY_SELECT);
+						select_tap_pending = 0;
+						select_tap_timer = 0;
+						select_double_handled = 1;
+						launcher_select_release_cooldown = 40;
+						launcher_vertical_folder_label_dirty = 1;
+						goto refind_file;
+					}
 				}
 			}
 			if(keysdown & KEY_START)
@@ -10315,8 +10407,9 @@ re_showfile:
 			{
 				if((page_num == SD_list) && recents_view_active)
 				{
-					/* Recently Played is modal now: exit with B before tabbing away. */
-					shift = 0;
+					UIAudio_PlaySfx(UI_SFX_TAB);
+					Launcher_SetRecentVirtualMode(!recents_view_favourites);
+					goto refind_file;
 				}
 				else if(page_num == SD_list)
 				{
@@ -10349,8 +10442,9 @@ re_showfile:
 			{
 				if((page_num == SD_list) && recents_view_active)
 				{
-					/* Recently Played is modal now: exit with B before tabbing away. */
-					shift = 0;
+					UIAudio_PlaySfx(UI_SFX_TAB);
+					Launcher_SetRecentVirtualMode(!recents_view_favourites);
+					goto refind_file;
 				}
 				else if(page_num == SD_list)
 				{
@@ -10530,23 +10624,13 @@ re_showfile:
 			{
 				if(!start_long_delete_done && (start_hold_frames < 120) && (page_num == SD_list))
 				{
+					UIAudio_PlaySfx(UI_SFX_MENU);
 					if(recents_view_active)
 					{
-						UIAudio_PlaySfx(UI_SFX_MENU);
-						recents_view_active = 0;
-						strncpy(currentpath, recents_return_path, sizeof(currentpath) - 1);
-						currentpath[sizeof(currentpath) - 1] = '\0';
-						folder_select = recents_return_folder_select;
-						p_folder_select_show_offset[folder_select] = recents_return_show_offset;
-						p_folder_select_file_select[folder_select] = recents_return_file_select;
-						Launcher_SaveSDState();
-						launcher_vertical_folder_label_dirty = 1;
-						launcher_force_full_redraw = 1;
-						goto refind_file;
+						Launcher_SetRecentVirtualMode(!recents_view_favourites);
 					}
 					else
 					{
-						UIAudio_PlaySfx(UI_SFX_MENU);
 						recents_view_active = 1;
 						strncpy(recents_return_path, currentpath, sizeof(recents_return_path) - 1);
 						recents_return_path[sizeof(recents_return_path) - 1] = '\0';
@@ -10554,15 +10638,9 @@ re_showfile:
 						recents_return_file_select = file_select;
 						recents_return_folder_select = folder_select;
 						Launcher_SaveSDState();
-						recents_saved_show_offset = 0;
-						recents_saved_file_select = 0;
-						strncpy(currentpath, recents_virtual_path, sizeof(currentpath) - 1);
-						currentpath[sizeof(currentpath) - 1] = '\0';
-						folder_select = 0;
-						launcher_vertical_folder_label_dirty = 1;
-						launcher_force_full_redraw = 1;
-						goto refind_file;
+						Launcher_SetRecentVirtualMode(0);
 					}
+					goto refind_file;
 				}
 			}
 			if(keys_released & KEY_START)

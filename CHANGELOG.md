@@ -1,5 +1,12 @@
 # Changelog
 
+## DS Style v6.7
+
+- Split Start screen On/Off from the Last played/Favourites source setting.
+- Select on the Start screen now only switches between Last played and Favourites.
+- Start on the SD page now opens Recently Played, then cycles between Recently Played and Favourites.
+- L and R also switch between Recently Played and Favourites while inside those lists.
+
 ## DS Style v6.6
 
 - Added custom thumbnail support for folders and all files. Improved thumbnail scraper integration.

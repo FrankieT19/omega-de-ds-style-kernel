@@ -192,7 +192,7 @@
 #define DSTEXT_CONTROL_DPAD "D-pad / L / R: Navigation"
 #endif
 #ifndef DSTEXT_CONTROL_START
-#define DSTEXT_CONTROL_START "Start (SD): View recents"
+#define DSTEXT_CONTROL_START "Start (SD): Recents/Faves"
 #endif
 #ifndef DSTEXT_CONTROL_SELECT
 #define DSTEXT_CONTROL_SELECT "Select (SD/NOR): Cycle view mode"
