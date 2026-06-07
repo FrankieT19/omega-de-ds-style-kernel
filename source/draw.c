@@ -250,6 +250,35 @@ static u32 DecodeUtf8Text12(char *str, u32 l, u32 *hi, u8 c1, u32 *codepoint)
 	return 0;
 }
 
+static u32 DecodeCp936LatinText12(char *str, u32 l, u32 *hi, u8 c1, u32 *codepoint)
+{
+	u8 c2;
+
+	if((c1 != 0xA8) || (*hi >= l))
+		return 0;
+
+	c2 = str[*hi];
+	switch(c2)
+	{
+		case 0xA2: *codepoint = 0x00E1; break; /* a acute */
+		case 0xA4: *codepoint = 0x00E0; break; /* a grave */
+		case 0xA6: *codepoint = 0x00E9; break; /* e acute */
+		case 0xA8: *codepoint = 0x00E8; break; /* e grave */
+		case 0xAA: *codepoint = 0x00ED; break; /* i acute */
+		case 0xAC: *codepoint = 0x00EC; break; /* i grave */
+		case 0xAE: *codepoint = 0x00F3; break; /* o acute */
+		case 0xB0: *codepoint = 0x00F2; break; /* o grave */
+		case 0xB2: *codepoint = 0x00FA; break; /* u acute */
+		case 0xB4: *codepoint = 0x00F9; break; /* u grave */
+		case 0xB9: *codepoint = 0x00FC; break; /* u diaeresis */
+		case 0xBA: *codepoint = 0x00EA; break; /* e circumflex */
+		default: return 0;
+	}
+
+	(*hi)++;
+	return 1;
+}
+
 static u32 MapLatinGlyph12(u32 cp, u8 *base, u8 *accent, u8 *special)
 {
 	*accent = TEXT_ACCENT_NONE;
@@ -355,7 +384,9 @@ u16 DrawText12VisibleLength(char *str)
 		else
 		{
 			u32 codepoint;
-			if((gl_select_lang != 0xE2E2) && DecodeUtf8Text12(str, l, &hi, c1, &codepoint))
+			if((gl_select_lang != 0xE2E2) &&
+			   (DecodeUtf8Text12(str, l, &hi, c1, &codepoint) ||
+			    DecodeCp936LatinText12(str, l, &hi, c1, &codepoint)))
 				shown++;
 			else if(hi < l)
 			{
@@ -386,7 +417,9 @@ u16 DrawText12ByteOffsetForGlyphs(char *str, u16 glyphs)
 		else
 		{
 			u32 codepoint;
-			if((gl_select_lang != 0xE2E2) && DecodeUtf8Text12(str, l, &hi, c1, &codepoint))
+			if((gl_select_lang != 0xE2E2) &&
+			   (DecodeUtf8Text12(str, l, &hi, c1, &codepoint) ||
+			    DecodeCp936LatinText12(str, l, &hi, c1, &codepoint)))
 				shown++;
 			else if(hi < l)
 			{
@@ -452,7 +485,9 @@ void DrawHZText12(char *str, u16 len, u16 x, u16 y, u16 c, u8 isDrawDirect)
 			u8 base;
 			u8 accent;
 			u8 special;
-			if((gl_select_lang != 0xE2E2) && DecodeUtf8Text12(str, l, &hi, c1, &codepoint))
+			if((gl_select_lang != 0xE2E2) &&
+			   (DecodeUtf8Text12(str, l, &hi, c1, &codepoint) ||
+			    DecodeCp936LatinText12(str, l, &hi, c1, &codepoint)))
 			{
 				if(MapLatinGlyph12(codepoint, &base, &accent, &special))
 					DrawMappedLatinGlyph12(v, x, y, c, base, accent, special);

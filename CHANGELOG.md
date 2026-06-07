@@ -1,5 +1,11 @@
 # Changelog
 
+## DS Style v6.8
+
+- Fixed translated settings values resetting or loading incorrectly after restarting.
+- Improved accented character support for SD card filenames.
+- Corrected the language options written to SETTINGS.TXT.
+
 ## DS Style v6.7
 
 - Split Start screen On/Off from the Last played/Favourites source setting.

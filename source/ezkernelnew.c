@@ -6729,8 +6729,11 @@ static void Launcher_ReadSoundsSetting(void)
     memset(buf, 0, sizeof(buf));
     if(Launcher_SettingsReadValue("Sounds", buf, sizeof(buf)))
     {
-        if(!strcasecmp(buf, "Off") || !strcasecmp(buf, "No") || (buf[0] == '0'))
+        if(!strcasecmp(buf, "Off") || !strcasecmp(buf, "No") ||
+           !strcasecmp(buf, DSTEXT_OFF) || (buf[0] == '0'))
             launcher_sounds_enabled = 0;
+        if(strcasecmp(buf, "On") && strcasecmp(buf, "Off"))
+            launcher_settings_migration_pending = 1;
     }
 }
 
@@ -6765,10 +6768,12 @@ static void Launcher_ReadThumbnailStyle(void)
     memset(buf, 0, sizeof(buf));
     if(Launcher_SettingsReadValue("Thumbnails", buf, sizeof(buf)))
     {
-        if(!strcasecmp(buf, "Box") || (buf[0] == '1'))
+        if(!strcasecmp(buf, "Box") || !strcasecmp(buf, DSTEXT_THUMB_BOX) || (buf[0] == '1'))
             launcher_thumbnail_style = LAUNCHER_THUMB_STYLE_BOX;
         else
             launcher_thumbnail_style = LAUNCHER_THUMB_STYLE_TITLE;
+        if(strcasecmp(buf, "Title") && strcasecmp(buf, "Box"))
+            launcher_settings_migration_pending = 1;
     }
     else
     {
@@ -7390,11 +7395,12 @@ static void Launcher_SaveUnifiedSettings(void)
         f_printf(&f, "Start screen source = %s\n", Launcher_StartSourceSettingName());
         f_printf(&f, "\n# Options: Title, Box\n");
         f_printf(&f, "# Title uses /SYSTEM/IMGS thumbnails. Box uses /SYSTEM/IMGS2 thumbnails.\n");
-        f_printf(&f, "Thumbnails = %s\n", Launcher_ThumbnailStyleText());
+        f_printf(&f, "Thumbnails = %s\n",
+                 (launcher_thumbnail_style == LAUNCHER_THUMB_STYLE_BOX) ? "Box" : "Title");
         f_printf(&f, "\n# Options: On, Off\n");
         f_printf(&f, "# Sounds controls launcher UI button sounds after startup.\n");
-        f_printf(&f, "Sounds = %s\n", Launcher_OnOffText(launcher_sounds_enabled));
-        f_printf(&f, "\n# Options: English, English (US), Espa??ol, Fran??ais, Portugu??s, Deutsch, T??rk??e, Italiano, Nederlands, Svenska, Suomi, Chinese\n");
+        f_printf(&f, "Sounds = %s\n", launcher_sounds_enabled ? "On" : "Off");
+        f_printf(&f, "\n# Options: English (UK), English (US), Espa\303\261ol, Fran\303\247ais, Portugu\303\252s, Deutsch, T\303\274rk\303\247e, Italiano, Nederlands, Svenska, Suomi, Chinese\n");
         f_printf(&f, "Language = %s\n", Launcher_LanguageName());
         f_printf(&f, "\n# Options: Start, Select, L, A, B\n");
         f_printf(&f, "Quick start hotkey = %s\n", Launcher_KeyName((u8)gl_auto_start_key));
