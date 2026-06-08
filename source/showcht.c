@@ -16,7 +16,7 @@ FM_CHT_LINE tmpCHTFS ;
 u8 *pCHTbuffer = (u8*)(pReadCache + 0x2000); //patchbuffer
 
 
-ST_entry pCHEAT[3000]EWRAM_BSS;
+ST_entry pCHEAT[MAX_CHEAT_ENTRIES]EWRAM_BSS;
 u32 gl_cheat_count;
 
 extern u16 gl_select_lang;
@@ -660,7 +660,8 @@ void Analyze_KEYVAL(FIL* file,u32 total)
 					else{	//next ','
 						//DEBUG_printf(",0x%x =%x", str2hex(address_buf)+address_add,str2hex(val_buf));
 						ST_entry cheat = { str2hex(address_buf)+address_add,str2hex(val_buf) };
-						pCHEAT[gl_cheat_count++] = cheat;
+						if(gl_cheat_count < MAX_CHEAT_ENTRIES)
+							pCHEAT[gl_cheat_count++] = cheat;
 		
 						address_add++;
 					}
@@ -671,7 +672,8 @@ void Analyze_KEYVAL(FIL* file,u32 total)
 				}
 				else if(_paramv[i] == ';'){
 					ST_entry cheat = { str2hex(address_buf)+address_add,str2hex(val_buf) };
-					pCHEAT[gl_cheat_count++] = cheat;	
+					if(gl_cheat_count < MAX_CHEAT_ENTRIES)
+						pCHEAT[gl_cheat_count++] = cheat;
 					
 					
 					is_val = 0;
@@ -690,7 +692,8 @@ void Analyze_KEYVAL(FIL* file,u32 total)
 				}							
 			}
 			ST_entry cheat = { str2hex(address_buf)+address_add,str2hex(val_buf) };
-			pCHEAT[gl_cheat_count++] = cheat;
+			if(gl_cheat_count < MAX_CHEAT_ENTRIES)
+				pCHEAT[gl_cheat_count++] = cheat;
 						
 		}
 	}

@@ -32,7 +32,7 @@ u32 w_cheat_on;
 
 SPatchInfo2 iPatchInfo2[EMax];
 u32 iCount2;
-extern ST_entry pCHEAT[256];
+extern ST_entry pCHEAT[MAX_CHEAT_ENTRIES];
 
 #define sizeofa(array) (sizeof(array)/sizeof(array[0]))
 

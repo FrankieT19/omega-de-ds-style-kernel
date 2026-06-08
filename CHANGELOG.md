@@ -1,5 +1,10 @@
 # Changelog
 
+## DS Style v6.9
+
+- Improved launcher stability by reducing RAM pressure in the menu.
+- Added a safety limit for cheat entries to match the space available in the in-game patch.
+
 ## DS Style v6.8
 
 - Fixed translated settings values resetting or loading incorrectly after restarting.

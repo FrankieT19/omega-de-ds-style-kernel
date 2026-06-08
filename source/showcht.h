@@ -16,10 +16,13 @@ typedef struct CHT_LINE{
 	u8 select ;
 } FM_CHT_LINE;
 
-typedef struct ST_entry_{	
-	u32  address;		
-	u32  VAL;	
+typedef struct ST_entry_{
+	u32  address;
+	u32  VAL;
 } ST_entry;
+
+/* gba_rts_patch.s reserves 0x400 bytes for 8-byte cheat entries. */
+#define MAX_CHEAT_ENTRIES 128
 
 //int Get_KEY_val(FIL* file,char*KEY_section,char*KEY_secval,char getbuff[]);
 int Show_all_KEY_val(FIL* file);
