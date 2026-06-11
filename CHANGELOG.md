@@ -4,6 +4,8 @@
 
 - Improved launcher stability by reducing RAM pressure in the menu.
 - Added a safety limit for cheat entries to match the space available in the in-game patch.
+- Refined list-view scrolling, redraw behaviour, and navigation consistency across launcher menus.
+- Refined the sound system for safer, more reliable audio playback during menu navigation.
 
 ## DS Style v6.8
 
