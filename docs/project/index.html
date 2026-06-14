@@ -349,8 +349,86 @@
       margin-top: 22px;
     }
 
-    .languages {
+    .themes {
       background: var(--white);
+    }
+
+    .theme-stack {
+      display: grid;
+      gap: 32px;
+    }
+
+    .theme-feature {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.38fr) minmax(0, 0.62fr);
+      overflow: hidden;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      box-shadow: 0 12px 30px rgba(16, 26, 43, 0.08);
+    }
+
+    .theme-feature.reverse {
+      grid-template-columns: minmax(0, 0.62fr) minmax(260px, 0.38fr);
+    }
+
+    .theme-copy {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: clamp(28px, 4vw, 48px);
+    }
+
+    .theme-copy h3 {
+      margin: 0 0 12px;
+      font-size: clamp(27px, 3vw, 38px);
+      line-height: 1.1;
+    }
+
+    .theme-copy p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .theme-copy .button {
+      margin-top: 24px;
+    }
+
+    .theme-gallery {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(130px, 0.55fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 4px;
+      min-height: 590px;
+      padding: 4px;
+      background: #cfd5de;
+    }
+
+    .theme-gallery img {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      object-fit: cover;
+    }
+
+    .theme-gallery .theme-primary {
+      grid-row: 1 / 4;
+    }
+
+    .theme-feature.reverse .theme-copy {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .theme-feature.reverse .theme-gallery {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .languages {
+      background: #eef1f6;
     }
 
     .language-strip {
@@ -363,7 +441,7 @@
       padding: 9px 13px;
       border: 1px solid var(--line);
       border-radius: 5px;
-      background: var(--paper);
+      background: var(--white);
       color: #3d4858;
       font-size: 14px;
     }
@@ -458,6 +536,18 @@
       color: #cdbdf0;
     }
 
+    .resource-group + .resource-group {
+      margin-top: 28px;
+    }
+
+    .resource-group h3 {
+      margin: 0 0 8px;
+      color: #94a3b8;
+      font-size: 12px;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
     footer {
       padding: 28px clamp(24px, 7vw, 104px);
       background: #0b1320;
@@ -516,6 +606,28 @@
       .download-grid {
         grid-template-columns: 1fr;
       }
+
+      .theme-feature,
+      .theme-feature.reverse {
+        grid-template-columns: 1fr;
+      }
+
+      .theme-feature.reverse .theme-copy,
+      .theme-feature.reverse .theme-gallery {
+        grid-column: 1;
+      }
+
+      .theme-feature.reverse .theme-copy {
+        grid-row: 1;
+      }
+
+      .theme-feature.reverse .theme-gallery {
+        grid-row: 2;
+      }
+
+      .theme-gallery {
+        min-height: 500px;
+      }
     }
 
     @media (max-width: 560px) {
@@ -537,6 +649,17 @@
 
       .tool p {
         min-height: 0;
+      }
+
+      .theme-gallery {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: minmax(360px, 1fr) 130px;
+        min-height: 0;
+      }
+
+      .theme-gallery .theme-primary {
+        grid-column: 1 / 4;
+        grid-row: 1;
       }
 
       .download {
@@ -562,6 +685,7 @@
     <nav class="nav-links">
       <a href="#features">Features</a>
       <a href="#tools">Tools</a>
+      <a href="#themes">Themes</a>
       <a href="#downloads">Downloads</a>
       <a href="#resources">Resources</a>
     </nav>
@@ -705,6 +829,57 @@
       </div>
     </section>
 
+    <section class="section themes" id="themes">
+      <div class="section-inner">
+        <div class="section-heading">
+          <h2>Start with a different style.</h2>
+          <p>
+            These optional examples show how far DS Style can be reshaped with the
+            Customiser. Each download includes versions for the original Omega and
+            Omega Definitive Edition.
+          </p>
+        </div>
+
+        <div class="theme-stack">
+          <article class="theme-feature">
+            <div class="theme-copy">
+              <p class="eyebrow">Example theme</p>
+              <h3>Simple Style</h3>
+              <p>
+                A dark, colourful homage to Sterophonick's Simple theme, rebuilt around
+                the current DS Style launcher and its three browsing layouts.
+              </p>
+              <a class="button dark" href="https://github.com/FrankieT19/ds-style-customiser/releases/download/example-theme-analogue-v6.9/Simple.Style.For.DS.Style.v6.9.zip">Download</a>
+            </div>
+            <div class="theme-gallery" aria-label="Simple Style gallery">
+              <img class="theme-primary" src="assets/themes/simple-1.jpg" alt="Simple Style start screen on a Game Boy Advance SP" loading="lazy">
+              <img src="assets/themes/simple-2.jpg" alt="Simple Style list view" loading="lazy">
+              <img src="assets/themes/simple-3.jpg" alt="Simple Style vertical carousel" loading="lazy">
+              <img src="assets/themes/simple-4.jpg" alt="Simple Style horizontal carousel" loading="lazy">
+            </div>
+          </article>
+
+          <article class="theme-feature reverse">
+            <div class="theme-copy">
+              <p class="eyebrow">Example theme</p>
+              <h3>Analogue Style</h3>
+              <p>
+                A restrained monochrome theme inspired by the minimal Analogue Pocket
+                interface, with clean typography and artwork-led browsing.
+              </p>
+              <a class="button dark" href="https://github.com/FrankieT19/ds-style-customiser/releases/download/example-theme-analogue-v6.9/Analogue.Style.For.DS.Style.v6.9.zip">Download</a>
+            </div>
+            <div class="theme-gallery" aria-label="Analogue Style gallery">
+              <img class="theme-primary" src="assets/themes/analogue-1.jpg" alt="Analogue Style start screen on an Analogue Pocket" loading="lazy">
+              <img src="assets/themes/analogue-2.jpg" alt="Analogue Style list view" loading="lazy">
+              <img src="assets/themes/analogue-3.jpg" alt="Analogue Style horizontal carousel" loading="lazy">
+              <img src="assets/themes/analogue-4.jpg" alt="Analogue Style vertical carousel" loading="lazy">
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <section class="section languages">
       <div class="section-inner">
         <div class="section-heading">
@@ -775,17 +950,26 @@
           </div>
         </div>
 
-        <nav class="link-list" aria-label="Project resources">
-          <a href="https://youtu.be/i807VUSWFjg" target="_blank" rel="noopener noreferrer"><span>Video showcase and tutorial</span></a>
-          <a href="https://github.com/FrankieT19/omega-de-ds-style-kernel"><span>Omega DE kernel source</span></a>
-          <a href="https://github.com/FrankieT19/omega-ds-style-kernel"><span>Original Omega kernel source</span></a>
-          <a href="https://github.com/FrankieT19/omega-de-ds-style-kernel/blob/main/CHANGELOG.md"><span>Complete DS Style changelog</span></a>
-          <a href="https://github.com/FrankieT19/ds-style-customiser"><span>Customiser source</span></a>
-          <a href="https://github.com/FrankieT19/ds-style-customiser/blob/main/CHANGELOG.md"><span>Customiser changelog</span></a>
-          <a href="https://github.com/FrankieT19/ds-style-thumbnail-scraper"><span>Thumbnail Scraper source</span></a>
-          <a href="https://github.com/FrankieT19/ds-style-thumbnail-scraper/blob/main/CHANGELOG.md"><span>Thumbnail Scraper changelog</span></a>
-          <a href="https://buymeacoffee.com/frankiet19" target="_blank" rel="noopener noreferrer"><span>Support the project</span></a>
-        </nav>
+        <div>
+          <nav class="resource-group link-list" aria-label="Learn about DS Style">
+            <h3>Learn</h3>
+            <a href="https://youtu.be/i807VUSWFjg" target="_blank" rel="noopener noreferrer"><span>Video showcase and tutorial</span></a>
+            <a href="https://github.com/FrankieT19/omega-de-ds-style-kernel/blob/main/CHANGELOG.md"><span>Project history</span></a>
+          </nav>
+
+          <nav class="resource-group link-list" aria-label="DS Style source code">
+            <h3>Source code</h3>
+            <a href="https://github.com/FrankieT19/omega-de-ds-style-kernel"><span>Omega DE kernel</span></a>
+            <a href="https://github.com/FrankieT19/omega-ds-style-kernel"><span>Original Omega kernel</span></a>
+            <a href="https://github.com/FrankieT19/ds-style-customiser"><span>Customiser</span></a>
+            <a href="https://github.com/FrankieT19/ds-style-thumbnail-scraper"><span>Thumbnail Scraper</span></a>
+          </nav>
+
+          <nav class="resource-group link-list" aria-label="Support DS Style">
+            <h3>Support</h3>
+            <a href="https://buymeacoffee.com/frankiet19" target="_blank" rel="noopener noreferrer"><span>Buy me a coffee</span></a>
+          </nav>
+        </div>
       </div>
     </section>
   </main>
