@@ -406,11 +406,32 @@
       background: #cfd5de;
     }
 
-    .theme-gallery img {
+    .theme-shot {
+      min-width: 0;
+      min-height: 0;
+      padding: 0;
+      overflow: hidden;
+      border: 0;
+      background: var(--navy);
+      cursor: pointer;
+    }
+
+    .theme-shot:hover img,
+    .theme-shot:focus-visible img {
+      transform: scale(1.015);
+    }
+
+    .theme-shot:focus-visible {
+      outline: 3px solid var(--purple);
+      outline-offset: -3px;
+    }
+
+    .theme-shot img {
       width: 100%;
       height: 100%;
       min-height: 0;
       object-fit: cover;
+      transition: transform 160ms ease;
     }
 
     .theme-gallery .theme-primary {
@@ -653,13 +674,18 @@
 
       .theme-gallery {
         grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: minmax(360px, 1fr) 130px;
+        grid-template-rows: minmax(360px, auto) 112px;
         min-height: 0;
+        background: var(--navy);
       }
 
       .theme-gallery .theme-primary {
         grid-column: 1 / 4;
         grid-row: 1;
+      }
+
+      .theme-shot img {
+        object-fit: contain;
       }
 
       .download {
@@ -834,7 +860,7 @@
         <div class="section-heading">
           <h2>Start with a different style.</h2>
           <p>
-            These optional examples show how far DS Style can be reshaped with the
+            These themes show how far DS Style can be reshaped with the
             Customiser. Each download includes versions for the original Omega and
             Omega Definitive Edition.
           </p>
@@ -843,37 +869,51 @@
         <div class="theme-stack">
           <article class="theme-feature">
             <div class="theme-copy">
-              <p class="eyebrow">Example theme</p>
-              <h3>Simple Style</h3>
+              <p class="eyebrow">Theme</p>
+              <h3>Analogue Style</h3>
               <p>
-                A dark, colourful homage to Sterophonick's Simple theme, rebuilt around
-                the current DS Style launcher and its three browsing layouts.
+                A monochrome theme inspired by the minimal Analogue Pocket interface.
               </p>
-              <a class="button dark" href="https://github.com/FrankieT19/ds-style-customiser/releases/download/example-theme-analogue-v6.9/Simple.Style.For.DS.Style.v6.9.zip">Download</a>
+              <a class="button dark" href="https://github.com/FrankieT19/ds-style-customiser/releases/download/example-theme-analogue-v6.9/Analogue.Style.For.DS.Style.v6.9.zip">Download</a>
             </div>
-            <div class="theme-gallery" aria-label="Simple Style gallery">
-              <img class="theme-primary" src="assets/themes/simple-1.jpg" alt="Simple Style start screen on a Game Boy Advance SP" loading="lazy">
-              <img src="assets/themes/simple-2.jpg" alt="Simple Style list view" loading="lazy">
-              <img src="assets/themes/simple-3.jpg" alt="Simple Style vertical carousel" loading="lazy">
-              <img src="assets/themes/simple-4.jpg" alt="Simple Style horizontal carousel" loading="lazy">
+            <div class="theme-gallery" aria-label="Analogue Style gallery">
+              <button class="theme-shot theme-primary" type="button" aria-label="Show Analogue Style start screen">
+                <img src="assets/themes/analogue-1.jpg" alt="Analogue Style start screen on an Analogue Pocket" loading="lazy">
+              </button>
+              <button class="theme-shot" type="button" aria-label="Show Analogue Style list view">
+                <img src="assets/themes/analogue-2.jpg" alt="Analogue Style list view" loading="lazy">
+              </button>
+              <button class="theme-shot" type="button" aria-label="Show Analogue Style horizontal carousel">
+                <img src="assets/themes/analogue-3.jpg" alt="Analogue Style horizontal carousel" loading="lazy">
+              </button>
+              <button class="theme-shot" type="button" aria-label="Show Analogue Style vertical carousel">
+                <img src="assets/themes/analogue-4.jpg" alt="Analogue Style vertical carousel" loading="lazy">
+              </button>
             </div>
           </article>
 
           <article class="theme-feature reverse">
             <div class="theme-copy">
-              <p class="eyebrow">Example theme</p>
-              <h3>Analogue Style</h3>
+              <p class="eyebrow">Theme</p>
+              <h3>Simple Style</h3>
               <p>
-                A restrained monochrome theme inspired by the minimal Analogue Pocket
-                interface, with clean typography and artwork-led browsing.
+                A homage to Sterophonick's Simple theme.
               </p>
-              <a class="button dark" href="https://github.com/FrankieT19/ds-style-customiser/releases/download/example-theme-analogue-v6.9/Analogue.Style.For.DS.Style.v6.9.zip">Download</a>
+              <a class="button dark" href="https://github.com/FrankieT19/ds-style-customiser/releases/download/example-theme-analogue-v6.9/Simple.Style.For.DS.Style.v6.9.zip">Download</a>
             </div>
-            <div class="theme-gallery" aria-label="Analogue Style gallery">
-              <img class="theme-primary" src="assets/themes/analogue-1.jpg" alt="Analogue Style start screen on an Analogue Pocket" loading="lazy">
-              <img src="assets/themes/analogue-2.jpg" alt="Analogue Style list view" loading="lazy">
-              <img src="assets/themes/analogue-3.jpg" alt="Analogue Style horizontal carousel" loading="lazy">
-              <img src="assets/themes/analogue-4.jpg" alt="Analogue Style vertical carousel" loading="lazy">
+            <div class="theme-gallery" aria-label="Simple Style gallery">
+              <button class="theme-shot theme-primary" type="button" aria-label="Show Simple Style horizontal carousel">
+                <img src="assets/themes/simple-4.jpg" alt="Simple Style horizontal carousel" loading="lazy">
+              </button>
+              <button class="theme-shot" type="button" aria-label="Show Simple Style start screen">
+                <img src="assets/themes/simple-1.jpg" alt="Simple Style start screen on a Game Boy Advance SP" loading="lazy">
+              </button>
+              <button class="theme-shot" type="button" aria-label="Show Simple Style list view">
+                <img src="assets/themes/simple-2.jpg" alt="Simple Style list view" loading="lazy">
+              </button>
+              <button class="theme-shot" type="button" aria-label="Show Simple Style vertical carousel">
+                <img src="assets/themes/simple-3.jpg" alt="Simple Style vertical carousel" loading="lazy">
+              </button>
             </div>
           </article>
         </div>
@@ -951,10 +991,14 @@
         </div>
 
         <div>
-          <nav class="resource-group link-list" aria-label="Learn about DS Style">
-            <h3>Learn</h3>
+          <nav class="resource-group link-list" aria-label="DS Style video">
             <a href="https://youtu.be/i807VUSWFjg" target="_blank" rel="noopener noreferrer"><span>Video showcase and tutorial</span></a>
-            <a href="https://github.com/FrankieT19/omega-de-ds-style-kernel/blob/main/CHANGELOG.md"><span>Project history</span></a>
+          </nav>
+
+          <nav class="resource-group link-list" aria-label="DS Style history">
+            <h3>History</h3>
+            <a href="https://github.com/FrankieT19/omega-de-ds-style-kernel/blob/main/CHANGELOG.md"><span>Omega DE changelog</span></a>
+            <a href="https://github.com/FrankieT19/omega-ds-style-kernel/blob/master/CHANGELOG.md"><span>Original Omega changelog</span></a>
           </nav>
 
           <nav class="resource-group link-list" aria-label="DS Style source code">
@@ -980,5 +1024,26 @@
       <a href="https://www.youtube.com/@frankietretro" target="_blank" rel="noopener noreferrer">FrankieT Retro on YouTube</a>
     </div>
   </footer>
+  <script>
+    document.querySelectorAll(".theme-gallery").forEach((gallery) => {
+      const primary = gallery.querySelector(".theme-primary");
+
+      gallery.addEventListener("click", (event) => {
+        const selected = event.target.closest(".theme-shot");
+        if (!selected || selected === primary) {
+          return;
+        }
+
+        const primaryImage = primary.querySelector("img");
+        const selectedImage = selected.querySelector("img");
+        const primaryLabel = primary.getAttribute("aria-label");
+
+        [primaryImage.src, selectedImage.src] = [selectedImage.src, primaryImage.src];
+        [primaryImage.alt, selectedImage.alt] = [selectedImage.alt, primaryImage.alt];
+        primary.setAttribute("aria-label", selected.getAttribute("aria-label"));
+        selected.setAttribute("aria-label", primaryLabel);
+      });
+    });
+  </script>
 </body>
 </html>
