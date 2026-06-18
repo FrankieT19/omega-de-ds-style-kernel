@@ -24,7 +24,7 @@
  *   for each non-combining byte  → draw bitmap, advance x by THAI_WIDTH[i]
  *   for each combining byte      → draw bitmap at current x, do NOT advance
  *
- * UTF-8 input:   unicode_codepoint U+0E01..U+0E5B → idx = cp - 0x0E01
+ * UTF-8 input:   unicode_codepoint U+0E01..U+0E5B → idx = cp - THAI_CP_FIRST
  * TIS-620 input: byte b in [0xA1, 0xFB]           → idx = b  - 0xA1
  */
 
@@ -36,10 +36,12 @@
 #define THAI_LAST            0xFBu  /* last  valid TIS-620 byte         */
 #define THAI_COUNT           91u    /* 0xFB - 0xA1 + 1                  */
 #define THAI_CLUSTER_SPACING 2      /* extra px advance between clusters */
+#define THAI_CP_FIRST        0x0E01u /* first Thai codepoint (ก); also gl_select_lang sentinel */
+#define THAI_CP_LAST         0x0E5Bu /* last  Unicode Thai codepoint      */
 
 /* TIS-620 <-> Unicode helpers */
-#define THAI_TO_UCS(b)  (0x0E01u + ((b) - THAI_BASE))
-#define UCS_TO_THAI(cp) ((unsigned char)((cp) - 0x0E01u + THAI_BASE))
+#define THAI_TO_UCS(b)  (THAI_CP_FIRST + ((b) - THAI_BASE))
+#define UCS_TO_THAI(cp) ((unsigned char)((cp) - THAI_CP_FIRST + THAI_BASE))
 #define THAI_IDX(b)     ((unsigned int)((b) - THAI_BASE))
 
 static const unsigned char THAI_DATA[91][12] = {
