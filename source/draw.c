@@ -7,6 +7,7 @@
 
 #include "ez_define.h"
 #include "hzk12.h"
+#include "thai620.h"
 #include "ezkernel.h"
 #include "draw.h"
 #include "lang.h"
@@ -159,6 +160,26 @@ static void DrawCustomGlyph12(u16 *v, u16 x, u16 y, u16 c, const u8 *rows)
 		if(cc & 0x04)
 			v[x + 5 + yy] = c;
 		yy += 240;
+	}
+}
+
+static void DrawThaiRows12(u16 *v, u16 x, u16 y, u16 c, const u8 *rows)
+{
+	u32 i;
+	u8 cc;
+	u16 *p = v + 240 * y + x;
+	for(i = 0; i < 12; i++, p += 240)
+	{
+		cc = rows[i];
+		if(!cc) continue;
+		if(cc & 0x80) p[0] = c;
+		if(cc & 0x40) p[1] = c;
+		if(cc & 0x20) p[2] = c;
+		if(cc & 0x10) p[3] = c;
+		if(cc & 0x08) p[4] = c;
+		if(cc & 0x04) p[5] = c;
+		if(cc & 0x02) p[6] = c;
+		if(cc & 0x01) p[7] = c;
 	}
 }
 
@@ -384,17 +405,42 @@ u16 DrawText12VisibleLength(char *str)
 		else
 		{
 			u32 codepoint;
-			if((gl_select_lang != 0xE2E2) &&
-			   (DecodeUtf8Text12(str, l, &hi, c1, &codepoint) ||
-			    DecodeCp936LatinText12(str, l, &hi, c1, &codepoint)))
-				shown++;
-			else if(hi < l)
+			u32 hi_save = hi;
+			if(gl_select_lang == THAI_CP_FIRST &&
+			   DecodeUtf8Text12(str, l, &hi, c1, &codepoint) &&
+			   codepoint >= THAI_CP_FIRST && codepoint <= THAI_CP_LAST)
 			{
-				hi++;
-				shown += 2;
+				if(THAI_WIDTH[codepoint - THAI_CP_FIRST] > 0)
+				{
+					while(hi < l)
+					{
+						u32 cp2;
+						u32 hi2 = hi;
+						u8 c2b = (u8)str[hi2]; hi2++;
+						if(c2b < 0x80) break;
+						if(!DecodeUtf8Text12(str, l, &hi2, c2b, &cp2)) break;
+						if(cp2 < THAI_CP_FIRST || cp2 > THAI_CP_LAST ||
+						   THAI_WIDTH[cp2 - THAI_CP_FIRST] > 0) break;
+						hi = hi2;
+					}
+					shown++;
+				}
 			}
 			else
-				shown++;
+			{
+				hi = hi_save;
+				if((gl_select_lang != 0xE2E2) &&
+				   (DecodeUtf8Text12(str, l, &hi, c1, &codepoint) ||
+				    DecodeCp936LatinText12(str, l, &hi, c1, &codepoint)))
+					shown++;
+				else if(hi < l)
+				{
+					hi++;
+					shown += 2;
+				}
+				else
+					shown++;
+			}
 		}
 	}
 
@@ -417,17 +463,42 @@ u16 DrawText12ByteOffsetForGlyphs(char *str, u16 glyphs)
 		else
 		{
 			u32 codepoint;
-			if((gl_select_lang != 0xE2E2) &&
-			   (DecodeUtf8Text12(str, l, &hi, c1, &codepoint) ||
-			    DecodeCp936LatinText12(str, l, &hi, c1, &codepoint)))
-				shown++;
-			else if(hi < l)
+			u32 hi_save = hi;
+			if(gl_select_lang == THAI_CP_FIRST &&
+			   DecodeUtf8Text12(str, l, &hi, c1, &codepoint) &&
+			   codepoint >= THAI_CP_FIRST && codepoint <= THAI_CP_LAST)
 			{
-				hi++;
-				shown += 2;
+				if(THAI_WIDTH[codepoint - THAI_CP_FIRST] > 0)
+				{
+					while(hi < l)
+					{
+						u32 cp2;
+						u32 hi2 = hi;
+						u8 c2b = (u8)str[hi2]; hi2++;
+						if(c2b < 0x80) break;
+						if(!DecodeUtf8Text12(str, l, &hi2, c2b, &cp2)) break;
+						if(cp2 < THAI_CP_FIRST || cp2 > THAI_CP_LAST ||
+						   THAI_WIDTH[cp2 - THAI_CP_FIRST] > 0) break;
+						hi = hi2;
+					}
+					shown++;
+				}
 			}
 			else
-				shown++;
+			{
+				hi = hi_save;
+				if((gl_select_lang != 0xE2E2) &&
+				   (DecodeUtf8Text12(str, l, &hi, c1, &codepoint) ||
+				    DecodeCp936LatinText12(str, l, &hi, c1, &codepoint)))
+					shown++;
+				else if(hi < l)
+				{
+					hi++;
+					shown += 2;
+				}
+				else
+					shown++;
+			}
 		}
 	}
 
@@ -479,12 +550,33 @@ void DrawHZText12(char *str, u16 len, u16 x, u16 y, u16 c, u8 isDrawDirect)
 			shown++;
     		continue;
     	}
-		else	//Double-byte
+		else	//Double-byte / multi-byte
 		{
 			u32 codepoint;
 			u8 base;
 			u8 accent;
 			u8 special;
+			u32 hi_save;
+
+			hi_save = hi;
+			if(gl_select_lang == THAI_CP_FIRST &&
+			   DecodeUtf8Text12(str, l, &hi, c1, &codepoint) &&
+			   codepoint >= THAI_CP_FIRST && codepoint <= THAI_CP_LAST)
+			{
+				const u8 *_tc_pp = (const u8 *)str + hi; /* just after base codepoint */
+				#define THAI_R_DRAW(idx, xpos, yoff) DrawThaiRows12(v, (u16)(xpos), (u16)((int)y + (yoff)), c, THAI_DATA[idx])
+				#define THAI_R_WIDTH(idx)      ((int)THAI_WIDTH[idx])
+				#define THAI_R_CP              codepoint
+				#define THAI_R_PP              (&_tc_pp)
+				#define THAI_R_X               x
+				#define THAI_R_SP              ((int)THAI_CLUSTER_SPACING)
+				#include "thai_cluster.h"
+				hi = (u32)(_tc_pp - (const u8 *)str);
+				shown++;
+				continue;
+			}
+			hi = hi_save;
+
 			if((gl_select_lang != 0xE2E2) &&
 			   (DecodeUtf8Text12(str, l, &hi, c1, &codepoint) ||
 			    DecodeCp936LatinText12(str, l, &hi, c1, &codepoint)))
@@ -598,8 +690,8 @@ void DEBUG_printf(const char *format, ...)
 //---------------------------------------------------------------------------------
 void ShowbootProgress(char *str)
 {
-    u8 str_len = strlen(str);
+    u16 str_glyphs = DrawText12VisibleLength(str);
     Clear(0,160-15,240,15,gl_color_cheat_black,1);
-	DrawHZText12(gl_loading_game,0,(240-strlen(gl_loading_game)*6)/2,72,0x7FFF,1);
-    DrawHZText12(str,0,(240-str_len*6)/2,160-15,0x7FFF,1);
+	DrawHZText12(gl_loading_game,0,(240-DrawText12VisibleLength(gl_loading_game)*6)/2,72,0x7FFF,1);
+    DrawHZText12(str,0,(240-str_glyphs*6)/2,160-15,0x7FFF,1);
 }

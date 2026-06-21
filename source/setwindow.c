@@ -214,7 +214,7 @@ u32 Setting_window(void)
 			DrawHZText12(msg,0,set_offset,y_offset+line_x*7,gl_color_selected,1);			
 				Draw_select_icon(x_offset,y_offset+line_x*7,(gl_ingame_RTC_open_status == 0x1));
 				//sprintf(msg,"%s",gl_offRTC_powersave);
-				ClearWithBG((u16*)gImage_SET,x_offset+15, y_offset+line_x*7, 6*6, 13, 1);
+				ClearWithBG((u16*)gImage_SET,x_offset+15, y_offset+line_x*7, 10*6, 13, 1);
 				if(gl_ingame_RTC_open_status){
 					sprintf(msg,"%s",gl_enabled);
 				}

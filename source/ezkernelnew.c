@@ -24,6 +24,7 @@
 #include "helpwindow.h"
 #include "launcher_version.h"
 #include "launcher_text.h"
+#include "thai620.h"
 
 static void Launcher_SaveUnifiedSettings(void);
 static void Launcher_SaveSettingsInfo(void);
@@ -60,6 +61,8 @@ static void Launcher_ApplyLanguageIndex(u32 index)
 	gl_select_lang = launcher_language_packs[launcher_language_index].stored;
 	if(gl_select_lang == 0xE2E2)
 		LoadChinese();
+	else if(gl_select_lang == THAI_CP_FIRST)
+		LoadThai();
 	else
 		LoadEnglish();
 }
@@ -1550,7 +1553,7 @@ void Show_ICON_filename_SD(u32 show_offset,u32 file_select,u32 haveThumbnail)
 		}
 		
 		if(line== file_select)
-		{			
+		{
 			Clear(17,20 + file_select*14,(char_num == 17)?(17*6+1):(240-17),13,gl_color_selectBG_sd,1);
 		}
 
@@ -1751,7 +1754,8 @@ void IWRAM_CODE Refresh_filename(u32 show_offset,u32 file_select,u32 updown,u32 
 	u32 need_show_game;
 	u32 need_show_folder;
 	char msg[20];
-	u32 y_offset= 20;	
+	u32 y_offset= 20;
+	int thaiy = gl_font_above_extent;
 		
 	u32 char_num1;
 	u32 char_num2;
@@ -1862,7 +1866,7 @@ void IWRAM_CODE Refresh_filename(u32 show_offset,u32 file_select,u32 updown,u32 
 		xx2 = file_select;
 		showy1 = y_offset +(file_select-1)*14;
 		showy2 = y_offset +(file_select)*14;
-		Launcher_ClearTextBodyBackgroundRegion(17, 20 + xx1*14, clean_len1, 13);
+		Launcher_ClearTextBodyBackgroundRegion(17, FONT_CLEAR_Y(20 + xx1*14, thaiy), clean_len1, FONT_CLEAR_H(13, thaiy));
 		Clear(17,20 + xx2*14,clean_len2,13,gl_color_selectBG_sd,1);
 		name_color2 = LAUNCHER_SELECTED_TEXT;
 	}
@@ -1871,9 +1875,9 @@ void IWRAM_CODE Refresh_filename(u32 show_offset,u32 file_select,u32 updown,u32 
 		xx1 = file_select;
 		xx2 = file_select+1;
 		showy1 = y_offset +(file_select)*14;
-		showy2 = y_offset +(file_select+1)*14;	
-		Clear(17,20 + xx1*14,clean_len1,13,gl_color_selectBG_sd,1);	
-		Launcher_ClearTextBodyBackgroundRegion(17, 20 + xx2*14, clean_len2, 13);	
+		showy2 = y_offset +(file_select+1)*14;
+		Clear(17,20 + xx1*14,clean_len1,13,gl_color_selectBG_sd,1);
+		Launcher_ClearTextBodyBackgroundRegion(17, FONT_CLEAR_Y(20 + xx2*14, thaiy), clean_len2, FONT_CLEAR_H(13, thaiy));
 		name_color1 = LAUNCHER_SELECTED_TEXT;
 	}
 
@@ -1957,9 +1961,9 @@ void Show_ICON_filename_NOR(u32 show_offset,u32 file_select)
 	int line;
 	char msg[20];
 	char title[128];
-	u32 y_offset= 20;	
+	u32 y_offset= 20;
 	u32 char_num=32;
-	
+
 	if(game_total_NOR<10)
 		need_show = game_total_NOR;
 	else
@@ -1995,6 +1999,7 @@ void Refresh_filename_NOR(u32 show_offset,u32 file_select,u32 updown)
 	char title2[128];
 	u16 name_color1;
 	u16 name_color2;
+	int thaiy = gl_font_above_extent;
 	u32 xx1;
 	u32 xx2;
 	u32 showy1;
@@ -2015,7 +2020,7 @@ void Refresh_filename_NOR(u32 show_offset,u32 file_select,u32 updown)
 		xx2 = file_select;
 		showy1 = y_offset +(file_select-1)*14;
 		showy2 = y_offset +(file_select)*14;
-		Launcher_ClearTextBodyBackgroundRegion(17, 20 + xx1*14, clean_len, 13);
+		Launcher_ClearTextBodyBackgroundRegion(17, FONT_CLEAR_Y(20 + xx1*14, thaiy), clean_len, FONT_CLEAR_H(13, thaiy));
 		Clear(17,20 + xx2*14,clean_len,13,gl_color_selectBG_nor,1);
 		name_color2 = LAUNCHER_SELECTED_TEXT;
 	}
@@ -2026,7 +2031,7 @@ void Refresh_filename_NOR(u32 show_offset,u32 file_select,u32 updown)
 		showy1 = y_offset +(file_select)*14;
 		showy2 = y_offset +(file_select+1)*14;
 		Clear(17,20 + xx1*14,clean_len,13,gl_color_selectBG_nor,1);
-		Launcher_ClearTextBodyBackgroundRegion(17, 20 + xx2*14, clean_len, 13);
+		Launcher_ClearTextBodyBackgroundRegion(17, FONT_CLEAR_Y(20 + xx2*14, thaiy), clean_len, FONT_CLEAR_H(13, thaiy));
 		name_color1 = LAUNCHER_SELECTED_TEXT;
 	}
 
@@ -2072,12 +2077,13 @@ void Filename_loop(u32 shift,u32 show_offset,u32 file_select,u32 haveThumbnail)
 {
 	if(haveThumbnail)
 		return;
-	
+
 	u32 need_show_folder;
 	//u32 line;
-	u32 char_num;	
-	u32 y_offset= 20;	
+	u32 char_num;
+	u32 y_offset= 20;
 	int namelen;
+	int thaiy = gl_font_above_extent;
 	static u32 orgtt = 123455;
 	u32 timeout = 20;
 	//u8 dwName=0;	
@@ -2147,7 +2153,9 @@ void Filename_loop(u32 shift,u32 show_offset,u32 file_select,u32 haveThumbnail)
 				else
 					dwName = 0;
 					
-				Clear(17,20 + file_select*14,(char_num)*6,13,gl_color_selectBG_sd,1);	
+				if(thaiy)
+					Launcher_ClearTextBodyBackgroundRegion(17, 20 + file_select*14 - 1, (char_num)*6, 1);
+				Clear(17,20 + file_select*14,(char_num)*6,13,gl_color_selectBG_sd,1);
 				DrawHZText12(msg, char_num-1, 1+16, y_offset + file_select*14, LAUNCHER_SELECTED_TEXT,1);
 			}	
 		}
@@ -2156,7 +2164,7 @@ void Filename_loop(u32 shift,u32 show_offset,u32 file_select,u32 haveThumbnail)
 //---------------------------------------------------------------------------------
 void Show_MENU_btn()
 {
-	char msg[30];
+	char msg[64];
 	Clear(60,118-1,55,14,gl_color_selectBG_sd,1);
 	Clear(125,118-1,55,14,gl_color_selectBG_sd,1);
 	sprintf(msg,"%s",gl_menu_btn);
@@ -2180,10 +2188,11 @@ static void Show_MENU_Row(u32 line, u32 menu_select, PAGE_NUM page, u32 havecht,
 {
 	u32 y_offset= 30;
 	u16 name_color;
-	char msg[30];
+	char msg[48];
+	int thaiy = gl_font_above_extent;
 
 	u32 row_y = y_offset + line*14;
-	Launcher_RestoreLegacyMenuRow(row_y, 13);
+	Launcher_RestoreLegacyMenuRow(FONT_CLEAR_Y(row_y, thaiy), FONT_CLEAR_H(13, thaiy));
 	if(line== menu_select){
 		Clear(42, row_y, 156, 13, gl_color_selectBG_sd, 1);
 		name_color = LAUNCHER_SELECTED_TEXT;
@@ -2367,6 +2376,7 @@ void Show_game_name(u32 total,u32 Select)
 	u32 Y_offset=20;
 	u32 line_x = 14;
 	const u16 *icon;
+	int thaiy = gl_font_above_extent;
 
 	if(total<10)
 		need_show = total;
@@ -2377,7 +2387,7 @@ void Show_game_name(u32 total,u32 Select)
 	{
 		u32 showy = Y_offset + line*line_x;
 
-		Launcher_ClearTextBodyBackgroundRegion(0, showy, 240, 13);
+		Launcher_ClearTextBodyBackgroundRegion(0, FONT_CLEAR_Y(showy, thaiy), 240, FONT_CLEAR_H(13, thaiy));
 		if(line == Select)
 			Clear(17, showy, 240-17, 13, gl_color_selectBG_sd, 1);
 
@@ -5110,6 +5120,7 @@ static const char* Launcher_GetCurrentFolderLabel(void)
 static void Launcher_MakeEllipsisText(const char *src, char *dst, u32 dst_size, u32 max_chars)
 {
 	u32 len;
+	u32 cut_byte;
 
 	if(!dst || dst_size == 0)
 		return;
@@ -5120,20 +5131,22 @@ static void Launcher_MakeEllipsisText(const char *src, char *dst, u32 dst_size, 
 
 	strncpy(dst, src, dst_size - 1);
 	dst[dst_size - 1] = '\0';
-	len = strlen(dst);
+	len = DrawText12VisibleLength(dst);
 	if(len <= max_chars)
 		return;
 
 	if(max_chars <= 3)
 	{
-		dst[max_chars] = '\0';
+		cut_byte = DrawText12ByteOffsetForGlyphs(dst, max_chars);
+		dst[cut_byte] = '\0';
 		return;
 	}
 
-	dst[max_chars - 3] = '.';
-	dst[max_chars - 2] = '.';
-	dst[max_chars - 1] = '.';
-	dst[max_chars] = '\0';
+	cut_byte = DrawText12ByteOffsetForGlyphs(dst, max_chars - 3);
+	dst[cut_byte] = '.';
+	dst[cut_byte + 1] = '.';
+	dst[cut_byte + 2] = '.';
+	dst[cut_byte + 3] = '\0';
 }
 
 static void Launcher_GetVerticalFolderLabelInfo(char *cleaned, int cleaned_size, int *outer_left, int *outer_top, int *outer_w, int *outer_h)
@@ -7013,7 +7026,7 @@ static void Launcher_SettingsGetLine(u32 item, char *out, u32 out_size)
 {
     const char *label = "";
     const char *value = "";
-    char label_short[48];
+    char label_short[96];
     u32 used;
     u32 spaces;
 
@@ -7065,12 +7078,13 @@ static void Launcher_SettingsGetLine(u32 item, char *out, u32 out_size)
 
 static void Launcher_SettingsDrawRow(u32 item, u32 selected, u32 top, void (*get_line)(u32,char*,u32))
 {
-    char msg[64];
+    char msg[160];
     const u32 visible = 9;
     const u32 y0 = 24;
     const u32 line_h = 14;
     u32 row;
     u32 y;
+    int thaiy = gl_font_above_extent;
 
     if(item < top || item >= top + visible)
         return;
@@ -7081,11 +7095,11 @@ static void Launcher_SettingsDrawRow(u32 item, u32 selected, u32 top, void (*get
        The top arrow lives on the first row; if this clear reaches it,
        it visibly flickers during page scrolling.  The value highlight still
        ends at x=224, so restoring through x=224 is enough to remove trails. */
-    Launcher_ClearWithThemeBG((const u16*)gImage_SET, 17, y, 208, 13);
+    Launcher_ClearWithThemeBG((const u16*)gImage_SET, 17, FONT_CLEAR_Y(y, thaiy), 208, FONT_CLEAR_H(13, thaiy));
     get_line(item, msg, sizeof(msg));
     if(item == selected)
     {
-        char label_part[64];
+        char label_part[96];
         const char *value_part = msg;
         u16 value_offset;
 
@@ -7108,13 +7122,32 @@ static void Launcher_SettingsDrawRow(u32 item, u32 selected, u32 top, void (*get
     }
     else
     {
-        DrawHZText12(msg, 32, 23, y, gl_color_text, 1);
+        if(gl_select_lang == THAI_CP_FIRST)
+        {
+            char label_part[96];
+            const char *value_part = msg;
+            u16 value_offset;
+            memset(label_part, 0, sizeof(label_part));
+            value_offset = DrawText12ByteOffsetForGlyphs(msg, 16);
+            if(value_offset >= sizeof(label_part))
+                value_offset = sizeof(label_part) - 1;
+            memcpy(label_part, msg, value_offset);
+            label_part[value_offset] = 0;
+            if(strlen(msg) > value_offset)
+                value_part = msg + value_offset;
+            DrawHZText12(label_part, 32, 23, y, gl_color_text, 1);
+            DrawHZText12((TCHAR*)value_part, 32, 119, y, gl_color_text, 1);
+        }
+        else
+        {
+            DrawHZText12(msg, 32, 23, y, gl_color_text, 1);
+        }
     }
 }
 
 static void Launcher_SettingsDrawRowValueOnly(u32 item, u32 selected, u32 top, void (*get_line)(u32,char*,u32))
 {
-    char msg[64];
+    char msg[160];
     const char *value_part = msg;
     const u32 visible = 9;
     const u32 y0 = 24;
@@ -7122,6 +7155,7 @@ static void Launcher_SettingsDrawRowValueOnly(u32 item, u32 selected, u32 top, v
     u32 row;
     u32 y;
     u16 value_offset;
+    int thaiy = gl_font_above_extent;
 
     if(item < top || item >= top + visible)
         return;
@@ -7140,7 +7174,7 @@ static void Launcher_SettingsDrawRowValueOnly(u32 item, u32 selected, u32 top, v
     }
     else
     {
-        Launcher_ClearWithThemeBG((const u16*)gImage_SET, 112, y, 112, 13);
+        Launcher_ClearWithThemeBG((const u16*)gImage_SET, 112, FONT_CLEAR_Y(y, thaiy), 112, FONT_CLEAR_H(13, thaiy));
         DrawHZText12((TCHAR*)value_part, 32, 119, y, gl_color_text, 1);
     }
 }
@@ -7192,10 +7226,26 @@ static void Launcher_SettingsDrawList(const char *title, u32 total, u32 selected
     Launcher_SettingsDrawRowsOnly(total, selected, top, get_line);
 }
 
+static void Launcher_DrawPopupMsg(char *msg, u32 x, u32 yy, u16 color)
+{
+    char *sep = strchr(msg, '\x01');
+    if(sep)
+    {
+        *sep = 0;
+        DrawHZText12(msg,     0, x + 18,  yy, color, 1);
+        DrawHZText12(sep + 1, 0, x + 103, yy, color, 1);
+        *sep = '\x01';
+    }
+    else
+    {
+        DrawHZText12(msg, 32, x + 18, yy, color, 1);
+    }
+}
+
 static void Launcher_SettingsDrawPopupEx(const char *title, u32 total, u32 selected, u32 top, void (*get_line)(u32,char*,u32), u32 row_y0)
 {
     u32 i;
-    char msg[40];
+    char msg[80];
     const u32 visible = 7;
     const u32 x = 36;
     const u32 y = 25;
@@ -7218,7 +7268,7 @@ static void Launcher_SettingsDrawPopupEx(const char *title, u32 total, u32 selec
         get_line(item, msg, sizeof(msg));
         if(item == selected)
             Clear(x + 12, yy, w - 24, 11, gl_color_selectBG_sd, 1);
-        DrawHZText12(msg, 32, x + 18, yy, (item == selected) ? LAUNCHER_SELECTED_TEXT : gl_color_text, 1);
+        Launcher_DrawPopupMsg(msg, x, yy, (item == selected) ? LAUNCHER_SELECTED_TEXT : gl_color_text);
     }
 }
 
@@ -7264,7 +7314,7 @@ static void Launcher_SettingsRestorePopupArea(u32 x, u32 y, u32 w, u32 h)
 
 static void Launcher_SettingsDrawPopupRowEx(u32 item, u32 selected, u32 top, void (*get_line)(u32,char*,u32), u32 row_y0)
 {
-    char msg[40];
+    char msg[80];
     const u32 visible = 7;
     const u32 x = 36;
     const u32 w = 168;
@@ -7281,7 +7331,7 @@ static void Launcher_SettingsDrawPopupRowEx(u32 item, u32 selected, u32 top, voi
     get_line(item, msg, sizeof(msg));
     if(item == selected)
         Clear(x + 12, yy, w - 24, 11, gl_color_selectBG_sd, 1);
-    DrawHZText12(msg, 32, x + 18, yy, (item == selected) ? LAUNCHER_SELECTED_TEXT : gl_color_text, 1);
+    Launcher_DrawPopupMsg(msg, x, yy, (item == selected) ? LAUNCHER_SELECTED_TEXT : gl_color_text);
 }
 
 static void Launcher_ViewModeCycle(int dir)
@@ -7338,6 +7388,29 @@ typedef enum
     ADDON_SETTING_TOTAL
 } LauncherAddonSettingItem;
 
+static void Launcher_BuildPopupLine(char *out, u32 out_size, const char *label, const char *value)
+{
+    u32 used;
+    u32 spaces;
+    u32 visible;
+
+    if(gl_select_lang == THAI_CP_FIRST)
+    {
+        snprintf(out, out_size, "%s\x01%s", label, value);
+        return;
+    }
+
+    snprintf(out, out_size, "%s", label);
+    used = strlen(out);
+    visible = DrawText12VisibleLength(out);
+    spaces = (visible < 11) ? (12 - visible) : 1;
+    while(spaces-- && (used + 1) < out_size)
+        out[used++] = ' ';
+    out[used] = 0;
+    if(used < out_size)
+        snprintf(out + used, out_size - used, "%s", value);
+}
+
 static void Launcher_AddonSettingsGetLine(u32 item, char *out, u32 out_size)
 {
     const char *label = "";
@@ -7352,7 +7425,7 @@ static void Launcher_AddonSettingsGetLine(u32 item, char *out, u32 out_size)
         default: break;
     }
 
-    snprintf(out, out_size, "%-11s %s", label, value);
+    Launcher_BuildPopupLine(out, out_size, label, value);
 }
 
 static void Launcher_AddonSettingsToggle(u32 item)
@@ -7397,7 +7470,7 @@ static void Launcher_LedSettingsGetLine(u32 item, char *out, u32 out_size)
         default: break;
     }
 
-    snprintf(out, out_size, "%-11s %s", label, value);
+    Launcher_BuildPopupLine(out, out_size, label, value);
 }
 
 static void Launcher_LedSettingsToggle(u32 item)
@@ -8301,7 +8374,7 @@ static int Launcher_SplitStartTitle(const char *title, char lines[3][32])
     int pos = 0;
     int line_count = 0;
     int i;
-    const int max_take = 18;
+    const int max_glyphs = LAUNCHER_START_LAST_TEXT_W / 6;
 
     memset(lines, 0, sizeof(char) * 3 * 32);
     if(!title || !title[0])
@@ -8314,7 +8387,9 @@ static int Launcher_SplitStartTitle(const char *title, char lines[3][32])
     while(pos < title_len && line_count < 3)
     {
         int remaining = title_len - pos;
-        int take = (remaining > max_take) ? max_take : remaining;
+        int take = (int)DrawText12ByteOffsetForGlyphs(title + pos, max_glyphs);
+        if(take <= 0 || take >= remaining)
+            take = remaining;
         int split = pos + take;
 
         if(split < title_len)
@@ -8332,14 +8407,16 @@ static int Launcher_SplitStartTitle(const char *title, char lines[3][32])
         if(split <= pos)
             split = pos + take;
 
-        strncpy(lines[line_count], title + pos, split - pos);
-        lines[line_count][split - pos] = '\0';
+        take = split - pos;
+        if(take > 31) take = 31;
+        strncpy(lines[line_count], title + pos, take);
+        lines[line_count][take] = '\0';
 
         while(lines[line_count][0] == ' ')
             memmove(lines[line_count], lines[line_count] + 1, strlen(lines[line_count]));
 
         pos = split;
-        while(title[pos] == ' ')
+        while(pos < title_len && title[pos] == ' ')
             pos++;
 
         line_count++;
@@ -9065,7 +9142,7 @@ static void Launcher_DrawStartLastTitle(u32 selected)
 
 static void Launcher_DrawStartOption(u32 item, u32 selected)
 {
-    char msg[24];
+    char msg[48];
     int x = 0;
     int y = 0;
     int w = 96;
@@ -9569,7 +9646,7 @@ int main(void) {
 
 	SetMode (MODE_3 | BG2_ENABLE );
 	
-	SD_Disable();	
+	SD_Disable();
 	Set_RTC_status(1);
 
 	//check FW

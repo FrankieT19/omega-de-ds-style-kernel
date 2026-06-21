@@ -16,6 +16,7 @@ char* gl_generating_emu;
 
 char* gl_menu_btn;
 char* gl_lastest_game;
+int gl_font_above_extent = 0;
 
 char* gl_writing;
 
@@ -122,131 +123,131 @@ char* gl_disabled;
 unsigned char* ASC_DATA;
 
 
-//����
-const char zh_init_error[]="TF����ʼ��ʧ��";
-const char zh_power_off[]="�ػ�";
-const char zh_init_ok[]="TF����ʼ���ɹ�";
-const char zh_Loading[]="������...";
-const char zh_file_overflow[]="�ļ�̫��,���ܼ���";
+//����
+const char zh_init_error[]="TF����ʼ��ʧ��";
+const char zh_power_off[]="�ػ�";
+const char zh_init_ok[]="TF����ʼ���ɹ�";
+const char zh_Loading[]="������...";
+const char zh_file_overflow[]="�ļ�̫��,���ܼ���";
 
-const char zh_menu_btn[]=" (B)ȡ��    (A)ȷ��";
-const char zh_writing[]="����д��...";
-const char zh_lastest_game[]="��ѡ�����һ����Ϸ";
+const char zh_menu_btn[]=" (B)ȡ��    (A)ȷ��";
+const char zh_writing[]="����д��...";
+const char zh_lastest_game[]="��ѡ�����һ����Ϸ";
 
-const char zh_time[] ="     ʱ��";
+const char zh_time[] ="     ʱ��";
 const char zh_Mon[]="һ";
-const char zh_Tues[]="��";
-const char zh_Wed[]="��";
-const char zh_Thur[]="��";
-const char zh_Fri[]="��";
-const char zh_Sat[]="��";
-const char zh_Sun[]="��";
+const char zh_Tues[]="��";
+const char zh_Wed[]="��";
+const char zh_Thur[]="��";
+const char zh_Fri[]="��";
+const char zh_Sat[]="��";
+const char zh_Sun[]="��";
 
-const char zh_addon[]="     ����";
-const char zh_reset[]="����λ";
-const char zh_rts[]="��ʱ�浵";
-const char zh_sleep[]="˯��";
-const char zh_cheat[]="����ָ";
+const char zh_addon[]="     ����";
+const char zh_reset[]="����λ";
+const char zh_rts[]="��ʱ�浵";
+const char zh_sleep[]="˯��";
+const char zh_cheat[]="����ָ";
 
-const char zh_hot_key[]=" ˯���ȼ�";
-const char zh_hot_key2[]=" �˵��ȼ�";
+const char zh_hot_key[]=" ˯���ȼ�";
+const char zh_hot_key2[]=" �˵��ȼ�";
 
 const char zh_language[]=" LANGUAGE";
-const char zh_lang[]=" ����";
+const char zh_lang[]=" ����";
 
-const char zh_set_btn[]="����";
-const char zh_ok_btn[]="����";
-const char zh_formatnor_info[]="ȷ��?��Լ4����";
+const char zh_set_btn[]="����";
+const char zh_ok_btn[]="����";
+const char zh_formatnor_info[]="ȷ��?��Լ4����";
 
 const char zh_theme_credit[]="DS Style v6";
 const char zh_theme_credit2[]="by FrankieT19";
 
-const char zh_check_sav[]="���SAV�ļ�";
-const char zh_make_sav[]="����SAV�ļ�";
+const char zh_check_sav[]="���SAV�ļ�";
+const char zh_make_sav[]="����SAV�ļ�";
 
-const char zh_check_RTS[]="���RTS�ļ�";
-const char zh_make_RTS[]="����RTS�ļ�";
+const char zh_check_RTS[]="���RTS�ļ�";
+const char zh_make_RTS[]="����RTS�ļ�";
 
-const char zh_check_pat[]="���PAT�ļ�";
-const char zh_make_pat[]="����PAT�ļ�";
+const char zh_check_pat[]="���PAT�ļ�";
+const char zh_make_pat[]="����PAT�ļ�";
 
-const char zh_please_wait[]="��ȴ�...";
+const char zh_please_wait[]="��ȴ�...";
 
-const char zh_loading_game[]="������Ϸ";
+const char zh_loading_game[]="������Ϸ";
 
-const char zh_no_roms[]="�Ҳ���.gba�ļ�!";
+const char zh_no_roms[]="�Ҳ���.gba�ļ�!";
 
-const char zh_engine[]="     ����";
-const char zh_use_engine[]="���ٲ�������";
+const char zh_engine[]="     ����";
+const char zh_use_engine[]="���ٲ�������";
 
-const char zh_recently_play[]="�����Ϸ�б�";
+const char zh_recently_play[]="�����Ϸ�б�";
 
-const char zh_START_help[]="�������Ϸ�б�";
-const char zh_SELECT_help[]="�л���Ϸ����ͼ";
-const char zh_L_A_help[]="��ѡ������ѡ��";
-const char zh_LSTART_help[]="ɾ���ļ�";
-const char zh_LSELECT_help[]="ɾ���浵";
-const char zh_online_manual[]="  ����˵����";
+const char zh_START_help[]="�������Ϸ�б�";
+const char zh_SELECT_help[]="�л���Ϸ����ͼ";
+const char zh_L_A_help[]="��ѡ������ѡ��";
+const char zh_LSTART_help[]="ɾ���ļ�";
+const char zh_LSELECT_help[]="ɾ���浵";
+const char zh_online_manual[]="  ����˵����";
 
-const char zh_no_game_played[]="�����û�����Ϸ";
+const char zh_no_game_played[]="�����û�����Ϸ";
 
-const char zh_ingameRTC[]=" ��Ϸʱ��";
+const char zh_ingameRTC[]=" ��Ϸʱ��";
 //const char zh_offRTC_powersave[]=" ";
-const char zh_ingameRTC_open[]="��";
-const char zh_ingameRTC_close[]="�ر�";//TURNOFF TO POWER SAVE
+const char zh_ingameRTC_open[]="��";
+const char zh_ingameRTC_close[]="�ر�";//TURNOFF TO POWER SAVE
 
-const char zh_lang_toggle_reset[]="Ӳ����";
-const char zh_lang_toggle_backup[]="���汸��";
+const char zh_lang_toggle_reset[]="Ӳ����";
+const char zh_lang_toggle_backup[]="���汸��";
 
-const char zh_error_0[]="�ļ��д���";
-const char zh_error_1[]="�ļ�����";
-const char zh_error_2[]="SAVER����";
-const char zh_error_3[]="�浵����";
-const char zh_error_4[]="��ȡ�浵����";
-const char zh_error_5[]="�����浵����";
-const char zh_error_6[]="RTS�ļ�����";
+const char zh_error_0[]="�ļ��д���";
+const char zh_error_1[]="�ļ�����";
+const char zh_error_2[]="SAVER����";
+const char zh_error_3[]="�浵����";
+const char zh_error_4[]="��ȡ�浵����";
+const char zh_error_5[]="�����浵����";
+const char zh_error_6[]="RTS�ļ�����";
 
-const char zh_save_sav[]="����浵?";
-const char zh_save_ing[]="����...";
-const char zh_save[]="     �浵";
-const char zh_auto_save[]="�����Զ�����";
+const char zh_save_sav[]="����浵?";
+const char zh_save_ing[]="����...";
+const char zh_save[]="     �浵";
+const char zh_auto_save[]="�����Զ�����";
 
 const char zh_modeB_INITstr[]="ģʽB״̬";
-const char zh_modeB_RUMBLE[]="��";
-const char zh_modeB_RAM[]="�ڴ�";
-const char zh_modeB_LINK[]="����";
+const char zh_modeB_RUMBLE[]="��";
+const char zh_modeB_RAM[]="�ڴ�";
+const char zh_modeB_LINK[]="����";
 
-const char zh_led[]="   ָʾ��";
-const char zh_led_open[]="��LED";
-const char zh_Breathing_light[]="   ������";
-const char zh_SD_working[]=" SD������";
+const char zh_led[]="   ָʾ��";
+const char zh_led_open[]="��LED";
+const char zh_Breathing_light[]="   ������";
+const char zh_SD_working[]=" SD������";
 
-const char zh_NOR_full[]="NOR�ռ䲻��";
-const char zh_save_loaded[]="�浵�Ѽ��ص�FRAM";
-const char zh_save_saved[]="�浵�ѱ��浽SD";
-const char zh_file_exist[]="�ļ�����,������?";
-const char zh_file_noexist[]="�Ҳ����浵�ļ�";
+const char zh_NOR_full[]="NOR�ռ䲻��";
+const char zh_save_loaded[]="�浵�Ѽ��ص�FRAM";
+const char zh_save_saved[]="�浵�ѱ��浽SD";
+const char zh_file_exist[]="�ļ�����,������?";
+const char zh_file_noexist[]="�Ҳ����浵�ļ�";
 
-const char zh_copying_data[]="����ROM...";
-const char zh_generating_emu[]="����ģ����...";
+const char zh_copying_data[]="����ROM...";
+const char zh_generating_emu[]="����ģ����...";
 
-const char zh_enabled[]="������";
-const char zh_disabled[]="�ѽ���";
+const char zh_enabled[]="������";
+const char zh_disabled[]="�ѽ���";
 
 const char *zh_rom_menu[]={
-	"ֱ������",
-	"����������",
-	"��¼��NOR",
-	"��¼��NOR������",
-	"�浵����",
-	"����ָ",
+	"ֱ������",
+	"����������",
+	"��¼��NOR",
+	"��¼��NOR������",
+	"�浵����",
+	"����ָ",
 };
 const char *zh_nor_op[5]={
-	"ֱ������",
-	"ɾ��",
-	"ȫ����ʽ��",
-	"���ش浵��FRAM",
-	"����FRAM�浵",
+	"ֱ������",
+	"ɾ��",
+	"ȫ����ʽ��",
+	"���ش浵��FRAM",
+	"����FRAM�浵",
 };
 
 
@@ -379,6 +380,131 @@ const char *en_nor_op[5]={
 };
 
 //---------------------------------------------------------------------------------
+
+// Thai
+const char th_init_error[]   = "ไม่สามารถเริ่มต้น SD";
+const char th_power_off[]    = "ปิดเครื่อง";
+const char th_init_ok[]      = "เริ่มต้น SD สำเร็จ";
+const char th_Loading[]      = "กำลังโหลด...";
+const char th_file_overflow[]= "ไฟล์ใหญ่เกินไป";
+
+const char th_menu_btn[]     = "(B)ยกเลิก   (A)ตกลง";
+const char th_writing[]      = "กำลังเขียน...";
+const char th_lastest_game[] = "เลือกเกมล่าสุด";
+
+const char th_time[]         = "     เวลา";
+const char th_Mon[]          = "จัน";
+const char th_Tues[]         = "อัง";
+const char th_Wed[]          = "พุธ";
+const char th_Thur[]         = "พฤหัส";
+const char th_Fri[]          = "ศุกร์";
+const char th_Sat[]          = "เสาร์";
+const char th_Sun[]          = "อาทิตย์";
+
+const char th_addon[]        = " ส่วนเสริม";
+const char th_reset[]        = "รีเซ็ต";
+const char th_rts[]          = "เซฟสเตท";
+const char th_sleep[]        = "สลีป";
+const char th_cheat[]        = "สูตรโกง";
+
+const char th_hot_key[]      = "ปุ่มลัดสลีป";
+const char th_hot_key2[]     = "ปุ่มลัดเมนู";
+
+const char th_language[]     = " ภาษา";
+const char th_lang[]         = "ไทย";
+const char th_zh_lang[]      = "จีน";
+const char th_set_btn[]      = "ตั้งค่า";
+const char th_ok_btn[]       = "ตกลง";
+const char th_formatnor_info1[] = "ยืนยัน?";
+const char th_formatnor_info2[] = "ใช้เวลาสักครู่";
+
+const char th_theme_credit[] = "DS Style v6";
+const char th_theme_credit2[]= "by FrankieT19";
+
+const char th_check_sav[]    = "ตรวจสอบ SAV...";
+const char th_make_sav[]     = "สร้าง SAV...";
+
+const char th_check_RTS[]    = "ตรวจสอบ RTS...";
+const char th_make_RTS[]     = "สร้าง RTS...";
+
+const char th_check_pat[]    = "ตรวจสอบแพทช์...";
+const char th_make_pat[]     = "สร้างแพทช์...";
+
+const char th_loading_game[] = "กำลังโหลดเกม";
+
+const char th_engine[]       = "   เอ็นจิน";
+const char th_use_engine[]   = "เอ็นจินเร็ว";
+
+const char th_recently_play[]= "เพิ่งเล่น";
+
+const char th_START_help[]   = "เล่นล่าสุด/โปรด";
+const char th_SELECT_help[]  = "สลับมุมมอง";
+const char th_L_A_help[]     = "สลับตัวเลือก";
+const char th_LSTART_help[]  = "ลบไฟล์";
+const char th_online_manual[]= "คู่มือออนไลน์";
+
+const char th_no_game_played[]= "ยังไม่มีเกม";
+
+const char th_ingameRTC[]    = "  นาฬิกา";
+const char th_ingameRTC_open[]= "เปิด";
+const char th_ingameRTC_close[]= "ปิด";
+
+const char th_lang_toggle_reset[]= "บูตเต็ม";
+const char th_lang_toggle_backup[]= "สำรอง";
+
+const char th_error_0[]      = "ข้อผิดพลาดของโฟลเดอร์";
+const char th_error_1[]      = "ข้อผิดพลาดไฟล์";
+const char th_error_2[]      = "ข้อผิดพลาด SAVER";
+const char th_error_3[]      = "ข้อผิดพลาดการบันทึก";
+const char th_error_4[]      = "ข้อผิดพลาดการอ่านเซฟ";
+const char th_error_5[]      = "ข้อผิดพลาดการสร้างเซฟ";
+const char th_error_6[]      = "ข้อผิดพลาด RTS";
+
+const char th_save_sav[]     = "บันทึก?";
+const char th_save_ing[]     = "กำลังบันทึก...";
+const char th_save[]         = "    บันทึก";
+const char th_auto_save[]    = "บันทึกอัตโนมัติ";
+
+const char th_modeB_INITstr[]= "  โหมด B";
+const char th_modeB_RUMBLE[] = "สั่น";
+const char th_modeB_RAM[]    = "RAM";
+const char th_modeB_LINK[]   = "ลิงค์";
+
+const char th_led[]          = "   LED";
+const char th_led_open[]     = "เปิด LED";
+const char th_Breathing_light[]= "Breathing";
+const char th_SD_working[]   = "   SD LED";
+
+const char th_NOR_full[]     = "NOR เต็มแล้ว!";
+const char th_save_loaded[]  = "โหลดเซฟแล้ว";
+const char th_save_saved[]   = "บันทึกเซฟแล้ว";
+const char th_file_exist[]   = "เขียนทับไฟล์?";
+const char th_file_noexist[] = "ไม่พบไฟล์เซฟ";
+
+const char th_copying_data[] = "กำลังคัดลอก ROM...";
+const char th_generating_emu[]= "สร้างโปรแกรมจำลอง...";
+
+const char th_enabled[]      = "เปิดใช้งาน";
+const char th_disabled[]     = "ปิดใช้งาน";
+
+const char *th_rom_menu[] = {
+	"โหลดตรง",
+	"โหลดพร้อมส่วนเสริม",
+	"บันทึก NOR",
+	"บันทึก NOR+ส่วนเสริม",
+	"ประเภทเซฟ",
+	"สูตรโกง",
+};
+const char *th_nor_op[] = {
+	"โหลดตรง",
+	"ลบ",
+	"ฟอร์แมตทั้งหมด",
+	"โหลดเซฟ FRAM",
+	"บันทึกเซฟ FRAM",
+};
+
+//---------------------------------------------------------------------------------
+
 void LoadChinese(void)
 {
 	gl_init_error = (char*)zh_init_error;
@@ -495,6 +621,7 @@ void LoadChinese(void)
 	gl_disabled = (char*)zh_disabled;
 
 	// For Chinese, Use old font
+	gl_font_above_extent = 0;
 	ASC_DATA = (unsigned char*)ASC_DATA_NEW;
 
 }
@@ -612,5 +739,121 @@ void LoadEnglish(void)
 	gl_disabled = (char*)en_disabled;
 
 	// For English, Use new font
+	gl_font_above_extent = 0;
 	ASC_DATA = (unsigned char*)ASC_DATA_NEW;
+}
+//---------------------------------------------------------------------------------
+void LoadThai(void)
+{
+	gl_init_error          = (char*)th_init_error;
+	gl_power_off           = (char*)th_power_off;
+	gl_init_ok             = (char*)th_init_ok;
+	gl_Loading             = (char*)th_Loading;
+	gl_file_overflow       = (char*)th_file_overflow;
+	gl_theme_credit        = (char*)th_theme_credit;
+	gl_theme_credit2       = (char*)th_theme_credit2;
+
+	gl_menu_btn            = (char*)th_menu_btn;
+	gl_writing             = (char*)th_writing;
+	gl_lastest_game        = (char*)th_lastest_game;
+
+	gl_time                = (char*)th_time;
+	gl_Mon                 = (char*)th_Mon;
+	gl_Tues                = (char*)th_Tues;
+	gl_Wed                 = (char*)th_Wed;
+	gl_Thur                = (char*)th_Thur;
+	gl_Fri                 = (char*)th_Fri;
+	gl_Sat                 = (char*)th_Sat;
+	gl_Sun                 = (char*)th_Sun;
+	gl_addon               = (char*)th_addon;
+	gl_reset               = (char*)th_reset;
+	gl_rts                 = (char*)th_rts;
+	gl_sleep               = (char*)th_sleep;
+	gl_cheat               = (char*)th_cheat;
+
+	gl_hot_key             = (char*)th_hot_key;
+	gl_hot_key2            = (char*)th_hot_key2;
+	
+	gl_language            = (char*)th_language;
+	gl_en_lang             = (char*)en_lang;
+	gl_zh_lang             = (char*)th_zh_lang;
+	gl_set_btn             = (char*)th_set_btn;
+	gl_ok_btn              = (char*)th_ok_btn;
+	gl_formatnor_info1     = (char*)th_formatnor_info1;
+	gl_formatnor_info2     = (char*)th_formatnor_info2;
+
+	temp                   = " ";
+	
+	gl_check_sav           = (char*)th_check_sav;
+	gl_make_sav            = (char*)th_make_sav;
+
+	gl_check_RTS           = (char*)th_check_RTS;
+	gl_make_RTS            = (char*)th_make_RTS;
+	
+	gl_check_pat           = (char*)th_check_pat;
+	gl_make_pat            = (char*)th_make_pat;
+	
+	gl_loading_game        = (char*)th_loading_game;
+	
+	gl_engine              = (char*)th_engine;
+	gl_use_engine          = (char*)th_use_engine;
+	
+	gl_recently_play       = (char*)th_recently_play;
+	
+	gl_START_help          = (char*)th_START_help;
+	gl_SELECT_help         = (char*)th_SELECT_help;
+	gl_L_A_help            = (char*)th_L_A_help;
+	gl_LSTART_help         = (char*)th_LSTART_help;
+	gl_online_manual       = (char*)th_online_manual;
+	
+	gl_no_game_played      = (char*)th_no_game_played;
+	
+	gl_ingameRTC           = (char*)th_ingameRTC;
+	gl_ingameRTC_open      = (char*)th_ingameRTC_open;
+	gl_ingameRTC_close     = (char*)th_ingameRTC_close;
+	
+	gl_lang_toggle_reset   = (char*)th_lang_toggle_reset;
+	gl_lang_toggle_backup  = (char*)th_lang_toggle_backup;
+	
+	gl_error_0             = (char*)th_error_0;
+	gl_error_1             = (char*)th_error_1;
+	gl_error_2             = (char*)th_error_2;
+	gl_error_3             = (char*)th_error_3;
+	gl_error_4             = (char*)th_error_4;
+	gl_error_5             = (char*)th_error_5;
+	gl_error_6             = (char*)th_error_6;
+	
+	gl_save_sav            = (char*)th_save_sav;
+	gl_save_ing            = (char*)th_save_ing;
+	gl_save                = (char*)th_save;
+	gl_auto_save           = (char*)th_auto_save;
+	
+	gl_modeB_INITstr       = (char*)th_modeB_INITstr;
+	gl_modeB_RUMBLE        = (char*)th_modeB_RUMBLE;
+	gl_modeB_RAM           = (char*)th_modeB_RAM;
+	gl_modeB_LINK          = (char*)th_modeB_LINK;
+	
+	gl_led                 = (char*)th_led;
+	gl_led_open            = (char*)th_led_open;
+	gl_Breathing_light     = (char*)th_Breathing_light;
+	gl_SD_working          = (char*)th_SD_working;
+	
+	gl_NOR_full            = (char*)th_NOR_full;
+	gl_save_loaded         = (char*)th_save_loaded;
+	gl_save_saved          = (char*)th_save_saved;
+	gl_file_exist          = (char*)th_file_exist;
+	gl_file_noexist        = (char*)th_file_noexist;
+	
+	gl_rom_menu            = (char**)th_rom_menu;
+	gl_nor_op              = (char**)th_nor_op;
+	
+	gl_copying_data        = (char*)th_copying_data;
+	
+	gl_generating_emu      = (char*)th_generating_emu;
+	
+	gl_enabled             = (char*)th_enabled;
+	gl_disabled            = (char*)th_disabled;
+	
+	gl_font_above_extent   = 1;
+	ASC_DATA               = (unsigned char*)ASC_DATA_NEW;
 }
