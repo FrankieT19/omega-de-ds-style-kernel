@@ -3785,6 +3785,7 @@ void ShowTime(u32 page_num ,u32 page_mode)
 	static u8 last_ss = 0xFF;
 	static u32 last_page_num = 0xFFFFFFFF;
 	static u32 last_page_mode = 0xFFFFFFFF;
+	int thaiy = gl_font_above_extent;
 	u8 datetime[3];
 	u8 HH;
 	u8 MM;
@@ -3826,11 +3827,11 @@ void ShowTime(u32 page_num ,u32 page_mode)
 	if(need_redraw)
 	{
 		if(page_mode==0x1)
-			Launcher_ClearWithThemeBG((const u16*)gImage_SD_LIST,80, 3, 105, 13);	
+			Launcher_ClearWithThemeBG((const u16*)gImage_SD_LIST,80, FONT_CLEAR_Y(3, thaiy), 105, FONT_CLEAR_H(13, thaiy));	
 		else if(page_num==SD_list)
-			Launcher_ClearWithThemeBG(Launcher_GetBGImage(),80, 3, 105, 13);
+			Launcher_ClearWithThemeBG(Launcher_GetBGImage(),80, FONT_CLEAR_Y(3, thaiy), 105, FONT_CLEAR_H(13, thaiy));
 		else if (page_num==NOR_list)
-			Launcher_ClearWithThemeBG(Launcher_GetBGImage(),80, 3, 105, 13);
+			Launcher_ClearWithThemeBG(Launcher_GetBGImage(),80, FONT_CLEAR_Y(3, thaiy), 105, FONT_CLEAR_H(13, thaiy));
 
 		if(launcher_system_name_dirty || (page_num != last_page_num))
 		{
@@ -3842,7 +3843,7 @@ void ShowTime(u32 page_num ,u32 page_mode)
 		{
 			/* Restore the complete title/name band so a shorter translation or
 			   a newly centred title cannot leave pixels behind. */
-			Launcher_ClearWithThemeBG(Launcher_GetTopbarBG(page_num), 0, 3, 185, 13);
+			Launcher_ClearWithThemeBG(Launcher_GetTopbarBG(page_num), 0, FONT_CLEAR_Y(3, thaiy), 185, FONT_CLEAR_H(13, thaiy));
 			Launcher_DrawTopbarName(page_num);
 			Launcher_DrawTopbarTitle(page_num, recent_title);
 		}
