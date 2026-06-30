@@ -525,8 +525,6 @@ void IWRAM_CODE Set_64MROM_flag(u16  flag)
 void IWRAM_CODE Check_FW_update()
 {
 	ASC_DATA = ASC_DATA_OLD;
-	vu16 busy;
-	vu32 offset;
 	u32 offset_Y = 5;
 	u32 line_x = 17;
 	char msg[100];

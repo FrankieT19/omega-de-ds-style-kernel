@@ -76,7 +76,6 @@ u32 Setting_window2(void)
 	u32 Set_OK_line=0;
 	u32 currstate=0;
 	char msg[128];
-	u16 clean_color;
 	u32 re_show=1;
 	u32 full_redraw = 1;
 	u16 prev_led_open_sel = 0xFFFF;

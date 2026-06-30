@@ -274,9 +274,8 @@ u32 Loadfile2NOR(TCHAR *filename, u32 NORaddress,u16 have_patch,u8 SAVEMODE)
 		*((vu16 *)(FlashBase_S98+0x000*2)) = 0x30 ;
 		{
 			int polling_counter = 0x15000;
-			u16 v1;
 			do {
-				v1 = *((vu16 *)(FlashBase_S98+ 0x5C0000));
+				(void)*((vu16 *)(FlashBase_S98+ 0x5C0000));
 				polling_counter--;
 
 			} while (polling_counter);
