@@ -1,0 +1,11 @@
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+
+[*.{bat,cmd}]
+end_of_line = crlf
+
+[*.{png,jpg,jpeg,gif,ico,bmp,bin,gba,zip,7z,pdf,dll,exe}]
+insert_final_newline = false
