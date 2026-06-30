@@ -55,6 +55,12 @@
 #ifndef DSTEXT_SETTINGS_COLOUR
 #define DSTEXT_SETTINGS_COLOUR "Colour"
 #endif
+#ifndef DSTEXT_SETTINGS_LOAD_STYLE
+#define DSTEXT_SETTINGS_LOAD_STYLE "Load style"
+#endif
+#ifndef DSTEXT_SETTINGS_HIDE_SYSTEM
+#define DSTEXT_SETTINGS_HIDE_SYSTEM "Hide system"
+#endif
 #ifndef DSTEXT_SETTINGS_BOOT_ENGINE
 #define DSTEXT_SETTINGS_BOOT_ENGINE "Boot engine"
 #endif
@@ -211,16 +217,19 @@
 #endif
 
 #ifndef DSTEXT_PREPARE_THEME_QUESTION
-#define DSTEXT_PREPARE_THEME_QUESTION "Prepare selected theme?"
+#define DSTEXT_PREPARE_THEME_QUESTION "Prepare selected style?"
 #endif
 #ifndef DSTEXT_PREPARING_THEME
-#define DSTEXT_PREPARING_THEME "Preparing theme"
+#define DSTEXT_PREPARING_THEME "Preparing style"
 #endif
 #ifndef DSTEXT_PLEASE_WAIT
 #define DSTEXT_PLEASE_WAIT "Please wait..."
 #endif
 #ifndef DSTEXT_THEME_READY
-#define DSTEXT_THEME_READY "Theme ready!"
+#define DSTEXT_THEME_READY "Style ready!"
+#endif
+#ifndef DSTEXT_NO_STYLES_FOUND
+#define DSTEXT_NO_STYLES_FOUND "No style files found."
 #endif
 #ifndef DSTEXT_REBOOT_HOLD_R
 #define DSTEXT_REBOOT_HOLD_R "Reboot and hold R"
@@ -230,6 +239,9 @@
 #endif
 #ifndef DSTEXT_PREPARATION_FAILED
 #define DSTEXT_PREPARATION_FAILED "Preparation failed."
+#endif
+#ifndef DSTEXT_A_OK_B_CANCEL
+#define DSTEXT_A_OK_B_CANCEL "A: OK   B: Cancel"
 #endif
 
 #ifndef DSTEXT_STATUS_INIT_ERROR

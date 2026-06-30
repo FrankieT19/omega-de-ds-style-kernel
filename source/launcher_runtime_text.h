@@ -17,6 +17,8 @@ typedef enum {
     LTXT_SETTINGS_LANGUAGE,
     LTXT_SETTINGS_THEME,
     LTXT_SETTINGS_COLOUR,
+    LTXT_SETTINGS_LOAD_STYLE,
+    LTXT_SETTINGS_HIDE_SYSTEM,
     LTXT_SETTINGS_BOOT_ENGINE,
     LTXT_SETTINGS_AUTO_SAVE,
     LTXT_SETTINGS_RESUME_LAST,
@@ -132,6 +134,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Language",
         "Theme",
         "Colour",
+        "Load style",
+        "Hide system",
         "Boot engine",
         "Auto save",
         "Resume last",
@@ -244,6 +248,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Language",
         "Theme",
         "Color",
+        "Load style",
+        "Hide system",
         "Boot engine",
         "Auto save",
         "Resume last",
@@ -356,6 +362,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Idioma",
         "Tema",
         "Color",
+        "Cargar estilo",
+        "Ocultar sist.",
         "Motor inicio",
         "Guardado auto",
         "Reanudar",
@@ -468,6 +476,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Langue",
         "Theme",
         "Couleur",
+        "Charger style",
+        "Masquer syst.",
         "Moteur",
         "Save auto",
         "Reprendre",
@@ -580,6 +590,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Idioma",
         "Tema",
         "Cor",
+        "Carg. estilo",
+        "Ocultar sist.",
         "Motor inicio",
         "Guardar auto",
         "Retomar ultimo",
@@ -692,6 +704,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Sprache",
         "Theme",
         "Farbe",
+        "Stil laden",
+        "System ausbl.",
         "Start-Engine",
         "Auto speichern",
         "Fortsetzen",
@@ -804,6 +818,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Dil",
         "Tema",
         "Renk",
+        "Stil y\303\203\302\274kle",
+        "Sistemi gizle",
         "Ba\305\237lat motoru",
         "Otomatik kay\304\261t",
         "Son oyuna don",
@@ -916,6 +932,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Lingua",
         "Tema",
         "Colore",
+        "Carica stile",
+        "Nascondi sist.",
         "Motore avvio",
         "Auto salva",
         "Riprendi",
@@ -1028,6 +1046,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Taal",
         "Thema",
         "Kleur",
+        "Stijl laden",
+        "Systeem weg",
         "Start-engine",
         "Auto opslaan",
         "Hervatten",
@@ -1140,6 +1160,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Spr\303\245k",
         "Tema",
         "F\303\244rg",
+        "Ladda stil",
+        "D\303\203\302\266lj system",
         "Startmotor",
         "Autospara",
         "Forts\303\244tt",
@@ -1252,6 +1274,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Kieli",
         "Teema",
         "V\303\244ri",
+        "Lataa tyyli",
+        "Piilota syst.",
         "K\303\244ynnistin",
         "Autosave",
         "Jatka",
@@ -1364,6 +1388,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "\323\357\321\324",
         "\326\367\314\342",
         "\321\325\311\253",
+        "\274\323\324\330\321\371\312\275",
+        "\322\376\262\330\317\265\315\263",
         "\306\364\266\257\322\375\307\346",
         "\327\324\266\257\261\243\264\346",
         "\274\314\320\370\311\317\264\316",
@@ -1477,6 +1503,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
 #undef DSTEXT_SETTINGS_LANGUAGE
 #undef DSTEXT_SETTINGS_THEME
 #undef DSTEXT_SETTINGS_COLOUR
+#undef DSTEXT_SETTINGS_LOAD_STYLE
+#undef DSTEXT_SETTINGS_HIDE_SYSTEM
 #undef DSTEXT_SETTINGS_BOOT_ENGINE
 #undef DSTEXT_SETTINGS_AUTO_SAVE
 #undef DSTEXT_SETTINGS_RESUME_LAST
@@ -1587,6 +1615,8 @@ static const LauncherLanguagePack launcher_language_packs[] = {
 #define DSTEXT_SETTINGS_LANGUAGE Launcher_Text(LTXT_SETTINGS_LANGUAGE)
 #define DSTEXT_SETTINGS_THEME Launcher_Text(LTXT_SETTINGS_THEME)
 #define DSTEXT_SETTINGS_COLOUR Launcher_Text(LTXT_SETTINGS_COLOUR)
+#define DSTEXT_SETTINGS_LOAD_STYLE Launcher_Text(LTXT_SETTINGS_LOAD_STYLE)
+#define DSTEXT_SETTINGS_HIDE_SYSTEM Launcher_Text(LTXT_SETTINGS_HIDE_SYSTEM)
 #define DSTEXT_SETTINGS_BOOT_ENGINE Launcher_Text(LTXT_SETTINGS_BOOT_ENGINE)
 #define DSTEXT_SETTINGS_AUTO_SAVE Launcher_Text(LTXT_SETTINGS_AUTO_SAVE)
 #define DSTEXT_SETTINGS_RESUME_LAST Launcher_Text(LTXT_SETTINGS_RESUME_LAST)

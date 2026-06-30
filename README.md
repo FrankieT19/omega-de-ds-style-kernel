@@ -28,6 +28,8 @@ Read the [DS Style User Guide](https://frankiet19.github.io/omega-de-ds-style-ke
 - Favourite and recent game support
 - Multi-language launcher text
 - UI sounds
+- Optional hiding of system/kernel files in the root file browser
+- Style loading from `SYSTEM/KERNELS`
 - Runtime settings stored in readable `SYSTEM/SETTINGS.TXT`
 
 ## Building

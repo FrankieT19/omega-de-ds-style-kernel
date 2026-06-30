@@ -506,6 +506,7 @@ static u16 launcher_dark_mode = 0;
 static u16 launcher_custom_theme_mode = 0;
 static u16 launcher_thumbnail_style = LAUNCHER_THUMB_STYLE_TITLE;
 static u16 launcher_sounds_enabled = 1;
+static u16 launcher_hide_system_files = 1;
 static u32 launcher_settings_migration_pending = 0;
 
 u16 gl_color_selected = RGB(31, 31, 31);
@@ -1396,7 +1397,7 @@ u32 Is_bin_file(const TCHAR *name)
 
 u32 Is_themes_folder(const TCHAR *path)
 {
-    return !strcmp(path, "/THEMES");
+    return !strcmp(path, "/THEMES") || !strcmp(path, "/SYSTEM/KERNELS");
 }
 
 u32 Get_file_size_path(const TCHAR *path, u32 *out_size)
@@ -1445,7 +1446,9 @@ u32 Stage_kernel_update(const TCHAR *src_name)
 
     memset(src_path, 0, sizeof(src_path));
 
-    if (!strcmp(currentpath, "/"))
+    if (src_name[0] == '/')
+        snprintf(src_path, sizeof(src_path), "%s", src_name);
+    else if (!strcmp(currentpath, "/"))
         snprintf(src_path, sizeof(src_path), "/%s", src_name);
     else
         snprintf(src_path, sizeof(src_path), "%s/%s", currentpath, src_name);
@@ -4316,6 +4319,58 @@ static void Launcher_CustomThumbFileName(const char *filename, char *name, u32 n
 		*dot = '\0';
 }
 
+static u32 Launcher_HasExtension(const TCHAR *filename, const char *ext)
+{
+	const char *dot;
+
+	if(!filename || !ext)
+		return 0;
+	dot = strrchr(filename, '.');
+	if(!dot)
+		return 0;
+	return !strcasecmp(dot, ext);
+}
+
+static u32 Launcher_LoadThumbnailGamecodeFromRom(const TCHAR *rom_name, u8 *dst)
+{
+	u32 rett;
+	u32 res;
+
+	res = f_open(&gfile, rom_name, FA_READ);
+	if(res != FR_OK)
+		return 0;
+
+	f_lseek(&gfile, 0xAC);
+	res = f_read(&gfile, GAMECODE, 4, (UINT *)&rett);
+	f_close(&gfile);
+	if((res != FR_OK) || (rett != 4))
+		return 0;
+
+	return Launcher_LoadThumbnailByGameCode(GAMECODE, dst);
+}
+
+static u32 Launcher_LoadThumbnailForSave(const TCHAR *sav_name, u8 *dst)
+{
+	TCHAR rom_name[MAX_path_len + 100];
+	char *dot;
+
+	if(!Launcher_HasExtension(sav_name, ".sav"))
+		return 0;
+
+	memset(rom_name, 0, sizeof(rom_name));
+	strncpy(rom_name, sav_name, sizeof(rom_name) - 1);
+	dot = strrchr(rom_name, '.');
+	if(!dot)
+		return 0;
+
+	strcpy(dot, ".gba");
+	if(Launcher_LoadThumbnailGamecodeFromRom(rom_name, dst))
+		return 1;
+
+	strcpy(dot, ".agb");
+	return Launcher_LoadThumbnailGamecodeFromRom(rom_name, dst);
+}
+
 u32 Load_ThumbnailEx(TCHAR *pfilename_pic, u8 *dst)
 {
   u32 rett;
@@ -4325,6 +4380,9 @@ u32 Load_ThumbnailEx(TCHAR *pfilename_pic, u8 *dst)
 	Launcher_CustomThumbFileName(pfilename_pic, custom_name, sizeof(custom_name));
 
 	if(Launcher_LoadCustomThumbnailByName(custom_name, dst))
+		return 1;
+
+	if(Launcher_LoadThumbnailForSave(pfilename_pic, dst))
 		return 1;
 
 	res = f_open(&gfile, pfilename_pic, FA_READ);
@@ -6913,6 +6971,57 @@ static void Launcher_ReadSoundsSetting(void)
     }
 }
 
+static void Launcher_ReadHideSystemFilesSetting(void)
+{
+    char buf[32];
+
+    launcher_hide_system_files = 1;
+    memset(buf, 0, sizeof(buf));
+    if(Launcher_SettingsReadValue("Hide system files", buf, sizeof(buf)))
+    {
+        if(!strcasecmp(buf, "Off") || !strcasecmp(buf, "No") ||
+           !strcasecmp(buf, DSTEXT_OFF) || (buf[0] == '0'))
+            launcher_hide_system_files = 0;
+        if(strcasecmp(buf, "On") && strcasecmp(buf, "Off"))
+            launcher_settings_migration_pending = 1;
+    }
+}
+
+static u32 Launcher_ShouldHideSystemEntry(const TCHAR *path, const TCHAR *name, u8 attrib)
+{
+    u32 is_dir = ((attrib == AM_DIR) || (attrib == 0x30));
+
+    if(!launcher_hide_system_files || !path || !name || strcmp(path, "/"))
+        return 0;
+
+    if(name[0] == '.')
+        return 1;
+
+    if(is_dir)
+    {
+        if(!strcasecmp(name, "SYSTEM") || !strcasecmp(name, "SAVER") ||
+           !strcasecmp(name, "RTS") || !strcasecmp(name, "CHEAT") ||
+           !strcasecmp(name, "PATCH") || !strcasecmp(name, "BACKUP") ||
+           !strcasecmp(name, "IMGS") || !strcasecmp(name, "IMGS2") ||
+           !strcasecmp(name, "THEMES") || !strcasecmp(name, "KERNELS") ||
+           !strcasecmp(name, "System Volume Information") ||
+           !strcasecmp(name, "$RECYCLE.BIN") || !strncasecmp(name, ".Trash", 6) ||
+           !strcasecmp(name, ".Trashes") || !strcasecmp(name, ".Spotlight-V100"))
+            return 1;
+    }
+    else
+    {
+        if(!strcasecmp(name, "ezkernel.bin") || !strcasecmp(name, "ezkernelnew.bin") ||
+           !strcasecmp(name, "ezkernel.tmp") || !strcasecmp(name, "ezkernelnew.tmp") ||
+           !strcasecmp(name, ".DS_Store") || !strcasecmp(name, "desktop.ini") ||
+           !strcasecmp(name, "Thumbs.db") || !strcasecmp(name, "IndexerVolumeGuid") ||
+           !strcasecmp(name, "WPSettings.dat") || !strncasecmp(name, "._", 2))
+            return 1;
+    }
+
+    return 0;
+}
+
 static void Launcher_ReadLanguageSetting(void)
 {
     char buf[32];
@@ -6984,6 +7093,8 @@ typedef enum
     SETTINGS_LANGUAGE,
     SETTINGS_THEME_MODE,
     SETTINGS_THEME,
+    SETTINGS_LOAD_STYLE,
+    SETTINGS_HIDE_SYSTEM,
     SETTINGS_BOOT_ENGINE,
     SETTINGS_AUTO_SAVE,
     SETTINGS_RESUME_LAST,
@@ -7020,6 +7131,8 @@ static void Launcher_SettingsGetLine(u32 item, char *out, u32 out_size)
         case SETTINGS_LANGUAGE: label = DSTEXT_SETTINGS_LANGUAGE; value = Launcher_LanguageName(); break;
         case SETTINGS_THEME_MODE: label = DSTEXT_SETTINGS_THEME; value = Launcher_ThemeModeName(); break;
         case SETTINGS_THEME: label = DSTEXT_SETTINGS_COLOUR; value = Launcher_ThemeName(); break;
+        case SETTINGS_LOAD_STYLE: label = DSTEXT_SETTINGS_LOAD_STYLE; value = ">"; break;
+        case SETTINGS_HIDE_SYSTEM: label = DSTEXT_SETTINGS_HIDE_SYSTEM; value = Launcher_OnOffText(launcher_hide_system_files); break;
         case SETTINGS_BOOT_ENGINE: label = DSTEXT_SETTINGS_BOOT_ENGINE; value = Launcher_EngineText(); break;
         case SETTINGS_AUTO_SAVE: label = DSTEXT_SETTINGS_AUTO_SAVE; value = Launcher_OnOffText(gl_auto_save_sel); break;
         case SETTINGS_RESUME_LAST: label = DSTEXT_SETTINGS_RESUME_LAST; value = Launcher_OnOffText(gl_resume_last_on); break;
@@ -7276,6 +7389,167 @@ static void Launcher_SettingsDrawPopupRowEx(u32 item, u32 selected, u32 top, voi
     if(item == selected)
         Clear(x + 12, yy, w - 24, 11, gl_color_selectBG_sd, 1);
     DrawHZText12(msg, 32, x + 18, yy, (item == selected) ? LAUNCHER_SELECTED_TEXT : gl_color_text, 1);
+}
+
+static u32 Launcher_LoadStyleList(void)
+{
+    FRESULT res;
+    u32 count = 0;
+
+    f_mkdir("/SYSTEM");
+    f_mkdir("/SYSTEM/KERNELS");
+
+    res = f_opendir(&dir, "/SYSTEM/KERNELS");
+    if(res != FR_OK)
+        return 0;
+
+    while(count < MAX_files)
+    {
+        res = f_readdir(&dir, &fileinfo);
+        if(res != FR_OK || fileinfo.fname[0] == 0)
+            break;
+        if((fileinfo.fattrib == AM_DIR) || (fileinfo.fattrib == 0x30))
+            continue;
+        if(!Is_bin_file(fileinfo.fname))
+            continue;
+        memcpy(pFilename_buffer[count].filename, fileinfo.fname, 100);
+        pFilename_buffer[count].filename[99] = 0;
+        count++;
+    }
+    f_closedir(&dir);
+    return count;
+}
+
+static void Launcher_StyleGetLine(u32 item, char *out, u32 out_size)
+{
+    if(out_size == 0)
+        return;
+    if(item >= MAX_files)
+        out[0] = 0;
+    else
+        snprintf(out, out_size, "%s", pFilename_buffer[item].filename);
+}
+
+static void Launcher_WaitForPopupButton(void)
+{
+    u16 keys;
+
+    while(1)
+    {
+        VBlankIntrWait();
+        UIAudio_Update();
+        scanKeys();
+        keys = keysUp();
+        if(keys & (KEY_A | KEY_B))
+            break;
+    }
+}
+
+static void Launcher_ShowStyleMessage(const char *line1, const char *line2, const char *line3)
+{
+    DrawPic((u16*)gImage_MENU, 36, 25, 168, 110, 1, 0, 1);
+    DrawHZText12((TCHAR*)line1, 0, 47, 45, gl_color_text, 1);
+    if(line2)
+        DrawHZText12((TCHAR*)line2, 0, 47, 63, gl_color_text, 1);
+    if(line3)
+        DrawHZText12((TCHAR*)line3, 0, 47, 81, gl_color_text, 1);
+}
+
+static void Launcher_PrepareStyleKernel(const char *name)
+{
+    char style_path[MAX_path_len + 100];
+    u16 keysdown;
+
+    Launcher_ShowStyleMessage(DSTEXT_PREPARE_THEME_QUESTION, name, DSTEXT_A_OK_B_CANCEL);
+
+    while(1)
+    {
+        VBlankIntrWait();
+        UIAudio_Update();
+        scanKeys();
+        keysdown = keysDown();
+
+        if(keysdown & KEY_A)
+        {
+            UIAudio_PlayAccept();
+            snprintf(style_path, sizeof(style_path), "/SYSTEM/KERNELS/%s", name);
+            Launcher_ShowStyleMessage(DSTEXT_PREPARING_THEME, DSTEXT_PLEASE_WAIT, NULL);
+            if(Stage_kernel_update(style_path))
+                Launcher_ShowStyleMessage(DSTEXT_THEME_READY, DSTEXT_REBOOT_HOLD_R, DSTEXT_TO_INSTALL_IT);
+            else
+                Launcher_ShowStyleMessage(DSTEXT_PREPARATION_FAILED, DSTEXT_A_OK_B_CANCEL, NULL);
+            Launcher_WaitForPopupButton();
+            launcher_force_full_redraw = 1;
+            return;
+        }
+        else if(keysdown & KEY_B)
+        {
+            UIAudio_PlayBack();
+            return;
+        }
+    }
+}
+
+static void Launcher_LoadStylePopup(void)
+{
+    u32 total = Launcher_LoadStyleList();
+    u32 selected = 0;
+    u32 top = 0;
+    const u32 visible = 7;
+    u16 keysdown;
+
+    if(total == 0)
+    {
+        Launcher_ShowStyleMessage(DSTEXT_NO_STYLES_FOUND, "/SYSTEM/KERNELS", DSTEXT_A_OK_B_CANCEL);
+        Launcher_WaitForPopupButton();
+        launcher_force_full_redraw = 1;
+        return;
+    }
+
+    Launcher_SettingsDrawPopupEx(DSTEXT_SETTINGS_LOAD_STYLE, total, selected, top, Launcher_StyleGetLine, 45);
+
+    while(1)
+    {
+        VBlankIntrWait();
+        UIAudio_Update();
+        scanKeys();
+        keysdown = keysDown();
+
+        if(keysdown & KEY_DOWN)
+        {
+            if(selected + 1 < total)
+            {
+                selected++;
+                if(selected >= top + visible)
+                    top = selected - visible + 1;
+                UIAudio_PlaySfx(UI_SFX_MOVE);
+                Launcher_SettingsDrawPopupEx(DSTEXT_SETTINGS_LOAD_STYLE, total, selected, top, Launcher_StyleGetLine, 45);
+            }
+        }
+        else if(keysdown & KEY_UP)
+        {
+            if(selected > 0)
+            {
+                selected--;
+                if(selected < top)
+                    top = selected;
+                UIAudio_PlaySfx(UI_SFX_MOVE);
+                Launcher_SettingsDrawPopupEx(DSTEXT_SETTINGS_LOAD_STYLE, total, selected, top, Launcher_StyleGetLine, 45);
+            }
+        }
+        else if(keysdown & KEY_A)
+        {
+            UIAudio_PlayAccept();
+            Launcher_PrepareStyleKernel(pFilename_buffer[selected].filename);
+            Launcher_SettingsDrawPopupEx(DSTEXT_SETTINGS_LOAD_STYLE, total, selected, top, Launcher_StyleGetLine, 45);
+        }
+        else if(keysdown & KEY_B)
+        {
+            UIAudio_PlayBack();
+            launcher_force_full_redraw = 1;
+            return;
+        }
+    }
 }
 
 static void Launcher_ViewModeCycle(int dir)
@@ -7565,6 +7839,11 @@ static void Launcher_SaveUnifiedSettings(void)
         f_printf(&f, "\n");
         f_printf(&f, "# Colour controls the top bar, icons, and selection colour.\n");
         f_printf(&f, "Colour = %s\n", Launcher_ThemeName());
+        f_printf(&f, "\n# Load style reads .bin files from /SYSTEM/KERNELS.\n");
+        f_printf(&f, "# Select one from the settings menu to prepare it for installation.\n");
+        f_printf(&f, "\n# Options: On, Off\n");
+        f_printf(&f, "# Hide system files keeps kernel and metadata files out of the root file browser.\n");
+        f_printf(&f, "Hide system files = %s\n", launcher_hide_system_files ? "On" : "Off");
         f_printf(&f, "\n# Options: On, Off\n");
         f_printf(&f, "Start screen = %s\n", Launcher_StartEnabledSettingName());
         f_printf(&f, "\n# Options: Last played, Favourites\n");
@@ -8067,6 +8346,13 @@ static void Launcher_SettingsToggle(u32 item, int dir)
             break;
         case SETTINGS_THEME:
             Launcher_CycleTheme(dir);
+            break;
+        case SETTINGS_LOAD_STYLE:
+            Launcher_LoadStylePopup();
+            break;
+        case SETTINGS_HIDE_SYSTEM:
+            launcher_hide_system_files ^= 1;
+            Launcher_SaveUnifiedSettings();
             break;
         case SETTINGS_BOOT_ENGINE:
             gl_engine_sel ^= 1;
@@ -9614,6 +9900,7 @@ int main(void) {
 	Launcher_ReadSystemName();
 	Launcher_ReadThumbnailStyle();
 	Launcher_ReadSoundsSetting();
+	Launcher_ReadHideSystemFilesSetting();
 	Launcher_ReadAutoStartKey();
 	Launcher_ReadStartSource();
 	Launcher_LoadFavourites();
@@ -9682,6 +9969,8 @@ refind_file:
 					//DEBUG_printf("=%x %s %x %x",res, fileinfo.fname,fileinfo.fname[0],fileinfo.fattrib);
 					//wait_btn();								
 					if (res != FR_OK || fileinfo.fname[0] == 0) break;
+					if(Launcher_ShouldHideSystemEntry(currentpath, fileinfo.fname, fileinfo.fattrib))
+						continue;
 
 					if(	(fileinfo.fattrib == AM_DIR) || (fileinfo.fattrib == 0x30))//DIR and exFAT dir
 					{
