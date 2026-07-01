@@ -231,6 +231,12 @@
 #ifndef DSTEXT_NO_STYLES_FOUND
 #define DSTEXT_NO_STYLES_FOUND "No style files found."
 #endif
+#ifndef DSTEXT_PLACE_STYLES_IN
+#define DSTEXT_PLACE_STYLES_IN "Place .bin files in"
+#endif
+#ifndef DSTEXT_THEN_LOAD_STYLE
+#define DSTEXT_THEN_LOAD_STYLE "Then choose Load style."
+#endif
 #ifndef DSTEXT_REBOOT_HOLD_R
 #define DSTEXT_REBOOT_HOLD_R "Reboot and hold R"
 #endif
