@@ -1,5 +1,11 @@
 # Changelog
 
+## DS Style v7.0
+
+- Added a Hide system files setting for keeping kernel, system, and metadata files out of the root file browser.
+- Added artwork matching for `.sav` files when a matching ROM is present.
+- Added Settings > Load style for installing `.bin` kernels from `SYSTEM/KERNELS`.
+
 This changelog records the complete DS Style project history. Some early releases or development notes apply specifically to the original Omega or Omega Definitive Edition, as stated.
 
 ## DS Style v6.9
