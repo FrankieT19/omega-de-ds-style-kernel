@@ -4349,10 +4349,36 @@ static u32 Launcher_LoadThumbnailGamecodeFromRom(const TCHAR *rom_name, u8 *dst)
 	return Launcher_LoadThumbnailByGameCode(GAMECODE, dst);
 }
 
+static u32 Launcher_TrySaveThumbnailInFolder(const char *folder, const char *base, u8 *dst)
+{
+	TCHAR rom_name[MAX_path_len + 100];
+
+	if(!folder || !folder[0] || !base || !base[0])
+		return 0;
+
+	if(!strcmp(folder, "/"))
+		snprintf(rom_name, sizeof(rom_name), "/%s.gba", base);
+	else
+		snprintf(rom_name, sizeof(rom_name), "%s/%s.gba", folder, base);
+	if(Launcher_LoadThumbnailGamecodeFromRom(rom_name, dst))
+		return 1;
+
+	if(!strcmp(folder, "/"))
+		snprintf(rom_name, sizeof(rom_name), "/%s.agb", base);
+	else
+		snprintf(rom_name, sizeof(rom_name), "%s/%s.agb", folder, base);
+	return Launcher_LoadThumbnailGamecodeFromRom(rom_name, dst);
+}
+
 static u32 Launcher_LoadThumbnailForSave(const TCHAR *sav_name, u8 *dst)
 {
 	TCHAR rom_name[MAX_path_len + 100];
+	char base[104];
 	char *dot;
+	static const char *const common_folders[] = {
+		"/", "/GBA", "/GAMES", "/Games", "/ROMS", "/Roms", "/ROM", "/Rom", "/GAME", "/Game"
+	};
+	u32 i;
 
 	if(!Launcher_HasExtension(sav_name, ".sav"))
 		return 0;
@@ -4368,7 +4394,30 @@ static u32 Launcher_LoadThumbnailForSave(const TCHAR *sav_name, u8 *dst)
 		return 1;
 
 	strcpy(dot, ".agb");
-	return Launcher_LoadThumbnailGamecodeFromRom(rom_name, dst);
+	if(Launcher_LoadThumbnailGamecodeFromRom(rom_name, dst))
+		return 1;
+
+	Launcher_CustomThumbFileName(sav_name, base, sizeof(base));
+	if(!base[0])
+		return 0;
+
+	if(strcmp(currentpath, "/SAVER") && strcmp(currentpath, "/saver") && currentpath[0])
+	{
+		if(Launcher_TrySaveThumbnailInFolder(currentpath, base, dst))
+			return 1;
+	}
+	if(launcher_sd_saved_path[0] && strcmp(launcher_sd_saved_path, currentpath))
+	{
+		if(Launcher_TrySaveThumbnailInFolder(launcher_sd_saved_path, base, dst))
+			return 1;
+	}
+
+	for(i = 0; i < sizeof(common_folders) / sizeof(common_folders[0]); i++)
+	{
+		if(Launcher_TrySaveThumbnailInFolder(common_folders[i], base, dst))
+			return 1;
+	}
+	return 0;
 }
 
 u32 Load_ThumbnailEx(TCHAR *pfilename_pic, u8 *dst)
@@ -7391,6 +7440,21 @@ static void Launcher_SettingsDrawPopupRowEx(u32 item, u32 selected, u32 top, voi
     DrawHZText12(msg, 32, x + 18, yy, (item == selected) ? LAUNCHER_SELECTED_TEXT : gl_color_text, 1);
 }
 
+static void Launcher_SettingsMovePopupSelection(const char *title, u32 total, u32 old_selected, u32 old_top, u32 selected, u32 top, void (*get_line)(u32,char*,u32), u32 row_y0)
+{
+    if(old_top != top)
+    {
+        Launcher_SettingsDrawPopupEx(title, total, selected, top, get_line, row_y0);
+        return;
+    }
+
+    if(old_selected != selected)
+    {
+        Launcher_SettingsDrawPopupRowEx(old_selected, selected, top, get_line, row_y0);
+        Launcher_SettingsDrawPopupRowEx(selected, selected, top, get_line, row_y0);
+    }
+}
+
 static u32 Launcher_LoadStyleList(void)
 {
     FRESULT res;
@@ -7434,12 +7498,19 @@ static void Launcher_WaitForPopupButton(void)
 {
     u16 keys;
 
+    do
+    {
+        VBlankIntrWait();
+        UIAudio_Update();
+        scanKeys();
+    } while(keysHeld() & (KEY_A | KEY_B));
+
     while(1)
     {
         VBlankIntrWait();
         UIAudio_Update();
         scanKeys();
-        keys = keysUp();
+        keys = keysDown();
         if(keys & (KEY_A | KEY_B))
             break;
     }
@@ -7455,7 +7526,7 @@ static void Launcher_ShowStyleMessage(const char *line1, const char *line2, cons
         DrawHZText12((TCHAR*)line3, 0, 47, 81, gl_color_text, 1);
 }
 
-static void Launcher_PrepareStyleKernel(const char *name)
+static u32 Launcher_PrepareStyleKernel(const char *name)
 {
     char style_path[MAX_path_len + 100];
     u16 keysdown;
@@ -7480,12 +7551,12 @@ static void Launcher_PrepareStyleKernel(const char *name)
                 Launcher_ShowStyleMessage(DSTEXT_PREPARATION_FAILED, DSTEXT_A_OK_B_CANCEL, NULL);
             Launcher_WaitForPopupButton();
             launcher_force_full_redraw = 1;
-            return;
+            return 1;
         }
         else if(keysdown & KEY_B)
         {
             UIAudio_PlayBack();
-            return;
+            return 0;
         }
     }
 }
@@ -7500,7 +7571,7 @@ static void Launcher_LoadStylePopup(void)
 
     if(total == 0)
     {
-        Launcher_ShowStyleMessage(DSTEXT_NO_STYLES_FOUND, "/SYSTEM/KERNELS", DSTEXT_A_OK_B_CANCEL);
+        Launcher_ShowStyleMessage(DSTEXT_PLACE_STYLES_IN, "/SYSTEM/KERNELS", DSTEXT_THEN_LOAD_STYLE);
         Launcher_WaitForPopupButton();
         launcher_force_full_redraw = 1;
         return;
@@ -7519,28 +7590,33 @@ static void Launcher_LoadStylePopup(void)
         {
             if(selected + 1 < total)
             {
+                u32 old_selected = selected;
+                u32 old_top = top;
                 selected++;
                 if(selected >= top + visible)
                     top = selected - visible + 1;
                 UIAudio_PlaySfx(UI_SFX_MOVE);
-                Launcher_SettingsDrawPopupEx(DSTEXT_SETTINGS_LOAD_STYLE, total, selected, top, Launcher_StyleGetLine, 45);
+                Launcher_SettingsMovePopupSelection(DSTEXT_SETTINGS_LOAD_STYLE, total, old_selected, old_top, selected, top, Launcher_StyleGetLine, 45);
             }
         }
         else if(keysdown & KEY_UP)
         {
             if(selected > 0)
             {
+                u32 old_selected = selected;
+                u32 old_top = top;
                 selected--;
                 if(selected < top)
                     top = selected;
                 UIAudio_PlaySfx(UI_SFX_MOVE);
-                Launcher_SettingsDrawPopupEx(DSTEXT_SETTINGS_LOAD_STYLE, total, selected, top, Launcher_StyleGetLine, 45);
+                Launcher_SettingsMovePopupSelection(DSTEXT_SETTINGS_LOAD_STYLE, total, old_selected, old_top, selected, top, Launcher_StyleGetLine, 45);
             }
         }
         else if(keysdown & KEY_A)
         {
             UIAudio_PlayAccept();
-            Launcher_PrepareStyleKernel(pFilename_buffer[selected].filename);
+            if(Launcher_PrepareStyleKernel(pFilename_buffer[selected].filename))
+                return;
             Launcher_SettingsDrawPopupEx(DSTEXT_SETTINGS_LOAD_STYLE, total, selected, top, Launcher_StyleGetLine, 45);
         }
         else if(keysdown & KEY_B)
