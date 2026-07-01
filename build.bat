@@ -32,6 +32,7 @@ if not exist images\blank\HELP.h (
 echo Making it with make...
 set "BUILD_CWD=%CD%"
 set "BUILD_DRIVE="
+set "BUILD_OUTPUT_GBA=x.gba"
 
 echo "%BUILD_CWD%" | findstr /C:" " >NUL
 if not errorlevel 1 (
@@ -47,6 +48,7 @@ if not errorlevel 1 (
 
 :drive_found
 if defined BUILD_DRIVE (
+	set "BUILD_OUTPUT_GBA=%BUILD_DRIVE:~0,1%.gba"
 	subst %BUILD_DRIVE% "%BUILD_CWD%" >NUL
 	if errorlevel 1 (
 		echo Could not map %BUILD_DRIVE% to "%BUILD_CWD%".
@@ -57,6 +59,8 @@ if defined BUILD_DRIVE (
 	pushd "%BUILD_CWD%"
 )
 
+if exist "%BUILD_OUTPUT_GBA%" del "%BUILD_OUTPUT_GBA%" >NUL
+if exist x.gba del x.gba >NUL
 make clean
 make
 set "MAKE_EXIT=%ERRORLEVEL%"
@@ -64,8 +68,8 @@ popd
 
 if defined BUILD_DRIVE subst %BUILD_DRIVE% /D >NUL
 if not "%MAKE_EXIT%"=="0" goto :done
-if exist x.gba (
-	copy /Y x.gba ezkernelnew.bin >NUL
+if exist "%BUILD_OUTPUT_GBA%" (
+	copy /Y "%BUILD_OUTPUT_GBA%" ezkernelnew.bin >NUL
 	echo Output: ezkernelnew.bin
 )
 echo Done!
