@@ -36,7 +36,7 @@ clearL2:
 	str		r0,[r2],#+4
 	cmp		r2,r3
 	blt		clearL2
-		
+
 	mov r0,#0x02000000
 	add r0,r0,#0x1000
 	add r0,r0,#1
@@ -47,8 +47,8 @@ clearL2:
 	.global RegisterRamReset
 RegisterRamReset:
 	swi		1
-	bx		lr	
-@----------------------------------------------	
+	bx		lr
+@----------------------------------------------
 	.global	SoftReset
 SoftReset:
 		ldr		r3, =0x04000208
@@ -67,8 +67,8 @@ SoftReset:
 		ldr		r1, =0x03007f00
 		mov		sp, r1
 		swi		0
-		
-		
+
+
 	@ldr		r3, =0x03007FFA		@ restart flag
 	@strb	r0,[r3, #0]
 	@ldr		r3, =0x04000208		@ REG_IME
@@ -88,7 +88,7 @@ HardReset:
 	ldr		r1, =0x3007f00
 	mov		SP, r1
 	swi     0x26
-	
+
 	.align
 	.ltorg
 SoftReset_end:

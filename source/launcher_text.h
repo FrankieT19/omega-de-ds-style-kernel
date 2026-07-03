@@ -61,6 +61,11 @@
 #ifndef DSTEXT_SETTINGS_HIDE_SYSTEM
 #define DSTEXT_SETTINGS_HIDE_SYSTEM "Hide system"
 #endif
+
+#ifndef DSTEXT_SETTINGS_LIST_FOLDERS
+#define DSTEXT_SETTINGS_LIST_FOLDERS "List folders"
+#endif
+
 #ifndef DSTEXT_SETTINGS_BOOT_ENGINE
 #define DSTEXT_SETTINGS_BOOT_ENGINE "Boot engine"
 #endif
@@ -184,6 +189,34 @@
 
 #ifndef DSTEXT_HELP_TITLE
 #define DSTEXT_HELP_TITLE "Help"
+#endif
+#ifndef DSTEXT_CATEGORY_SYSTEM
+#define DSTEXT_CATEGORY_SYSTEM "System"
+#endif
+#ifndef DSTEXT_CATEGORY_INTERFACE
+#define DSTEXT_CATEGORY_INTERFACE "Interface"
+#endif
+#ifndef DSTEXT_CATEGORY_GAMES
+#define DSTEXT_CATEGORY_GAMES "Games"
+#endif
+#ifndef DSTEXT_CATEGORY_HARDWARE
+#define DSTEXT_CATEGORY_HARDWARE "Hardware"
+#endif
+
+#ifndef DSTEXT_HELP_ONLINE
+#define DSTEXT_HELP_ONLINE "Online guides"
+#endif
+#ifndef DSTEXT_HELP_OPERATION
+#define DSTEXT_HELP_OPERATION "Using DS Style"
+#endif
+#ifndef DSTEXT_HELP_ARTWORK
+#define DSTEXT_HELP_ARTWORK "Artwork"
+#endif
+#ifndef DSTEXT_HELP_SAVES
+#define DSTEXT_HELP_SAVES "Saves & safety"
+#endif
+#ifndef DSTEXT_HELP_ABOUT
+#define DSTEXT_HELP_ABOUT "About"
 #endif
 #ifndef DSTEXT_CONTROLS_TITLE
 #define DSTEXT_CONTROLS_TITLE "Controls"

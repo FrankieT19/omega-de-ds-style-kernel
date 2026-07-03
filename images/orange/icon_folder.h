@@ -3,7 +3,7 @@
 
 //======================================================================
 //
-//	gImage_icon_folder_ORANGE, 16x14@16, 
+//	gImage_icon_folder_ORANGE, 16x14@16,
 //	+ bitmap not compressed
 //	Total size: 448 = 448
 //

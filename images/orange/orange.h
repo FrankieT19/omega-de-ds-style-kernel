@@ -3,7 +3,7 @@
 
 //======================================================================
 //
-//	gImage_orange_ORANGE, 240x19@16, 
+//	gImage_orange_ORANGE, 240x19@16,
 //	+ bitmap not compressed
 //	Total size: 9120 = 9120
 //

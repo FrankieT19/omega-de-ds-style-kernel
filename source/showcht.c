@@ -35,6 +35,7 @@ extern void UIAudio_PlayBackExport(void);
 extern void UIAudio_UpdateExport(void);
 extern void UIAudio_WaitForCurrentClipExport(u32 max_frames);
 extern void UIAudio_CutOffTrailingClipExport(void);
+extern const char *Launcher_OnOffText(u16 value);
 
 static u32 cheat_use_chinese_folder = 0;
 
@@ -47,12 +48,20 @@ static u32 CheatTextLooksGB2312(const char *str)
 	{
 		u8 c1 = (u8)str[i];
 		u8 c2 = (u8)str[i+1];
-		if((c1 >= 0xA1) && (c1 <= 0xF7) && (c2 >= 0xA1) && (c2 <= 0xFE))
+
+		if((c1 >= 0xC2) && (c1 <= 0xDF) && ((c2 & 0xC0) == 0x80))
 		{
-			if((c1 >= 0xE0) && (i+2<l) && (((u8)str[i+1] & 0xC0) == 0x80) && (((u8)str[i+2] & 0xC0) == 0x80))
-				continue;
-			return 1;
+			i++;
+			continue;
 		}
+		if((c1 >= 0xE0) && (c1 <= 0xEF) && (i+2<l) && ((c2 & 0xC0) == 0x80) && (((u8)str[i+2] & 0xC0) == 0x80))
+		{
+			i += 2;
+			continue;
+		}
+
+		if((c1 >= 0xA1) && (c1 <= 0xF7) && (c2 >= 0xA1) && (c2 <= 0xFE))
+			return 1;
 	}
 	return 0;
 }
@@ -133,7 +142,7 @@ void Get_KEY_val(FIL* file,char*KEY_section,char*KEY_secval,char getbuff[])
     }
 
 		int buf_len = strlen(buf);
-          
+
     // ignore and skip the line with first chracter '#', '=' or '/'
     if (buf_len <= 1 || buf[0] == '#' || buf[0] == '=' || buf[0] == '/')
     {
@@ -141,7 +150,7 @@ void Get_KEY_val(FIL* file,char*KEY_section,char*KEY_secval,char getbuff[])
         continue;
     }
 
-		char _paramk[MAX_KEY_LEN] = {0}; 
+		char _paramk[MAX_KEY_LEN] = {0};
 		char _paramv[/*MAX_VAL_LEN*/MAX_KEY_LEN] = {0};
 
     int _kv=0, _klen=0, _vlen=0;
@@ -160,7 +169,7 @@ void Get_KEY_val(FIL* file,char*KEY_section,char*KEY_secval,char getbuff[])
 			{
 				is_section = 1;
 				in_section = 0;
-				
+
 				memset(section,0,MAX_KEY_LEN);
 				continue;
 			}
@@ -179,7 +188,7 @@ void Get_KEY_val(FIL* file,char*KEY_section,char*KEY_secval,char getbuff[])
       }
 
 			if(in_section ==1)
-			{				
+			{
 				// scan param key name
         if (_kv == 0 && buf[i] != '=')
         {
@@ -193,24 +202,24 @@ void Get_KEY_val(FIL* file,char*KEY_section,char*KEY_secval,char getbuff[])
             _kv = 1;
             continue;
         }
-	      	
+
 	      // scan param key value
 	      if (_vlen >= MAX_KEY_LEN || buf[i] == '#')
 					break;
-	                
+
 	      _paramv[_vlen++] = buf[i];
 	    }
-	          
+
 	  }
-     //DEBUG_printf("KEY_section %s, section %s",KEY_section,section);	     
+     //DEBUG_printf("KEY_section %s, section %s",KEY_section,section);
 		if( strcmp(KEY_section,section)== 0)
 		{
 			if( strcmp(KEY_secval,_paramk) == 0)
 			{
-				strcpy(getbuff,_paramv); 
+				strcpy(getbuff,_paramv);
 
-				return ;	
-			}				
+				return ;
+			}
 		}
 		if (strcmp(_paramk, "")==0 || strcmp(_paramv, "")==0)
 			continue;
@@ -252,8 +261,8 @@ u32 Get_CHT_val(FIL* file,char*KEY_section,char*KEY_secval/*,char getbuff[]*/)
     }
 
 		int buf_len = strlen(buf);
-		//DEBUG_printf("cht buf_len %x",buf_len);	    
-          
+		//DEBUG_printf("cht buf_len %x",buf_len);
+
     // ignore and skip the line with first chracter '#', '=' or '/'
     if (buf_len <= 1 || buf[0] == '#' || buf[0] == '=' || buf[0] == '/')
     {
@@ -261,7 +270,7 @@ u32 Get_CHT_val(FIL* file,char*KEY_section,char*KEY_secval/*,char getbuff[]*/)
         continue;
     }
 
-		char _paramk[MAX_KEY_LEN] = {0}; 
+		char _paramk[MAX_KEY_LEN] = {0};
 		//char _paramv[/*MAX_VAL_LEN*/MAX_KEY_LEN] = {0};
 
     int _kv=0, _klen=0, _vlen=0;
@@ -280,7 +289,7 @@ u32 Get_CHT_val(FIL* file,char*KEY_section,char*KEY_secval/*,char getbuff[]*/)
 			{
 				is_section = 1;
 				in_section = 0;
-				
+
 				memset(section,0,MAX_KEY_LEN);
 				continue;
 			}
@@ -299,7 +308,7 @@ u32 Get_CHT_val(FIL* file,char*KEY_section,char*KEY_secval/*,char getbuff[]*/)
       }
 
 			if(in_section ==1)
-			{				
+			{
 				// scan param key name
         if (_kv == 0 && buf[i] != '=')
         {
@@ -312,18 +321,18 @@ u32 Get_CHT_val(FIL* file,char*KEY_section,char*KEY_secval/*,char getbuff[]*/)
         {
             _kv = 1;
             continue;
-        }	      	
+        }
 	      // scan param key value
 	      if (_vlen >= MAX_BUF_LEN || buf[i] == '#')
 					break;
-	                
+
 	      _paramv[_vlen++] = buf[i];
 	    }
-	          
+
 	  }
 	  _vlen--; //remove 0xd
-	    
-     //DEBUG_printf("KEY_section %s, section %s",KEY_section,section);	     
+
+     //DEBUG_printf("KEY_section %s, section %s",KEY_section,section);
 		if( strcmp(KEY_section,section)== 0)
 		{
 			if( strcmp(KEY_secval,_paramk) == 0)
@@ -352,11 +361,11 @@ u32 Get_CHT_val(FIL* file,char*KEY_section,char*KEY_secval/*,char getbuff[]*/)
 			    }
 
 					int buf_len = strlen(buf);
-					//DEBUG_printf("cht buf_len %x",buf_len);	    
-			          
+					//DEBUG_printf("cht buf_len %x",buf_len);
+
 			    // ignore and skip the line with first chracter '#', '=' or '/'
 			    if (buf_len <= 1 || buf[0] == '#' || buf[0] == '=' || buf[0] == '/')
-			    {	    	
+			    {
 			        break;
 			    }
 			    for (i=0; i<buf_len; ++i)
@@ -369,13 +378,13 @@ u32 Get_CHT_val(FIL* file,char*KEY_section,char*KEY_secval/*,char getbuff[]*/)
 						_paramv[_vlen++] = buf[i];
 		      }
 		       _vlen--; //remove 0xd
-		      //DEBUG_printf("%x %x %x %x %x %x %x %x", buf[0],buf[1], buf[2],buf[3], buf[4],buf[5], buf[6],buf[7]);	
+		      //DEBUG_printf("%x %x %x %x %x %x %x %x", buf[0],buf[1], buf[2],buf[3], buf[4],buf[5], buf[6],buf[7]);
 		      //wait_btn();
-			    
-			  }			  			  
+
+			  }
 			  endcht:
-				return _vlen;	
-			}				
+				return _vlen;
+			}
 		}
 		if (strcmp(_paramk, "")==0 || strcmp(_paramv, "")==0)
 			continue;
@@ -425,15 +434,15 @@ u32 Get_all_Section_val(FIL* file)
 		    continue;
 		}
 
-		int buf_len = strlen(buf);            
-		
+		int buf_len = strlen(buf);
+
 		// ignore and skip the line with first chracter '#', '=' or '/'
 		if (buf_len <= 1 || buf[0] == '#' || buf[0] == '=' || buf[0] == '/')
 		{
 			in_section =0;
 		    continue;
 		}
-		char _paramk[MAX_KEY_LEN] = {0}; 
+		char _paramk[MAX_KEY_LEN] = {0};
 		//char _paramv[MAX_sectionVAL_LEN] = {0};
 
 		int _kv=0, _klen=0, _vlen=0;
@@ -452,7 +461,7 @@ u32 Get_all_Section_val(FIL* file)
 			{
 				is_section = 1;
 				in_section = 0;
-				
+
 				memset(section,0,MAX_KEY_LEN);
 				continue;
 			}
@@ -463,14 +472,14 @@ u32 Get_all_Section_val(FIL* file)
 				continue;
 			}
       else if (buf[i] == ']')
-      {      	
-      	memcpy(tmpCHTFS.LINEname,section,section_len);      	
+      {
+      	memcpy(tmpCHTFS.LINEname,section,section_len);
       	tmpCHTFS.is_section = 1;
       	tmpCHTFS.len = section_len;
       	tmpCHTFS.select =0;
-      	
+
       	dmaCopy(&tmpCHTFS,&((FM_CHT_LINE*)pCHTbuffer)[Line], sizeof(FM_CHT_LINE));
-      	
+
       	Line++;
       	//if(Line==10)return;
         is_section = 0;
@@ -478,9 +487,9 @@ u32 Get_all_Section_val(FIL* file)
         //_val_len = 0;
         break;
       }
-					
+
 			if(in_section ==1)
-			{								
+			{
         // scan param key name
         if (_kv == 0 && buf[i] != '=')
         {
@@ -492,11 +501,11 @@ u32 Get_all_Section_val(FIL* file)
         else if (buf[i] == '=')
         {
       		//DEBUG_printf(":%s ",_paramk);
-      		memcpy(tmpCHTFS.LINEname,_paramk,_klen);      		
-      		tmpCHTFS.is_section = 0; 
-      		
-      		tmpCHTFS.select =0;  
-      			     		        		
+      		memcpy(tmpCHTFS.LINEname,_paramk,_klen);
+      		tmpCHTFS.is_section = 0;
+
+      		tmpCHTFS.select =0;
+
           _kv = 1;
           continue;
         }
@@ -505,17 +514,17 @@ u32 Get_all_Section_val(FIL* file)
 		      // scan param key value
 		      if (_vlen >= MAX_VAL_LEN || buf[i] == '#')
 		                break;
-		                
+
 		      _paramv[_vlen++] = buf[i];
 		      */
 	    	}
       }
-            
-		}	
+
+		}
 		if(_kv ==1)
-		{	
+		{
 			tmpCHTFS.len = _vlen;
-			//memcpy(tmpCHTFS.KEY_val,_paramv,_vlen);    
+			//memcpy(tmpCHTFS.KEY_val,_paramv,_vlen);
 			dmaCopy(&tmpCHTFS,&((FM_CHT_LINE*)pCHTbuffer)[Line], sizeof(FM_CHT_LINE));
 			Line++;
 		}
@@ -561,6 +570,8 @@ static void Show_KEY_line(u32 line,u32 Select,u32 showoffset)
 	{
 		Draw_select_icon(X_offset+13,row_y,select);
 		sprintf(msg,"%s",((FM_CHT_LINE*)pCHTbuffer)[showoffset+line].LINEname);
+		if(!strcasecmp(msg, "ON"))
+			sprintf(msg, "%s", Launcher_OnOffText(select));
 		if(line== Select)
 		{
 			msg_len = CheatTextVisibleColumns(msg);
@@ -577,7 +588,7 @@ static void Show_KEY_line(u32 line,u32 Select,u32 showoffset)
 
 void Show_KEY_val(u32 total,u32 Select,u32 showoffset)
 {
-	u32 need_show;	
+	u32 need_show;
 	u32 line;
 
 	if(total<10)
@@ -594,7 +605,7 @@ unsigned long str2hex( char*str)
 	unsigned long sum=0;
 	unsigned long i;
 	int len = strlen(str);
-	
+
 	if(len >8) return 0;
 	for(i=0;i<len;i++)
 	{
@@ -603,7 +614,7 @@ unsigned long str2hex( char*str)
 		else if(str[i] >= 'a' && str[i] <= 'f')
 			sum = sum*16 + str[i]-0x57;
 		else if(str[i] >= 'A' && str[i] <= 'F')
-			sum = sum*16 + str[i]-0x37;										
+			sum = sum*16 + str[i]-0x37;
 	}
 	return sum;
 }
@@ -622,26 +633,26 @@ void Analyze_KEYVAL(FIL* file,u32 total)
 	u32 is_address;
 	u32 address_add;
 	//char BUF_val[256];
-	
+
 	//DEBUG_printf("total %x  ",total);
 	gl_cheat_count=0;
-		
+
 	if(total)
-	{		
+	{
 	}
 	for(tol=0;tol<total;tol++)
 	{
-		
+
 		if( ((FM_CHT_LINE*)pCHTbuffer)[tol].select == 1)
-		{						
+		{
 			u32 current_select = tol-1;
-			while(((FM_CHT_LINE*)pCHTbuffer)[current_select].is_section != 1)						
+			while(((FM_CHT_LINE*)pCHTbuffer)[current_select].is_section != 1)
 			{
 				current_select--;
 			}
-			//DEBUG_printf("section %s  ", ((FM_CHT_LINE*)pCHTbuffer)[current_select].LINEname);										
+			//DEBUG_printf("section %s  ", ((FM_CHT_LINE*)pCHTbuffer)[current_select].LINEname);
 			buflen= Get_CHT_val(&gfile,((FM_CHT_LINE*)pCHTbuffer)[current_select].LINEname,((FM_CHT_LINE*)pCHTbuffer)[tol].LINEname);
-																																				
+
 			address_len=0;
 			is_val = 0;
 			is_address = 1;
@@ -652,21 +663,21 @@ void Analyze_KEYVAL(FIL* file,u32 total)
 	      if (_paramv[i] == ' '){
 	          continue;
 				}
-				else if (_paramv[i] == ','){						
+				else if (_paramv[i] == ','){
 					if(is_address==1)	//first ','
-					{					
-						is_address = 0;											 
+					{
+						is_address = 0;
 					}
 					else{	//next ','
 						//DEBUG_printf(",0x%x =%x", str2hex(address_buf)+address_add,str2hex(val_buf));
 						ST_entry cheat = { str2hex(address_buf)+address_add,str2hex(val_buf) };
 						if(gl_cheat_count < MAX_CHEAT_ENTRIES)
 							pCHEAT[gl_cheat_count++] = cheat;
-		
+
 						address_add++;
 					}
 					val_len=0;
-					memset(val_buf,0x00,3);	
+					memset(val_buf,0x00,3);
 					is_val = 1;
 					continue;
 				}
@@ -674,27 +685,27 @@ void Analyze_KEYVAL(FIL* file,u32 total)
 					ST_entry cheat = { str2hex(address_buf)+address_add,str2hex(val_buf) };
 					if(gl_cheat_count < MAX_CHEAT_ENTRIES)
 						pCHEAT[gl_cheat_count++] = cheat;
-					
-					
+
+
 					is_val = 0;
 					is_address = 1;
 					address_add=0;
 					memset(address_buf,0x00,8);
-					address_len=0;				
+					address_len=0;
 					continue;
 				}
-				
+
 				if(is_val){
 					val_buf[val_len++] = _paramv[i];
 				}
 				else{
 					address_buf[address_len++] = _paramv[i];
-				}							
+				}
 			}
 			ST_entry cheat = { str2hex(address_buf)+address_add,str2hex(val_buf) };
 			if(gl_cheat_count < MAX_CHEAT_ENTRIES)
 				pCHEAT[gl_cheat_count++] = cheat;
-						
+
 		}
 	}
 }
@@ -707,34 +718,34 @@ u32 Check_count(u32 all_count)
 	{
 		if(strcmp( ((FM_CHT_LINE*)pCHTbuffer)[Line].LINEname,"GameInfo")==0)
 			break;
-			
-		count++;	
+
+		count++;
 		//if(count>512)
 			//break;
 	}
 	return count;
 }
 //------------------------------------------------------------------
-unsigned char HexToChar(unsigned char bChar)  
-{  
-    if((bChar>=0x30)&&(bChar<=0x39))  
-    {  
-        bChar -= 0x30;  
-    }  
-    else if((bChar>=0x41)&&(bChar<=0x46)) // Capital  
-    {  
-        bChar -= 0x37;  
-    }  
-    else if((bChar>=0x61)&&(bChar<=0x66)) //littlecase  
-    {  
-        bChar -= 0x57;  
-    }  
-    else   
-    {  
-        bChar = 0xff;  
-    }  
-    return bChar;  
-}  
+unsigned char HexToChar(unsigned char bChar)
+{
+    if((bChar>=0x30)&&(bChar<=0x39))
+    {
+        bChar -= 0x30;
+    }
+    else if((bChar>=0x41)&&(bChar<=0x46)) // Capital
+    {
+        bChar -= 0x37;
+    }
+    else if((bChar>=0x61)&&(bChar<=0x66)) //littlecase
+    {
+        bChar -= 0x57;
+    }
+    else
+    {
+        bChar = 0xff;
+    }
+    return bChar;
+}
 //------------------------------------------------------------------
 u32 Change2cht_folder(u32 chtname)
 {
@@ -743,11 +754,11 @@ u32 Change2cht_folder(u32 chtname)
 	TCHAR* folder_name;
 	TCHAR currentpath[256];
 	memset(currentpath,00,256);
-	
+
 	memset(chtnamebuf,0x00,100);
 	sprintf(chtnamebuf,"%d%d%d%d",HexToChar(((u8*)&chtname)[0]),HexToChar(((u8*)&chtname)[1]),HexToChar(((u8*)&chtname)[2]),HexToChar(  ((u8*)&chtname)[3] )  );
 	u32 num=atoi(chtnamebuf);
-	//DEBUG_printf("num =%d", num);					
+	//DEBUG_printf("num =%d", num);
 	if(num < 200){
 		folder_name = (TCHAR*)"0000";
 	}
@@ -756,7 +767,7 @@ u32 Change2cht_folder(u32 chtname)
 	}
 	else if(num < 600){
 		folder_name = (TCHAR*)"0400";
-	}			
+	}
 	else if(num < 800){
 		folder_name = (TCHAR*)"0600";
 	}
@@ -765,44 +776,44 @@ u32 Change2cht_folder(u32 chtname)
 	}
 	else if(num < 1200){
 		folder_name = (TCHAR*)"1000";
-	}			
+	}
 	else if(num < 1400){
 		folder_name = (TCHAR*)"1200";
-	}	
+	}
 	else if(num < 1600){
 		folder_name = (TCHAR*)"1400";
 	}
 	else if(num < 1800){
 		folder_name = (TCHAR*)"1600";
-	}			
+	}
 	else if(num < 2000){
 		folder_name = (TCHAR*)"1800";
-	}				
+	}
 	else if(num < 2200){
 		folder_name = (TCHAR*)"2000";
 	}
 	else if(num < 2400){
 		folder_name = (TCHAR*)"2200";
-	}			
+	}
 	else if(num < 2600){
 		folder_name = (TCHAR*)"2400";
-	}	
+	}
 	else if(num < 2800){
 		folder_name = (TCHAR*)"2600";
-	}				
+	}
 	else {
 		folder_name = (TCHAR*)"2800";
-	}						
-	
-	
+	}
+
+
 	if(!cheat_use_chinese_folder)
 	{
 		sprintf(currentpath,"/SYSTEM/CHEAT/Eng/%s",folder_name);
 	}
-	else{		
+	else{
 		sprintf(currentpath,"/SYSTEM/CHEAT/Chn/%s",folder_name);
 	}
-	res=f_chdir(currentpath);		
+	res=f_chdir(currentpath);
 	return res;
 }
 //------------------------------------------------------------------
@@ -810,7 +821,7 @@ u32 Check_cheat_file(TCHAR *gamefilename)
 {
 	u32 res;
 	UINT ret;
-	TCHAR chtnamebuf[100];	
+	TCHAR chtnamebuf[100];
 	u32 filesize;
 	u32 GAMEID=0;
 	u32 i;
@@ -824,27 +835,27 @@ u32 Check_cheat_file(TCHAR *gamefilename)
 		f_close(&gfile);
 		if(GAMEID==0) return 0;
 	}
-	
+
 	memcpy(chtnamebuf,gamefilename,100);
 	u32 len=strlen(chtnamebuf);
 	chtnamebuf[len-3] = 'c';
 	chtnamebuf[len-2] = 'h';
-	chtnamebuf[len-1] = 't';	
-	
+	chtnamebuf[len-1] = 't';
+
 	res=f_chdir("/SYSTEM/CHEAT");
 	if(res != FR_OK){
 		return 0;
 	}
-	
-	res = f_open(&gfile,chtnamebuf, FA_OPEN_EXISTING);	
+
+	res = f_open(&gfile,chtnamebuf, FA_OPEN_EXISTING);
 	//f_chdir(currentpath);
 	if(res == FR_OK)//have a cht file
 	{
 		f_close(&gfile);
 		return 0x0000FFFF;
-	}					
+	}
 	else
-	{			
+	{
 		res = f_open(&gfile,"GameID2cht.bin", FA_READ);
 		u32* tempbuff = (u32*)(pReadCache);
 		if(res == FR_OK)//have a file
@@ -856,11 +867,11 @@ u32 Check_cheat_file(TCHAR *gamefilename)
 
 			for(i=0;i<filesize/4;i+=2)
 			{
-				
+
 				if(tempbuff[i]== GAMEID)
 				{
-					f_close(&gfile); 
-					
+					f_close(&gfile);
+
 					u32 chtname= ((u32*)tempbuff)[i+1];
 
 					cheat_use_chinese_folder = (gl_select_lang == 0xE2E2);
@@ -872,22 +883,22 @@ u32 Check_cheat_file(TCHAR *gamefilename)
 					}
 					if(res!=0)return 0;
 					memset(chtnamebuf,0x00,100);
-					sprintf(chtnamebuf,"%d%d%d%d.cht",HexToChar(((u8*)&chtname)[0]),HexToChar(((u8*)&chtname)[1]),HexToChar(((u8*)&chtname)[2]),HexToChar(  ((u8*)&chtname)[3] )  );			
-					res = f_open(&gfile,chtnamebuf, FA_OPEN_EXISTING);	
+					sprintf(chtnamebuf,"%d%d%d%d.cht",HexToChar(((u8*)&chtname)[0]),HexToChar(((u8*)&chtname)[1]),HexToChar(((u8*)&chtname)[2]),HexToChar(  ((u8*)&chtname)[3] )  );
+					res = f_open(&gfile,chtnamebuf, FA_OPEN_EXISTING);
 
 					if(res == FR_OK)//have a cht file
-					{					
-						f_close(&gfile);							
+					{
+						f_close(&gfile);
 						return chtname;
 					}
 					else{
 						return 0;
 					}
 				}
-			}			
+			}
 		}
 		return 0;
-	}	
+	}
 }
 //---------------------------------------------------------------------------------
 void Show_num(u32 totalcount,u32 select)
@@ -903,21 +914,21 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 {
 	u32 res;
 	char msg[128];
-	TCHAR chtnamebuf[100];	
+	TCHAR chtnamebuf[100];
 
 	char buffer[127]={0};
-		
+
 	if(havecht == 0x0000FFFF)
 	{
 		res=f_chdir("/SYSTEM/CHEAT");
 		if(res != FR_OK){
 			return;
-		}	
-		memcpy(chtnamebuf,gamefilename,100);	
+		}
+		memcpy(chtnamebuf,gamefilename,100);
 		u32 len=strlen(chtnamebuf);
 		chtnamebuf[len-3] = 'c';
 		chtnamebuf[len-2] = 'h';
-		chtnamebuf[len-1] = 't';			
+		chtnamebuf[len-1] = 't';
 	}
 	else
 	{
@@ -925,33 +936,33 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 		u8* chtmode;
 		chtmode = (u8*)&havecht;
 		sprintf(chtnamebuf,"%d%d%d%d.cht",HexToChar(chtmode[0]),HexToChar(chtmode[1]),HexToChar(chtmode[2]),HexToChar(chtmode[3]));
-	}	
-	res = f_open(&gfile,chtnamebuf, FA_READ);	
+	}
+	res = f_open(&gfile,chtnamebuf, FA_READ);
 
 	if(res == FR_OK)//have a cht file
-	{		
+	{
 		ClearWithBG((u16*)gImage_SD, 0, 0, 240, 160, 1);
 
 		Get_KEY_val(&gfile,"GameInfo","Name",buffer);
 		sprintf(msg,"%s ",buffer);
-		
+
 		DrawCheatText12(msg,30,2,4, gl_color_text,1);
-		
+
 		u32 all_count = Get_all_Section_val(&gfile);
 		u32 Select = 1;
 		u32 showoffset = 0;
 		u32 re_show = 2;
 		u32 old_select = 1;
 		u32 old_showoffset = 0;
-			
+
 		if(all_count)
 		{
 			all_count = Check_count(all_count);//cut from "GameInfo"
-			setRepeat(15,1);		
+			setRepeat(15,1);
 			while(1)//3
 			{
 				VBlankIntrWait();
-				VBlankIntrWait();	
+				VBlankIntrWait();
 				UIAudio_UpdateExport();
 				if(re_show)
 				{
@@ -972,12 +983,12 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 					old_select = Select;
 					old_showoffset = showoffset;
 					re_show = 0;
-				}								
+				}
 				scanKeys();
 				u16 keysdown  = keysDown();
 				u16 keysup = keysUp();
-				u16 keysrepeat = keysDownRepeat();	
-								
+				u16 keysrepeat = keysDownRepeat();
+
 				if (keysrepeat & KEY_DOWN) {
 					u32 prev_select = Select;
 					u32 prev_showoffset = showoffset;
@@ -987,7 +998,7 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 		            showoffset++;
           			if( ((FM_CHT_LINE*)pCHTbuffer)[showoffset+Select].is_section==1){
           				showoffset++;
-          			}		            
+          			}
 		            re_show=2;
 		          }
 		        }else{
@@ -999,16 +1010,16 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 				        		Select--;
 				            showoffset++;
 
-				            
+
 				            re_show=2;
 				        }
-		          }		          
+		          }
 		        }
 
 					}
 					if((Select != prev_select) || (showoffset != prev_showoffset))
 						UIAudio_PlayMove();
-					
+
 				}
 				else if(keysrepeat & KEY_UP)
 				{
@@ -1020,12 +1031,12 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
   						if( ((FM_CHT_LINE*)pCHTbuffer)[Select].is_section==1){
   							Select=1;
   						}
-  					}	
-  					
+  					}
+
 						if( ((FM_CHT_LINE*)pCHTbuffer)[showoffset+Select].is_section==1){
 							if(Select)
 	          		Select--;
-	          }						
+	          }
 						re_show=1;
 					}else{
 						if (showoffset){
@@ -1034,8 +1045,8 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
     						if( ((FM_CHT_LINE*)pCHTbuffer)[0].is_section==1){
     							Select=1;
     						}
-    					}						
-							
+    					}
+
         			if( ((FM_CHT_LINE*)pCHTbuffer)[showoffset+Select].is_section==1){
         				if(showoffset){
         					showoffset--;
@@ -1045,7 +1056,7 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
         						}
         					}
         				}
-        			}	
+        			}
 							re_show=2;
 						}
 					}
@@ -1086,7 +1097,7 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 		          showoffset += 10;
 		        else
 		          showoffset = all_count - 10;
-		          
+
 						if( ((FM_CHT_LINE*)pCHTbuffer)[showoffset+Select].is_section==1){
 							showoffset--;
 						}
@@ -1100,16 +1111,16 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 					if(((FM_CHT_LINE*)pCHTbuffer)[showoffset+Select].is_section != 1)
 					{
 						u32 current_select = showoffset+Select-1;
-						while(((FM_CHT_LINE*)pCHTbuffer)[current_select].is_section != 1)						
+						while(((FM_CHT_LINE*)pCHTbuffer)[current_select].is_section != 1)
 						{
 							((FM_CHT_LINE*)pCHTbuffer)[current_select--].select = 0;
 						}
 						current_select = showoffset+Select+1;
-						while(((FM_CHT_LINE*)pCHTbuffer)[current_select].is_section != 1)						
+						while(((FM_CHT_LINE*)pCHTbuffer)[current_select].is_section != 1)
 						{
 							((FM_CHT_LINE*)pCHTbuffer)[current_select++].select = 0;
-						}		
-						
+						}
+
 						u8 select	= ((FM_CHT_LINE*)pCHTbuffer)[showoffset+Select].select;
 						((FM_CHT_LINE*)pCHTbuffer)[showoffset+Select].select = !select;
 						UIAudio_PlayAcceptExport();
@@ -1123,9 +1134,9 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 					UIAudio_CutOffTrailingClipExport();
 					Analyze_KEYVAL(&gfile,all_count);
 					break;
-				}				
+				}
 			}
 		}
-	}					
-	f_close(&gfile);	
+	}
+	f_close(&gfile);
 }

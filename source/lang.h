@@ -123,4 +123,3 @@ void LoadEnglish(void);
 void LoadChinese(void);
 
 #endif
-

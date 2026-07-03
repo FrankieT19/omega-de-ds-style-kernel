@@ -1,6 +1,6 @@
 @;--------------------------------------------------------------------
 	.section   	.iwram,"ax",%progbits
-		
+
 	.global  RTS_only_ReplaceIRQ_start
 	.global  RTS_only_ReplaceIRQ_end
 	.global  RTS_only_Return_address_L
@@ -8,7 +8,7 @@
 	.global  RTS_only_LOAD_key
 
 
-	
+
 REG_BASE		= 0x4000000
 REG_DISPCNT		= 0x00
 REG_DISPSTAT	= 0x04
@@ -77,7 +77,7 @@ REG_P1			= 0x130
 REG_P1CNT		= 0x132
 REG_WAITCNT		= 0x204
 
-@;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
+@;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	.arm
 RTS_only_ReplaceIRQ_start:
 	MOV             R0, #0x4000000
@@ -101,18 +101,18 @@ RTS_irq:
 	ldr 		r2,[r0,#REG_P1]
 	bic 		r2,r2,#0xFF000000
 	bic 		r2,r2,#0x00FF0000
-	
+
 check_save:
-	adr 		r3,RTS_only_SAVE_key 
+	adr 		r3,RTS_only_SAVE_key
 	ldr 		r3,[r3]
-	cmp 		r2,r3		
-	beq			call_Save	
+	cmp 		r2,r3
+	beq			call_Save
 check_load:
-	adr 		r3,RTS_only_LOAD_key 
+	adr 		r3,RTS_only_LOAD_key
 	ldr 		r3,[r3]
-	cmp 		r2,r3 	
-	beq 		call_Load	
-	ldr 		pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine								
+	cmp 		r2,r3
+	beq 		call_Load
+	ldr 		pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -157,7 +157,7 @@ wSram_loop:
 	LSR     R3, R3, #0x8
 	STRB    R3, [R0],#1
 	LSR     R3, R3, #0x8
-	STRB    R3, [R0],#1	
+	STRB    R3, [R0],#1
 	B       wSram_loop1
 @;------------------------------------------------------
 ReadSram: @;(u32 address, u8 *data, u32 size)
@@ -191,11 +191,11 @@ restore2_IO:        @; IOaddress, offset
 	LSL 		R5,R3,#8
 	ORR			R4,R5
 	STRH    R4, [R0]
-	bx lr	
-	.ltorg	
+	bx lr
+	.ltorg
 @;------------------------------------------------------
 @;------------------------------------------------------
-call_Save:	
+call_Save:
 	@;adrl	r7,RTS_switch
 	@;ldr		r7,[r7]
 	@;cmp 	r7,#1
@@ -205,53 +205,53 @@ call_Save:
 	stmia		r2!,{r4-r11,sp,lr} @;0x0
 	mrs	 		r3,SPSR
 	stmia		r2!,{r3}      			@;0x28
-	
+
 	stmfd		sp!,{r0-r10,lr}
-	bl			BAK_	
+	bl			BAK_
 
 	@;02000000-0203FFFF   WRAM - On-board Work RAM  (256 KBytes)
 	mov		r8,#0x40   @; 0x40 0x50 0x60 0x70
 	mov   r9,#0x2000000
 wram_2000000:
 	mov 	r0,r8
-	bl 		SetRampage	
+	bl 		SetRampage
 	mov 	r0,#0x0E000000
 	mov 	r1,r9
 	mov		r2,#0x10000
 	bl 		WriteSram
 	add 	r8,#0x10
 	add 	r9,#0x10000
-	cmp 	r8,#0x80	
+	cmp 	r8,#0x80
 	bne 	wram_2000000
-	
+
 	@;03000000-03007FFF   WRAM - On-chip Work RAM   (32 KBytes)
 	mov 	r0,#0x80
-	bl 		SetRampage	
+	bl 		SetRampage
 	mov r0,#0x0E000000
 	mov r1,#0x3000000
 	mov r2,#0x8000
 	bl 	WriteSram
-	
+
 	@;05000000-050003FF   BG/OBJ Palette RAM        (1 Kbyte)
 	ldr r0,=0x0E008000
 	mov r1,#0x5000000
 	mov r2,#0x400
-	bl 	WriteSram	
-		
+	bl 	WriteSram
+
 	mov 	r0,#0x90
-	bl 		SetRampage	
+	bl 		SetRampage
 	mov r0,#0x0E000000
 	mov r1,#0x6000000
 	mov r2,#0x10000
 	bl 	WriteSram
-	
+
 	mov 	r0,#0xA0
-	bl 		SetRampage	
+	bl 		SetRampage
 	mov r0,#0x0E000000
 	ldr r1,=0x6010000
 	mov r2,#0x8000
 	bl 	WriteSram
-	
+
 	@;07000000-070003FF   OAM - OBJ Attributes      (1 Kbyte)
 	ldr r0,=0x0E008000
 	mov r1,#0x7000000
@@ -263,110 +263,110 @@ wram_2000000:
 	adrl	r7, spend_0x80
 	ldr		r7,[r7]
 	add		r7,#0x50  @;{r4-r11,sp,lr} SPSR  0x28+4
-		
+
 	mov		r1, #0xDF		@; Switch to systme Mode
 	msr		cpsr_cf, r1
 	NOP
 	mov		r6,sp
-	stmia r7!,{r6,lr}	
-	
-	msr 	cpsr_cf,r0	;@return IRQ mode	
+	stmia r7!,{r6,lr}
+
+	msr 	cpsr_cf,r0	;@return IRQ mode
 	NOP
-	
+
 	ldr 	r0,=0x0E008400
 	adrl 	r1, spend_0x80
 	ldr		r1,[r1]
 	mov 	r2,#0x80
-	bl 		WriteSram	
-	
+	bl 		WriteSram
+
 	@;04000000-040003FE   I/O Registers
 	ldr r0,=0x0E009000
 	mov r1,#0x4000000
 	mov r2,#0x210  @;#0x60					@;0x0-0x60
 	bl 	WriteSram
-	
-	@;FLAG	
+
+	@;FLAG
 	ldr r0,=0x0E00FFF0
 	adrl r1,S_RTS_FLAG
 	mov r2,#0x10
-	bl 	WriteSram	
-	
+	bl 	WriteSram
+
 save_exit:
 	mov 	r0,#0x0
 	bl 		SetRampage
 
-	BL 		Restore_	
+	BL 		Restore_
 	ldmfd	sp!,{r0-r10,lr}
 	@;mov 	r0,#0x04000000
-	ldr 	pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine	
-@;===================================================	
-BAK_:	
+	ldr 	pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine
+@;===================================================
+BAK_:
 	adrl		R2, spend_0x80
 	ldr			R2,[R2]
 	add 		R2,#0x30
 	LDR			R0, =0x4000200
 	MOV			R1, #0
-	
+
 	LDRH		R3, [R0,#8]
 	STRH		R3, [R2,#0]
 	STRH		R1, [R0,#8]@;v4000208 = 0;
-		
+
 	LDR			R0, =0x4000100
 	LDRH		R3, [R0,#2]
 	STRH		R3, [R2,#2]
 	STRH		R1, [R0,#2]@;v4000102 = 0;
-	
+
 	LDRH		R3, [R0,#6]
 	STRH		R3, [R2,#4]
 	STRH    R1, [R0,#6]@;v4000106 = 0;
-	
+
 	LDRH    R3, [R0,#0xA]
 	STRH		R3, [R2,#6]
 	STRH    R1, [R0,#0xA]@;v400010A = 0;
-	
+
 	LDRH    R3, [R0,#0xE]
 	STRH		R3, [R2,#8]
 	STRH    R1, [R0,#0xE]@;v400010E = 0;
 	MOV			PC, LR
-@;===================================================			
+@;===================================================
 Restore_:
 	adrl		R3, spend_0x80
 	ldr			R3,[R3]
 	add 		R3,#0x30
-	
+
 	LDR			R0, =0x4000100
-	
+
 	LDRH		R1, [R3,#2]
 	STRH		R1, [R0,#2]@;v4000102
-	
+
 	LDRH		R1, [R3,#4]
 	STRH		R1, [R0,#6]@;v4000106;
-	
+
 	LDRH		R1, [R3,#6]
 	STRH		R1, [R0,#0xA]@;v400010A;
-	
+
 	LDRH		R1, [R3,#8]
 	STRH		R1, [R0,#0xE]@;v400010E;
-	
+
 	LDR			R0, =0x4000200
 	LDR			R2, =0x0
 	STRH		R2, [R0,#0x2]@;v4000202;
 	LDRH		R1, [R3,#0]
 	STRH		R1, [R0,#0x8]@;v4000208;	 IME
 	MOV			PC, LR
-@;===================================================	
-call_Load:	
-	@;check 	;FLAG	
-	stmfd		sp!,{r0-r3,lr}	
+@;===================================================
+call_Load:
+	@;check 	;FLAG
+	stmfd		sp!,{r0-r3,lr}
 	mov 	r0,#0xA0
 	bl 		SetRampage
 	ldr 	r0,=0x0E00FFF0
 	adrl 	r1, spend_0x80  @;temp buff
 	ldr 	r1,[r1]
 	mov 	r2,#0x10
-	bl 		ReadSram	
-	
-	adrl 	r1,S_RTS_FLAG	
+	bl 		ReadSram
+
+	adrl 	r1,S_RTS_FLAG
 	adrl 	r2, spend_0x80 @;temp buff
 	ldr 	r2,[r2]
 	mov 	r3,#0
@@ -381,11 +381,11 @@ loop_check:
 	b 		checkOK
 errorRTS:
 	mov 	r0,#0x0
-	bl 		SetRampage		
+	bl 		SetRampage
 	ldmfd		sp!,{r0-r3,lr}
-	ldr 		pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine		
-@;===================================================	
-@;===================================================	
+	ldr 		pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine
+@;===================================================
+@;===================================================
 checkOK:
 	ldr r0,=0x4000208   @;0x4000208
 	mov r1,#0
@@ -396,24 +396,24 @@ checkOK:
 	mov   r9,#0x2000000
 wram_2000000_Load:
 	mov 	r0,r8
-	bl 		SetRampage	
+	bl 		SetRampage
 	mov 	r0,#0x0E000000
 	mov 	r1,r9
 	mov		r2,#0x10000
 	bl 		ReadSram
 	add 	r8,#0x10
 	add 	r9,#0x10000
-	cmp 	r8,#0x80	
+	cmp 	r8,#0x80
 	bne 	wram_2000000_Load
 
 	@;03000000-03007FFF   WRAM - On-chip Work RAM   (32 KBytes)
 	mov 	r0,#0x80
-	bl 		SetRampage	
+	bl 		SetRampage
 	mov r0,#0x0E000000
 	mov r1,#0x3000000
 	mov r2,#0x8000
 	bl 	ReadSram
-	
+
 	@;05000000-050003FF   BG/OBJ Palette RAM        (1 Kbyte)
 	ldr r0,=0x0E008000
 	mov r1,#0x5000000
@@ -422,28 +422,28 @@ wram_2000000_Load:
 
 	@;06000000-06017FFF   VRAM - Video RAM          (96 KBytes)
 	mov 	r0,#0x90
-	bl 		SetRampage	
+	bl 		SetRampage
 	mov r0,#0x0E000000
 	mov r1,#0x6000000
 	mov r2,#0x10000
 	bl 	ReadSram
 	mov 	r0,#0xA0
-	bl 		SetRampage	
+	bl 		SetRampage
 	mov r0,#0x0E000000
 	ldr r1,=0x6010000
 	mov r2,#0x8000
 	bl 	ReadSram
-	
+
 	@;07000000-070003FF   OAM - OBJ Attributes      (1 Kbyte)
 	ldr r0,=0x0E008000
 	mov r1,#0x7000000
 	mov r2,#0x400
 	bl 	ReadSram
-	
+
 	@;-------------------------------------
 	mov r10,#0x4000000
 	LDR r11,=0x0E009000
-	
+
 	adr r9,register_list
 register_list_loop:
 	ldrh r2,[r9],#2
@@ -457,41 +457,41 @@ register_list_loop:
 register_list_end:
 
 	@;mov r10,#0x4000000
-	@;LDR r11,=0x0E008500		
+	@;LDR r11,=0x0E008500
 @;	add r0,r10,#0xBA  @;0x40000BA  DMA
 @;	add r1,r11,#0x32
-@;	bl  restore2_IO	
+@;	bl  restore2_IO
 	@;add r0,r10,#0xC6  @;0x40000C6
 	@;add r1,r11,#0x34
-	@;bl  restore2_IO	
+	@;bl  restore2_IO
 @;	add r0,r10,#0xD2  @;0x40000D2
 @;	add r1,r11,#0x36
-@;	bl  restore2_IO	
+@;	bl  restore2_IO
 @;	add r0,r10,#0xDE  @;0x40000DE
 @;	add r1,r11,#0x38
-@;	bl  restore2_IO	
-	
+@;	bl  restore2_IO
+
 	@;mov   r4,#0x8F
 	@;mov   r7,#0x4000000
 	@;strh 	r4,[r7,#REG_SOUNDCNT_X]
-	
+
 	@;ldr r0,=0x4000202   @;0x4000202
 	@;mov r1,#0
-	@;strh r1,[r0]	
+	@;strh r1,[r0]
 
 	ldr 	r0,=0x0E008400
 	adrl 	r1, spend_0x80 @;temp buff
-	ldr		r1,[r1] 
+	ldr		r1,[r1]
 	mov 	r2,#0x80
-	bl 		ReadSram	
-	
+	bl 		ReadSram
+
 	mrs	  r0,CPSR
 	adrl	r7, spend_0x80
-	ldr		r7,[r7] 
+	ldr		r7,[r7]
 	add		r7,#0x28      @;SPSR offset
-	
+
 	ldmia	r7!,{r2}			@;r7=0x2C
-	msr		SPSR_cxsf,r2	@;restore SPSR_irq  
+	msr		SPSR_cxsf,r2	@;restore SPSR_irq
 
 	mov		r1, #0xDF		  @;Switch to systme Mode
 	msr		cpsr_cf, r1
@@ -499,23 +499,23 @@ register_list_end:
 	add		r7,#0x24					@;offset 0x50
 	ldmia r7!,{r13-r14}
 
-	msr 	cpsr_cf,r0	  @;restore IRQ	
+	msr 	cpsr_cf,r0	  @;restore IRQ
 	NOP
 
 	mov 	r0,#0x0
 	bl 		SetRampage
-		
-	BL 		Restore_	
-	
+
+	BL 		Restore_
+
 	adrl	r12, spend_0x80
-	ldr		r12,[r12] 
+	ldr		r12,[r12]
 	ldmia r12!,{r4-r11,sp,lr}
 	mov 	r0,#0x04000000
-	ldr 	pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine		
+	ldr 	pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine
 
-	@;===================================================		
-	.ltorg	
-	@;===================================================		
+	@;===================================================
+	.ltorg
+	@;===================================================
 register_list:
 	.hword 0x0000,0x0002,0x0004,0x0008,0x000A,0x000C,0x000E
 	.hword 0x0048,0x004A,0x0050,0x0052
@@ -523,18 +523,18 @@ register_list:
 	.hword 0x0060,0x0062,0x0068,0x0070,0x0072,0x0078
 	.hword 0x0080,0x0082,0x0088                 @;0x008C,0x008E,
 	.hword 0x0090,0x0092,0x0094,0x0096,0x0098,0x009A,0x009C,0x009E
-	
+
 	.hword 0x00B8,0x00C4,0x00D0,0x00DC  @;DMA
 	.hword 0x0120,0x0122,0x0124,0x0126,0x0128,0x012A,0x012C,0x0132,0x0134
-	.hword 0x0140,0x0150,0x0154    
+	.hword 0x0140,0x0150,0x0154
 	@;,0x0200,0x0204,0x0208
 	.hword 0xFF00
 	.align
-@;------------------------------------------------	
+@;------------------------------------------------
 
-	.align	
+	.align
 S_RTS_FLAG:
  	.byte  'E','Z','-','O','m','e','g','a','R','T','C','F','I','L','E','.'
-	.align	
+	.align
 RTS_only_ReplaceIRQ_end:
    .end

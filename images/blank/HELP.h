@@ -3,7 +3,7 @@
 
 //======================================================================
 //
-//	gImage_HELP_BLANK, 240x160@16, 
+//	gImage_HELP_BLANK, 240x160@16,
 //	+ bitmap not compressed
 //	Total size: 76800 = 76800
 //

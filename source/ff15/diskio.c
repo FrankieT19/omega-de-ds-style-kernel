@@ -244,7 +244,6 @@ DWORD get_fattime (void)
 		u8 datetime[7];
 		rtc_enable();
 		rtc_get(datetime);
-		rtc_disenable();	
+		rtc_disenable();
 		return ((DWORD)(UNBCD(datetime[0])+20) << 25 | (DWORD)UNBCD(datetime[1]) << 21 | (DWORD)UNBCD(datetime[2]&0x3F) << 16 | (DWORD)UNBCD(datetime[4]&0x3F) << 11 | (DWORD)UNBCD(datetime[5]) << 5  | (DWORD)UNBCD(datetime[6]) >> 1   );
 }
-

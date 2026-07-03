@@ -53,7 +53,7 @@ u16 v_reset;
 u16 v_rts;
 u16 v_sleep;
 u16 v_cheat;
-u16 language_sel;	
+u16 language_sel;
 u16 engine_sel;
 u8 edit_sleephotkey[3]={0};
 u8 edit_rtshotkey[3]={0};
@@ -61,7 +61,7 @@ u8 edit_rtshotkey[3]={0};
 //---------------------------------------------------------------------------------
 void Draw_select_icon(u32 X,u32 Y,u32 mode)
 {
-	
+
 	Clear(X+2, Y+2, 8, 8, gl_color_text, 1);
 	Clear(X+3, Y+3, 6, 6, RGB(4,8,12), 1);
 	if(mode)
@@ -75,11 +75,11 @@ u32 Setting_window(void)
 	u32 select;
 	u32 Set_OK=0;
 	u32 Set_OK_line=0;
-	
+
 	u8 edit_pos=0;
-	//u32 i; 
+	//u32 i;
 	u32 currstate=0;
-	
+
 	char msg[128];
 	u16 clean_color;
 	u16 clean_pos;
@@ -87,29 +87,29 @@ u32 Setting_window(void)
 	u32 re_show=1;
 
 	u32 addon_sel=2;
-	
+
 	u8 sleep_pos=0;
 	u8 rtshotkey_pos=0;
-	
-	u8 	engine_pos = 1;			
-	 
+
+	u8 	engine_pos = 1;
+
 	u8 datetime[7];
 	u8 edit_datetime[7]={0};
-	
+
 	u8 RTC_pos = 1;
 
 	u8 *str0;
 	u8 *str1;
 	u8 *str2;
-	
-	
+
+
 	select = 0;
 	u32 y_offset = 24;
 	u32 set_offset = 1;
 	u32 x_offset = set_offset+9*6+3;
-	
+
 	u32 line_x = 17;
-			
+
 	if(gl_select_lang == 0xE1E1)
 	{
 		language_sel = 0;
@@ -117,7 +117,7 @@ u32 Setting_window(void)
 	else
 	{
 		language_sel = 1;
-	}	
+	}
 	v_reset = Read_SET_info(assress_v_reset);
 	v_rts = 	Read_SET_info(assress_v_rts);
 	v_sleep = Read_SET_info(assress_v_sleep);
@@ -138,80 +138,80 @@ u32 Setting_window(void)
 	{
 		v_cheat = 0x0;
 	}
-	
+
 
 	engine_sel = gl_engine_sel;
 
-	
+
 	while(1)
 	{
-		VBlankIntrWait(); 	
-		
+		VBlankIntrWait();
+
 		if(re_show)
-		{	
+		{
 			//
 			sprintf(msg,"%s",gl_time);
-			DrawHZText12(msg,0,set_offset,y_offset,gl_color_selected,1);	
+			DrawHZText12(msg,0,set_offset,y_offset,gl_color_selected,1);
 
 			//
 			sprintf(msg,"%s",gl_addon);
-			DrawHZText12(msg,0,set_offset,y_offset+line_x,gl_color_selected,1);	
-			
+			DrawHZText12(msg,0,set_offset,y_offset+line_x,gl_color_selected,1);
+
 				Draw_select_icon(x_offset,y_offset+line_x,v_reset);
 				sprintf(msg,"%s",gl_reset);
-				DrawHZText12(msg,0,x_offset+15,y_offset+line_x,(addon_sel==0)?gl_color_selected:gl_color_text,1);	
-			
+				DrawHZText12(msg,0,x_offset+15,y_offset+line_x,(addon_sel==0)?gl_color_selected:gl_color_text,1);
+
 				Draw_select_icon(x_offset+12*6,y_offset+line_x,v_rts);
 				sprintf(msg,"%s",gl_rts);
 				DrawHZText12(msg,0,x_offset+12*6+15,y_offset+line_x,(addon_sel==1)?gl_color_selected:gl_color_text,1);
-				VBlankIntrWait();	
+				VBlankIntrWait();
 				Draw_select_icon(x_offset,y_offset+line_x*2,v_sleep);
 				sprintf(msg,"%s",gl_sleep);
-				DrawHZText12(msg,0,x_offset+15,y_offset+line_x*2,(addon_sel==3)?gl_color_selected:gl_color_text,1);	
-				VBlankIntrWait();	
+				DrawHZText12(msg,0,x_offset+15,y_offset+line_x*2,(addon_sel==3)?gl_color_selected:gl_color_text,1);
+				VBlankIntrWait();
 				Draw_select_icon(x_offset+12*6,y_offset+line_x*2,v_cheat);
 				sprintf(msg,"%s",gl_cheat);
 				DrawHZText12(msg,0,x_offset+12*6+15,y_offset+line_x*2,(addon_sel==4)?gl_color_selected:gl_color_text,1);
-			
-			//					
+
+			//
 			sprintf(msg,"%s",gl_language);
-			DrawHZText12(msg,0,set_offset,y_offset+line_x*3,gl_color_selected,1);			
+			DrawHZText12(msg,0,set_offset,y_offset+line_x*3,gl_color_selected,1);
 				Draw_select_icon(x_offset,y_offset+line_x*3,(language_sel == 0x0));
-				Draw_select_icon(x_offset+12*6,y_offset+line_x*3,(language_sel == 0x1));	
+				Draw_select_icon(x_offset+12*6,y_offset+line_x*3,(language_sel == 0x1));
 				sprintf(msg,"%s",gl_en_lang);
 				DrawHZText12(msg,0,x_offset+15,y_offset+line_x*3,((language_sel==0)&&currstate&& (2== select))?gl_color_selected:gl_color_text,1);
 				sprintf(msg,"%s",gl_zh_lang);
-				DrawHZText12(msg,0,x_offset+12*6+15,y_offset+line_x*3,((language_sel==1)&&currstate&& (2== select))?gl_color_selected:gl_color_text,1);			
-			
+				DrawHZText12(msg,0,x_offset+12*6+15,y_offset+line_x*3,((language_sel==1)&&currstate&& (2== select))?gl_color_selected:gl_color_text,1);
+
 			//
-			VBlankIntrWait();			
+			VBlankIntrWait();
 			sprintf(msg,"%s",gl_engine);
 			DrawHZText12(msg,0,set_offset,y_offset+line_x*4,gl_color_selected,1);
 				Draw_select_icon(x_offset,y_offset+line_x*4,(engine_sel == 0x1));
 				sprintf(msg,"%s",gl_use_engine);
-				DrawHZText12(msg,0,x_offset+15,y_offset+line_x*4,(engine_pos==0)?gl_color_selected:gl_color_text,1);	
-			//	
-			
+				DrawHZText12(msg,0,x_offset+15,y_offset+line_x*4,(engine_pos==0)?gl_color_selected:gl_color_text,1);
+			//
+
 			ClearWithBG((u16*)gImage_SET,set_offset, y_offset+line_x*5, 9*6, 13, 1);
 			ClearWithBG((u16*)gImage_SET,set_offset, y_offset+line_x*6, 9*6, 13, 1);
 			if( (v_rts==1) && (v_cheat == 0)  && (v_reset == 0)  && (v_sleep == 0)  ) {
 				sprintf(msg,"%s"," Save Key");
-				DrawHZText12(msg,0,set_offset,y_offset+line_x*5,gl_color_selected,1);	
-				
+				DrawHZText12(msg,0,set_offset,y_offset+line_x*5,gl_color_selected,1);
+
 				sprintf(msg,"%s"," Load Key");
-				DrawHZText12(msg,0,set_offset,y_offset+line_x*6,gl_color_selected,1);	
+				DrawHZText12(msg,0,set_offset,y_offset+line_x*6,gl_color_selected,1);
 			}
-			else{						
+			else{
 				sprintf(msg,"%s",gl_hot_key);
-				DrawHZText12(msg,0,set_offset,y_offset+line_x*5,gl_color_selected,1);	
-				
+				DrawHZText12(msg,0,set_offset,y_offset+line_x*5,gl_color_selected,1);
+
 				sprintf(msg,"%s",gl_hot_key2);
-				DrawHZText12(msg,0,set_offset,y_offset+line_x*6,gl_color_selected,1);		
+				DrawHZText12(msg,0,set_offset,y_offset+line_x*6,gl_color_selected,1);
 			}
 
 			//RTC
 			sprintf(msg,"%s",gl_ingameRTC);
-			DrawHZText12(msg,0,set_offset,y_offset+line_x*7,gl_color_selected,1);			
+			DrawHZText12(msg,0,set_offset,y_offset+line_x*7,gl_color_selected,1);
 				Draw_select_icon(x_offset,y_offset+line_x*7,(gl_ingame_RTC_open_status == 0x1));
 				//sprintf(msg,"%s",gl_offRTC_powersave);
 				ClearWithBG((u16*)gImage_SET,x_offset+15, y_offset+line_x*7, 6*6, 13, 1);
@@ -220,61 +220,61 @@ u32 Setting_window(void)
 				}
 				else {
 					sprintf(msg,"%s",gl_disabled);
-				}			
-				DrawHZText12(msg,0,x_offset+15,y_offset+line_x*7,(RTC_pos==0)?gl_color_selected:gl_color_text,1);	
-	
-	
+				}
+				DrawHZText12(msg,0,x_offset+15,y_offset+line_x*7,(RTC_pos==0)?gl_color_selected:gl_color_text,1);
+
+
 			u32 offsety;
 			for(line=0;line<7;line++)
 			{
 				if(Set_OK==1)
 				{
 					if((line== select) && (0== select)&& (edit_pos==7))
-						clean_color = gl_color_btn_clean;					
-					else if((line== select) && (1== select) && (addon_sel==2)) 
-						clean_color = gl_color_btn_clean;	
-					else if((line== select) && (3== select) && (engine_pos==1)) 
-						clean_color = gl_color_btn_clean;	
-					else if((line== select) && (4== select) && (sleep_pos==3)) 	
-						clean_color = gl_color_btn_clean;	
-					else if((line== select) && (5== select) && (rtshotkey_pos==3)) 	
-						clean_color = gl_color_btn_clean;		
-					else if((line== select) && (6== select) && (RTC_pos==1)) 
-						clean_color = gl_color_btn_clean;	
-						
-					else 
+						clean_color = gl_color_btn_clean;
+					else if((line== select) && (1== select) && (addon_sel==2))
+						clean_color = gl_color_btn_clean;
+					else if((line== select) && (3== select) && (engine_pos==1))
+						clean_color = gl_color_btn_clean;
+					else if((line== select) && (4== select) && (sleep_pos==3))
+						clean_color = gl_color_btn_clean;
+					else if((line== select) && (5== select) && (rtshotkey_pos==3))
+						clean_color = gl_color_btn_clean;
+					else if((line== select) && (6== select) && (RTC_pos==1))
+						clean_color = gl_color_btn_clean;
+
+					else
 						clean_color = gl_color_MENU_btn;
-				}		
+				}
 				else
 				{
 					if(line== select)
 						clean_color = gl_color_btn_clean;
-					else 
+					else
 						clean_color = gl_color_MENU_btn;
-				}	
+				}
 				offsety = y_offset + line*line_x;
-				if(line>1) offsety += line_x; 
-					
-				Clear(202,offsety-2 ,30,14,clean_color,1);	
-				
+				if(line>1) offsety += line_x;
+
+				Clear(202,offsety-2 ,30,14,clean_color,1);
+
 				if(Set_OK && (line == Set_OK_line)){
 					sprintf(msg,"%s",gl_ok_btn);
 				}
 				else {
 					sprintf(msg,"%s",gl_set_btn);
 				}
-				DrawHZText12(msg,0,200+5,offsety,gl_color_text,1);	
-				VBlankIntrWait();		
-			}						
-		}		
-			
-		currstate=Set_OK;		
+				DrawHZText12(msg,0,200+5,offsety,gl_color_text,1);
+				VBlankIntrWait();
+			}
+		}
+
+		currstate=Set_OK;
 		switch(currstate) {
 			case 0: //initial state
-				//get date and time 	
+				//get date and time
 				rtc_enable();
 				rtc_get(datetime);
-				rtc_disenable();				
+				rtc_disenable();
 				char* wkday;
 				switch(UNBCD(datetime[3]&0x7))
 				{
@@ -284,10 +284,10 @@ u32 Setting_window(void)
 					case 3:wkday = gl_Wed;break;
 					case 4:wkday = gl_Thur;break;
 					case 5:wkday = gl_Fri;break;
-					case 6:wkday = gl_Sat;break;	
-					default:wkday = gl_Sun;break;	
+					case 6:wkday = gl_Sat;break;
+					default:wkday = gl_Sun;break;
 				}
-				
+
 				u8 HH = UNBCD(datetime[4]&0x3F);
 				u8 MM = UNBCD(datetime[5]&0x7F);
 				u8 SS = UNBCD(datetime[6]&0x7F);
@@ -295,18 +295,18 @@ u32 Setting_window(void)
 				if(MM >59)MM=0;
 				if(SS >59)SS=0;
 				u8 month = UNBCD(datetime[1]&0x1F);
-				u8 day = UNBCD(datetime[2]&0x3F);	
+				u8 day = UNBCD(datetime[2]&0x3F);
 				if(month ==0)month=1;
 				if(day ==0)day=1;
-					
+
 				sprintf(msg,"%u/%02u/%02u %02d:%02d:%02d %s",UNBCD(datetime[0])+2000,month,day,HH,MM,SS, wkday);
-				ClearWithBG((u16*)gImage_SET,x_offset, y_offset, 22*6, 13, 1);	
-				DrawHZText12(msg,0,x_offset,y_offset,gl_color_text,1);	
+				ClearWithBG((u16*)gImage_SET,x_offset, y_offset, 22*6, 13, 1);
+				DrawHZText12(msg,0,x_offset,y_offset,gl_color_text,1);
 				VBlankIntrWait();
 
-				u16 read5 = Read_SET_info(assress_edit_sleephotkey_0); 
-				u16 read6 = Read_SET_info(assress_edit_sleephotkey_1); 
-				u16 read7 = Read_SET_info(assress_edit_sleephotkey_2); 
+				u16 read5 = Read_SET_info(assress_edit_sleephotkey_0);
+				u16 read6 = Read_SET_info(assress_edit_sleephotkey_1);
+				u16 read7 = Read_SET_info(assress_edit_sleephotkey_2);
 				switch(read5)
 				{
 					case 0:str0 = str_A;break;
@@ -315,12 +315,12 @@ u32 Setting_window(void)
 					case 3:str0 = str_START;break;
 					case 4:str0 = str_RIGHT;break;
 					case 5:str0 = str_LEFT;break;
-					case 6:str0 = str_UP;break;	
+					case 6:str0 = str_UP;break;
 					case 7:str0 = str_DOWN;break;
 					case 8:str0 = str_R;break;
 					case 9:str0 = str_L;break;
-					default:str0 = str_L;break;							
-				}	
+					default:str0 = str_L;break;
+				}
 				switch(read6)
 				{
 					case 0:str1 = str_A;break;
@@ -329,12 +329,12 @@ u32 Setting_window(void)
 					case 3:str1 = str_START;break;
 					case 4:str1 = str_RIGHT;break;
 					case 5:str1 = str_LEFT;break;
-					case 6:str1 = str_UP;break;	
+					case 6:str1 = str_UP;break;
 					case 7:str1 = str_DOWN;break;
 					case 8:str1 = str_R;break;
 					case 9:str1 = str_L;break;
-					default:str1 = str_R;break;										
-				}	
+					default:str1 = str_R;break;
+				}
 				switch(read7)
 				{
 					case 0:str2 = str_A;break;
@@ -343,17 +343,17 @@ u32 Setting_window(void)
 					case 3:str2 = str_START;break;
 					case 4:str2 = str_RIGHT;break;
 					case 5:str2 = str_LEFT;break;
-					case 6:str2 = str_UP;break;	
+					case 6:str2 = str_UP;break;
 					case 7:str2 = str_DOWN;break;
 					case 8:str2 = str_R;break;
-					case 9:str2 = str_L;break;	
-					default:str2 = str_SELECT;break;										
-				}	
+					case 9:str2 = str_L;break;
+					default:str2 = str_SELECT;break;
+				}
 				sprintf(msg,"%s %s  %s",str0,str1,str2);//read from flash
 				DrawHZText12(msg,0,x_offset+10,y_offset+line_x*5,gl_color_text,1);
-				u16 read8 = Read_SET_info(assress_edit_rtshotkey_0); 
-				u16 read9 = Read_SET_info(assress_edit_rtshotkey_1); 
-				u16 read10 = Read_SET_info(assress_edit_rtshotkey_2); 
+				u16 read8 = Read_SET_info(assress_edit_rtshotkey_0);
+				u16 read9 = Read_SET_info(assress_edit_rtshotkey_1);
+				u16 read10 = Read_SET_info(assress_edit_rtshotkey_2);
 				switch(read8)
 				{
 					case 0:str0 = str_A;break;
@@ -362,12 +362,12 @@ u32 Setting_window(void)
 					case 3:str0 = str_START;break;
 					case 4:str0 = str_RIGHT;break;
 					case 5:str0 = str_LEFT;break;
-					case 6:str0 = str_UP;break;	
+					case 6:str0 = str_UP;break;
 					case 7:str0 = str_DOWN;break;
 					case 8:str0 = str_R;break;
-					case 9:str0 = str_L;break;		
-					default:str0 = str_L;break;							
-				}	
+					case 9:str0 = str_L;break;
+					default:str0 = str_L;break;
+				}
 				switch(read9)
 				{
 					case 0:str1 = str_A;break;
@@ -376,12 +376,12 @@ u32 Setting_window(void)
 					case 3:str1 = str_START;break;
 					case 4:str1 = str_RIGHT;break;
 					case 5:str1 = str_LEFT;break;
-					case 6:str1 = str_UP;break;	
+					case 6:str1 = str_UP;break;
 					case 7:str1 = str_DOWN;break;
 					case 8:str1 = str_R;break;
-					case 9:str1 = str_L;break;	
-					default:str1 = str_R;break;									
-				}	
+					case 9:str1 = str_L;break;
+					default:str1 = str_R;break;
+				}
 				switch(read10)
 				{
 					case 0:str2 = str_A;break;
@@ -390,16 +390,16 @@ u32 Setting_window(void)
 					case 3:str2 = str_START;break;
 					case 4:str2 = str_RIGHT;break;
 					case 5:str2 = str_LEFT;break;
-					case 6:str2 = str_UP;break;	
+					case 6:str2 = str_UP;break;
 					case 7:str2 = str_DOWN;break;
 					case 8:str2 = str_R;break;
-					case 9:str2 = str_L;break;	
-					default:str2 = str_START;break;									
-				}	
+					case 9:str2 = str_L;break;
+					default:str2 = str_START;break;
+				}
 				sprintf(msg,"%s %s  %s",str0,str1,str2);
 				DrawHZText12(msg,0,x_offset+10,y_offset+line_x*6,gl_color_text,1);
-				
-				re_show = 0;		
+
+				re_show = 0;
 				scanKeys();
 				keys = keysDown();
 				{
@@ -416,14 +416,14 @@ u32 Setting_window(void)
 					edit_datetime[_DAY] 	= day;//UNBCD(datetime[_DAY]&0x3F);
 					edit_datetime[_MONTH] = month;//UNBCD(datetime[_MONTH]&0x1F);
 					edit_datetime[_YEAR] 	= UNBCD(datetime[_YEAR]);
-					edit_datetime[_WKD] 	= UNBCD(datetime[_WKD]&0x7);	
-					
+					edit_datetime[_WKD] 	= UNBCD(datetime[_WKD]&0x7);
+
 					if(select==1)
 					{
 						addon_sel = 0;
-					}	
+					}
 					else if(select==3)
-					{								
+					{
 						engine_pos = 0;
 					}
 					else if(select==6)
@@ -438,9 +438,9 @@ u32 Setting_window(void)
 					edit_rtshotkey[2] = (read10>10)?K_START:read10;
 
 				}
-				else if (keys  & KEY_DOWN){  
+				else if (keys  & KEY_DOWN){
 					if(select < 6){
-						select++;		
+						select++;
 						re_show=1;
 					}
 				}
@@ -449,7 +449,7 @@ u32 Setting_window(void)
 						select--;
 						re_show=1;
 					}
-				}  	
+				}
 				else if(keys & KEY_L) {
 					return 0;
 				}
@@ -463,12 +463,12 @@ u32 Setting_window(void)
 					}
 				}
 				break	;
-			case 1: //edit state	
-				//if(Set_OK_line==0) {														
+			case 1: //edit state
+				//if(Set_OK_line==0) {
 					if(re_show)
-					{																
+					{
 						if(select ==0){
-							ClearWithBG((u16*)gImage_SET,x_offset, y_offset, 23*6, 13, 1);	
+							ClearWithBG((u16*)gImage_SET,x_offset, y_offset, 23*6, 13, 1);
 							switch(edit_pos)
 							{
 								case 0:clean_pos = x_offset;
@@ -491,12 +491,12 @@ u32 Setting_window(void)
 									break;
 								case 6:clean_pos = x_offset+6*20;
 									clean_w = 18;
-									break;	
-															
+									break;
+
 							}
-							if(	edit_pos < 7)	
+							if(	edit_pos < 7)
 								Clear(clean_pos,y_offset ,clean_w,13,gl_color_btn_clean,1);
-								
+
 							char* wkday;
 							switch(edit_datetime[_WKD])
 							{
@@ -506,15 +506,15 @@ u32 Setting_window(void)
 								case 3:wkday = gl_Wed;break;
 								case 4:wkday = gl_Thur;break;
 								case 5:wkday = gl_Fri;break;
-								case 6:wkday = gl_Sat;break;	
-								default:wkday = gl_Sun;break;	
-							}						
+								case 6:wkday = gl_Sat;break;
+								default:wkday = gl_Sun;break;
+							}
 							sprintf(msg,"20%02d/%02d/%02d %02d:%02d:%02d %s",edit_datetime[_YEAR],edit_datetime[_MONTH],edit_datetime[_DAY],edit_datetime[_HOUR],edit_datetime[_MIN],edit_datetime[_SEC] ,wkday);
-							DrawHZText12(msg,0,x_offset,y_offset,gl_color_text,1);	
+							DrawHZText12(msg,0,x_offset,y_offset,gl_color_text,1);
 						}
 						else if(select ==4)
 						{
-							ClearWithBG((u16*)gImage_SET,x_offset, y_offset+line_x*5, 23*6, 13, 1);	
+							ClearWithBG((u16*)gImage_SET,x_offset, y_offset+line_x*5, 23*6, 13, 1);
 							switch(sleep_pos)
 							{
 								case 0:clean_pos = x_offset+10;
@@ -523,11 +523,11 @@ u32 Setting_window(void)
 									break;
 								case 2:clean_pos = x_offset+10+6*12+18;
 									break;
-															
+
 							}
-							if(	sleep_pos < 3)	
+							if(	sleep_pos < 3)
 								Clear(clean_pos,y_offset+line_x*5 ,36,13,gl_color_btn_clean,1);
-							
+
 							//DEBUG_printf("%x %x %x", edit_sleephotkey[0],edit_sleephotkey[1],edit_sleephotkey[2]);
 							switch(edit_sleephotkey[0])
 							{
@@ -537,12 +537,12 @@ u32 Setting_window(void)
 								case 3:str0 = str_START;break;
 								case 4:str0 = str_RIGHT;break;
 								case 5:str0 = str_LEFT;break;
-								case 6:str0 = str_UP;break;	
+								case 6:str0 = str_UP;break;
 								case 7:str0 = str_DOWN;break;
 								case 8:str0 = str_R;break;
 								case 9:str0 = str_L;break;
-								default:str0= str_L;break;						
-							}	
+								default:str0= str_L;break;
+							}
 							switch(edit_sleephotkey[1])
 							{
 								case 0:str1 = str_A;break;
@@ -551,12 +551,12 @@ u32 Setting_window(void)
 								case 3:str1 = str_START;break;
 								case 4:str1 = str_RIGHT;break;
 								case 5:str1 = str_LEFT;break;
-								case 6:str1 = str_UP;break;	
+								case 6:str1 = str_UP;break;
 								case 7:str1 = str_DOWN;break;
 								case 8:str1 = str_R;break;
 								case 9:str1 = str_L;break;
-								default:str1= str_R;break;										
-							}	
+								default:str1= str_R;break;
+							}
 							switch(edit_sleephotkey[2])
 							{
 								case 0:str2 = str_A;break;
@@ -565,18 +565,18 @@ u32 Setting_window(void)
 								case 3:str2 = str_START;break;
 								case 4:str2 = str_RIGHT;break;
 								case 5:str2 = str_LEFT;break;
-								case 6:str2 = str_UP;break;	
+								case 6:str2 = str_UP;break;
 								case 7:str2 = str_DOWN;break;
 								case 8:str2 = str_R;break;
-								case 9:str2 = str_L;break;	
-								default:str2= str_SELECT;break;							
-							}	
+								case 9:str2 = str_L;break;
+								default:str2= str_SELECT;break;
+							}
 							sprintf(msg,"%s %s  %s",str0,str1,str2);
 							DrawHZText12(msg,0,x_offset+10,y_offset+line_x*5,gl_color_text,1);
 						}
 						else if(select ==5)
 						{
-							ClearWithBG((u16*)gImage_SET,x_offset, y_offset+line_x*6, 23*6, 13, 1);	
+							ClearWithBG((u16*)gImage_SET,x_offset, y_offset+line_x*6, 23*6, 13, 1);
 							switch(rtshotkey_pos)
 							{
 								case 0:clean_pos = x_offset+10;
@@ -585,11 +585,11 @@ u32 Setting_window(void)
 									break;
 								case 2:clean_pos = x_offset+10+6*12+18;
 									break;
-															
+
 							}
-							if(	rtshotkey_pos < 3)	
+							if(	rtshotkey_pos < 3)
 								Clear(clean_pos,y_offset+line_x*6 ,36,13,gl_color_btn_clean,1);
-							//DEBUG_printf("%x %x %x", edit_rtshotkey[0],edit_rtshotkey[1],edit_rtshotkey[2]);	
+							//DEBUG_printf("%x %x %x", edit_rtshotkey[0],edit_rtshotkey[1],edit_rtshotkey[2]);
 							switch(edit_rtshotkey[0])
 							{
 								case 0:str0 = str_A;break;
@@ -598,12 +598,12 @@ u32 Setting_window(void)
 								case 3:str0 = str_START;break;
 								case 4:str0 = str_RIGHT;break;
 								case 5:str0 = str_LEFT;break;
-								case 6:str0 = str_UP;break;	
+								case 6:str0 = str_UP;break;
 								case 7:str0 = str_DOWN;break;
 								case 8:str0 = str_R;break;
 								case 9:str0 = str_L;break;
-								default:str0= str_L;break;										
-							}	
+								default:str0= str_L;break;
+							}
 							switch(edit_rtshotkey[1])
 							{
 								case 0:str1 = str_A;break;
@@ -612,12 +612,12 @@ u32 Setting_window(void)
 								case 3:str1 = str_START;break;
 								case 4:str1 = str_RIGHT;break;
 								case 5:str1 = str_LEFT;break;
-								case 6:str1 = str_UP;break;	
+								case 6:str1 = str_UP;break;
 								case 7:str1 = str_DOWN;break;
 								case 8:str1 = str_R;break;
 								case 9:str1 = str_L;break;
-								default:str1= str_R;break;												
-							}	
+								default:str1= str_R;break;
+							}
 							switch(edit_rtshotkey[2])
 							{
 								case 0:str2 = str_A;break;
@@ -626,19 +626,19 @@ u32 Setting_window(void)
 								case 3:str2 = str_START;break;
 								case 4:str2 = str_RIGHT;break;
 								case 5:str2 = str_LEFT;break;
-								case 6:str2 = str_UP;break;	
+								case 6:str2 = str_UP;break;
 								case 7:str2 = str_DOWN;break;
 								case 8:str2 = str_R;break;
 								case 9:str2 = str_L;break;
-								default:str2= str_START;break;										
-							}	
+								default:str2= str_START;break;
+							}
 							sprintf(msg,"%s %s  %s",str0,str1,str2);
 							DrawHZText12(msg,0,x_offset+10,y_offset+line_x*6,gl_color_text,1);
 						}
-						
-						
+
+
 					}
-					re_show = 0;		
+					re_show = 0;
 					scanKeys();
 					keys = keysDown();
 					u16 keysrepeat = keysDownRepeat();
@@ -708,9 +708,9 @@ u32 Setting_window(void)
 								case 5:
 									//second
 									if(edit_datetime[_SEC]==59) {edit_datetime[_SEC]=0;} else {edit_datetime[_SEC]++;}
-								break;			
+								break;
 							}
-											
+
 						}
 						else if(select == 1){
 							if(addon_sel>2){
@@ -720,144 +720,144 @@ u32 Setting_window(void)
 						else if(select ==4){
 							switch(sleep_pos) {
 								case 0:
-									if(edit_sleephotkey[0]==9) 
-										{edit_sleephotkey[0]=0;} 
+									if(edit_sleephotkey[0]==9)
+										{edit_sleephotkey[0]=0;}
 									else{edit_sleephotkey[0]++;}
-										
+
 									if(edit_sleephotkey[0]==edit_sleephotkey[1])
 									{
 										edit_sleephotkey[0]++;
 										if(edit_sleephotkey[0]==edit_sleephotkey[2])
 											edit_sleephotkey[0]++;
-									}		
+									}
 									else if(edit_sleephotkey[0]==edit_sleephotkey[2])
 									{
 										edit_sleephotkey[0]++;
 										if(edit_sleephotkey[0]==edit_sleephotkey[1])
 											edit_sleephotkey[0]++;
-									}						
+									}
 									break;
 								case 1:
-									if(edit_sleephotkey[1]==9) 
-										{edit_sleephotkey[1]=0;} 
+									if(edit_sleephotkey[1]==9)
+										{edit_sleephotkey[1]=0;}
 									else {edit_sleephotkey[1]++;}
-										
+
 									if(edit_sleephotkey[1]==edit_sleephotkey[0])
 									{
 										edit_sleephotkey[1]++;
 										if(edit_sleephotkey[1]==edit_sleephotkey[2])
 											edit_sleephotkey[1]++;
-									}	
+									}
 									else if(edit_sleephotkey[1]==edit_sleephotkey[2])
 									{
 										edit_sleephotkey[1]++;
 										if(edit_sleephotkey[1]==edit_sleephotkey[0])
 											edit_sleephotkey[1]++;
-									}	
+									}
 									break;
 								case 2:
-									if(edit_sleephotkey[2]==9) 
-										{edit_sleephotkey[2]=0;} 
+									if(edit_sleephotkey[2]==9)
+										{edit_sleephotkey[2]=0;}
 									else {edit_sleephotkey[2]++;}
-										
+
 									if(edit_sleephotkey[2]==edit_sleephotkey[0])
 									{
 										edit_sleephotkey[2]++;
 										if(edit_sleephotkey[2]==edit_sleephotkey[1])
 											edit_sleephotkey[2]++;
-									}	
+									}
 									else if(edit_sleephotkey[2]==edit_sleephotkey[1])
 									{
 										edit_sleephotkey[2]++;
 										if(edit_sleephotkey[2]==edit_sleephotkey[0])
 											edit_sleephotkey[2]++;
-									}			
+									}
 									break;
 							}
 						}
 						else if(select ==5){
 							switch(rtshotkey_pos) {
 								case 0:
-									if(edit_rtshotkey[0]==9) 
-										{edit_rtshotkey[0]=0;} 
+									if(edit_rtshotkey[0]==9)
+										{edit_rtshotkey[0]=0;}
 									else {edit_rtshotkey[0]++;}
-										
+
 									if(edit_rtshotkey[0]==edit_rtshotkey[1])
 									{
 										edit_rtshotkey[0]++;
 										if(edit_rtshotkey[0]==edit_rtshotkey[2])
 											edit_rtshotkey[0]++;
-									}		
+									}
 									else if(edit_rtshotkey[0]==edit_rtshotkey[2])
 									{
 										edit_rtshotkey[0]++;
 										if(edit_rtshotkey[0]==edit_rtshotkey[1])
 											edit_rtshotkey[0]++;
-									}	
+									}
 									break;
 								case 1:
-									if(edit_rtshotkey[1]==9) 
-										{edit_rtshotkey[1]=0;} 
+									if(edit_rtshotkey[1]==9)
+										{edit_rtshotkey[1]=0;}
 									else {edit_rtshotkey[1]++;}
-										
+
 									if(edit_rtshotkey[1]==edit_rtshotkey[0])
 									{
 										edit_rtshotkey[1]++;
 										if(edit_rtshotkey[1]==edit_rtshotkey[2])
 											edit_rtshotkey[1]++;
-									}	
+									}
 									else if(edit_rtshotkey[1]==edit_rtshotkey[2])
 									{
 										edit_rtshotkey[1]++;
 										if(edit_rtshotkey[1]==edit_rtshotkey[0])
 											edit_rtshotkey[1]++;
-									}	
+									}
 									break;
 								case 2:
-									if(edit_rtshotkey[2]==9) 
-										{edit_rtshotkey[2]=0;} 
+									if(edit_rtshotkey[2]==9)
+										{edit_rtshotkey[2]=0;}
 									else {edit_rtshotkey[2]++;}
-										
+
 									if(edit_rtshotkey[2]==edit_rtshotkey[0])
 									{
 										edit_rtshotkey[2]++;
 										if(edit_rtshotkey[2]==edit_rtshotkey[1])
 											edit_rtshotkey[2]++;
-									}	
+									}
 									else if(edit_rtshotkey[2]==edit_rtshotkey[1])
 									{
 										edit_rtshotkey[2]++;
 										if(edit_rtshotkey[2]==edit_rtshotkey[0])
 											edit_rtshotkey[2]++;
-									}	
+									}
 									break;
 							}
-						}					
-						
-						
-						re_show = 1;								
+						}
+
+
+						re_show = 1;
 					} else if(keysrepeat & KEY_DOWN) {
 						if(select ==0){
 							switch(edit_pos) {
 								case 2:
 									switch(edit_datetime[_MONTH]) {
 										case 1: case 3: case 5: case 7: case 8: case 10: case 12:
-											if(edit_datetime[_DAY]==1) 
+											if(edit_datetime[_DAY]==1)
 											{
 												edit_datetime[_DAY]=31;
-											} 
-											else 
+											}
+											else
 											{
 												//if(edit_datetime[_DAY] > 1)
 													edit_datetime[_DAY]--;
 											}
 										break;
 										case 4: case 6: case 9: case 11:
-											if(edit_datetime[_DAY]==1) 
+											if(edit_datetime[_DAY]==1)
 											{
 												edit_datetime[_DAY]=30;
-											} 
-											else 
+											}
+											else
 											{
 												//if(edit_datetime[_DAY] > 1)
 													edit_datetime[_DAY]--;
@@ -898,7 +898,7 @@ u32 Setting_window(void)
 									//second
 									if(edit_datetime[_SEC]==0) {edit_datetime[_SEC]=59;} else {edit_datetime[_SEC]--;}
 								break;
-							
+
 							}
 						}
 						else if(select == 1){
@@ -909,157 +909,157 @@ u32 Setting_window(void)
 						else if(select == 4){
 							switch(sleep_pos) {
 								case 0:
-									if(edit_sleephotkey[0]==0) 
-										{edit_sleephotkey[0]=9;} 
+									if(edit_sleephotkey[0]==0)
+										{edit_sleephotkey[0]=9;}
 									else{	edit_sleephotkey[0]--;}
-										
-										
+
+
 									if(edit_sleephotkey[0]==edit_sleephotkey[1])
 									{
-										if(edit_sleephotkey[0]==0) 
-											{edit_sleephotkey[0]=9;} 
+										if(edit_sleephotkey[0]==0)
+											{edit_sleephotkey[0]=9;}
 										else{	edit_sleephotkey[0]--;}
-											
+
 										if(edit_sleephotkey[0]==edit_sleephotkey[2])
 											edit_sleephotkey[0]--;
-									}		
+									}
 									else if(edit_sleephotkey[0]==edit_sleephotkey[2])
 									{
-										if(edit_sleephotkey[0]==0) 
-											{edit_sleephotkey[0]=9;} 
+										if(edit_sleephotkey[0]==0)
+											{edit_sleephotkey[0]=9;}
 										else{	edit_sleephotkey[0]--;}
-											
+
 										if(edit_sleephotkey[0]==edit_sleephotkey[1])
 											edit_sleephotkey[0]--;
-									}																			
+									}
 									break;
 								case 1:
-									if(edit_sleephotkey[1]==0) 
-										{edit_sleephotkey[1]=9;} 
+									if(edit_sleephotkey[1]==0)
+										{edit_sleephotkey[1]=9;}
 									else {edit_sleephotkey[1]--;}
 									if(edit_sleephotkey[1]==edit_sleephotkey[0])
 									{
-										if(edit_sleephotkey[1]==0) 
-											{edit_sleephotkey[1]=9;} 
+										if(edit_sleephotkey[1]==0)
+											{edit_sleephotkey[1]=9;}
 										else{	edit_sleephotkey[1]--;}
-											
+
 										if(edit_sleephotkey[1]==edit_sleephotkey[2])
 											edit_sleephotkey[1]--;
-									}	
+									}
 									else if(edit_sleephotkey[1]==edit_sleephotkey[2])
 									{
-										if(edit_sleephotkey[1]==0) 
-											{edit_sleephotkey[1]=9;} 
+										if(edit_sleephotkey[1]==0)
+											{edit_sleephotkey[1]=9;}
 										else{	edit_sleephotkey[1]--;}
-											
+
 										if(edit_sleephotkey[1]==edit_sleephotkey[0])
 											edit_sleephotkey[1]--;
-									}																					
+									}
 									break;
 								case 2:
-									if(edit_sleephotkey[2]==0) 
-										{edit_sleephotkey[2]=9;} 
+									if(edit_sleephotkey[2]==0)
+										{edit_sleephotkey[2]=9;}
 									else{edit_sleephotkey[2]--;}
-										
+
 									if(edit_sleephotkey[2]==edit_sleephotkey[0])
 									{
-										if(edit_sleephotkey[2]==0) 
-											{edit_sleephotkey[2]=9;} 
+										if(edit_sleephotkey[2]==0)
+											{edit_sleephotkey[2]=9;}
 										else{	edit_sleephotkey[2]--;}
-											
+
 										if(edit_sleephotkey[2]==edit_sleephotkey[1])
 											edit_sleephotkey[2]--;
-									}	
+									}
 									else if(edit_sleephotkey[2]==edit_sleephotkey[1])
 									{
-										if(edit_sleephotkey[2]==0) 
-											{edit_sleephotkey[2]=9;} 
+										if(edit_sleephotkey[2]==0)
+											{edit_sleephotkey[2]=9;}
 										else{	edit_sleephotkey[2]--;}
-											
+
 										if(edit_sleephotkey[2]==edit_sleephotkey[0])
 											edit_sleephotkey[2]--;
-									}														
+									}
 									break;
 							}
 						}
 						else if(select == 5){
 							switch(rtshotkey_pos) {
 								case 0:
-									if(edit_rtshotkey[0]==0) 
-										{edit_rtshotkey[0]=9;} 
-									else{edit_rtshotkey[0]--;}	
-										
+									if(edit_rtshotkey[0]==0)
+										{edit_rtshotkey[0]=9;}
+									else{edit_rtshotkey[0]--;}
+
 									if(edit_rtshotkey[0]==edit_rtshotkey[1])
 									{
-										if(edit_rtshotkey[0]==0) 
-											{edit_rtshotkey[0]=9;} 
+										if(edit_rtshotkey[0]==0)
+											{edit_rtshotkey[0]=9;}
 										else{	edit_rtshotkey[0]--;}
-											
+
 										if(edit_rtshotkey[0]==edit_rtshotkey[2])
 											edit_rtshotkey[0]--;
-									}		
+									}
 									else if(edit_rtshotkey[0]==edit_rtshotkey[2])
 									{
-										if(edit_rtshotkey[0]==0) 
-											{edit_rtshotkey[0]=9;} 
+										if(edit_rtshotkey[0]==0)
+											{edit_rtshotkey[0]=9;}
 										else{	edit_rtshotkey[0]--;}
-											
+
 										if(edit_rtshotkey[0]==edit_rtshotkey[1])
 											edit_rtshotkey[0]--;
-									}																				
+									}
 									break;
 								case 1:
-									if(edit_rtshotkey[1]==0) 
-										{edit_rtshotkey[1]=9;} 
-									else 
+									if(edit_rtshotkey[1]==0)
+										{edit_rtshotkey[1]=9;}
+									else
 										{edit_rtshotkey[1]--;}
-											
+
 									if(edit_rtshotkey[1]==edit_rtshotkey[0])
 									{
-										if(edit_rtshotkey[1]==0) 
-											{edit_rtshotkey[1]=9;} 
+										if(edit_rtshotkey[1]==0)
+											{edit_rtshotkey[1]=9;}
 										else{	edit_rtshotkey[1]--;}
-											
+
 										if(edit_rtshotkey[1]==edit_rtshotkey[2])
 											edit_rtshotkey[1]--;
-									}	
+									}
 									else if(edit_rtshotkey[1]==edit_rtshotkey[2])
 									{
-										if(edit_rtshotkey[1]==0) 
-											{edit_rtshotkey[1]=9;} 
+										if(edit_rtshotkey[1]==0)
+											{edit_rtshotkey[1]=9;}
 										else{	edit_rtshotkey[1]--;}
-											
+
 										if(edit_rtshotkey[1]==edit_rtshotkey[0])
 											edit_rtshotkey[1]--;
-									}									
+									}
 									break;
 								case 2:
-									if(edit_rtshotkey[2]==0) 
-										{edit_rtshotkey[2]=9;} 
+									if(edit_rtshotkey[2]==0)
+										{edit_rtshotkey[2]=9;}
 									else{edit_rtshotkey[2]--;}
-										
+
 									if(edit_rtshotkey[2]==edit_rtshotkey[0])
 									{
-										if(edit_rtshotkey[2]==0) 
-											{edit_rtshotkey[2]=9;} 
+										if(edit_rtshotkey[2]==0)
+											{edit_rtshotkey[2]=9;}
 										else{	edit_rtshotkey[2]--;}
-											
+
 										if(edit_rtshotkey[2]==edit_rtshotkey[1])
 											edit_rtshotkey[2]--;
-									}	
+									}
 									else if(edit_rtshotkey[2]==edit_rtshotkey[1])
 									{
-										if(edit_rtshotkey[2]==0) 
-											{edit_rtshotkey[2]=9;} 
+										if(edit_rtshotkey[2]==0)
+											{edit_rtshotkey[2]=9;}
 										else{	edit_rtshotkey[2]--;}
-											
+
 										if(edit_rtshotkey[2]==edit_rtshotkey[0])
 											edit_rtshotkey[2]--;
-									}																	
+									}
 									break;
 							}
 						}
-						re_show = 1;	
+						re_show = 1;
 					} else if(keys & KEY_RIGHT) {
 						if(select ==0){
 							if(edit_pos==7) {
@@ -1068,7 +1068,7 @@ u32 Setting_window(void)
 								edit_pos++;
 							}
 						}
-						else if(select ==1) 
+						else if(select ==1)
 						{
 							if(addon_sel==3){
 								addon_sel ++;
@@ -1079,7 +1079,7 @@ u32 Setting_window(void)
 						}
 						else if(select ==2) //lang
 						{
-							language_sel = 1;								
+							language_sel = 1;
 						}
 						else if(select ==3)
 						{
@@ -1091,7 +1091,7 @@ u32 Setting_window(void)
 								sleep_pos ++;
 							}
 						}
-						else if	(select ==5) 
+						else if	(select ==5)
 						{
 							if(rtshotkey_pos<3){
 								rtshotkey_pos ++;
@@ -1101,7 +1101,7 @@ u32 Setting_window(void)
 						{
 								RTC_pos = 1;
 						}
-						re_show = 1;	
+						re_show = 1;
 					}
 					else if(keys & KEY_LEFT) {
 						if(select ==0){
@@ -1111,40 +1111,40 @@ u32 Setting_window(void)
 								edit_pos--;
 							}
 						}
-						else if(select ==1) 
+						else if(select ==1)
 						{
 							if(addon_sel==4){
 								addon_sel --;
-							}							
+							}
 							else if((addon_sel>0)&&(addon_sel<3)){
 								addon_sel --;
-							}		
+							}
 						}
 						else if(select ==2) //lang
 						{
 								language_sel = 0;
-						}						
+						}
 						else if(select ==3)
 						{
 								engine_pos = 0;
 						}
-						else if(select ==4)	
+						else if(select ==4)
 						{
 							if(sleep_pos){
 								sleep_pos--;
-							}	
-						}	
-						else if(select ==5)	
+							}
+						}
+						else if(select ==5)
 						{
 							if(rtshotkey_pos){
 								rtshotkey_pos--;
-							}		
-						}	
+							}
+						}
 						else if(select ==6)
 						{
 								RTC_pos = 0;
 						}
-						re_show = 1;	
+						re_show = 1;
 					} else if(keys & KEY_A) {
 						if((0== select) && (edit_pos==7)){
 							rtc_enable();
@@ -1154,33 +1154,33 @@ u32 Setting_window(void)
 								UIAudio_HandleKeys(KEY_A, 0);
 							Set_OK = 0;//!Set_OK;
 						}
-						else if(select == 1) 
+						else if(select == 1)
 						{
 							switch(addon_sel)
 							{
 								case 0:v_reset = !v_reset;break;
 								case 1:v_rts   = !v_rts;break;
 								case 3:v_sleep = !v_sleep;break;
-								case 4:v_cheat = !v_cheat;break;	
+								case 4:v_cheat = !v_cheat;break;
 								case 2:
 									{
 										save_setw_info();
-										CheckSwitch(); //read again  
+										CheckSwitch(); //read again
 										UIAudio_HandleKeys(KEY_A, 0);
-										Set_OK = 0;	
-										break;							
+										Set_OK = 0;
+										break;
 									}
-							}	
+							}
 						}
-						else if(select == 2) 
+						else if(select == 2)
 						{
 							save_setw_info();
-							CheckLanguage(); //read again    	
+							CheckLanguage(); //read again
 							ClearWithBG((u16*)gImage_SET,0, 20, 240, 160-20, 1);
 								UIAudio_HandleKeys(KEY_A, 0);
-							Set_OK = 0;													
+							Set_OK = 0;
 						}
-						else if(select == 3) 
+						else if(select == 3)
 						{
 							switch(engine_pos)
 							{
@@ -1189,29 +1189,29 @@ u32 Setting_window(void)
 									{
 										save_setw_info();
 										UIAudio_HandleKeys(KEY_A, 0);
-										Set_OK = 0;	
+										Set_OK = 0;
 										gl_engine_sel = Read_SET_info(assress_engine_sel);
 										if( (gl_engine_sel != 0x0) && (gl_engine_sel != 0x1))
 										{
 											gl_engine_sel = 0x1;
 										}
-										break;							
+										break;
 									}
-							}	
+							}
 						}
 						else if((select == 4)  && (sleep_pos==3))
 						{
 							save_setw_info();
 							UIAudio_HandleKeys(KEY_A, 0);
 							Set_OK = 0;
-						}			
+						}
 						else if((select == 5)  && (rtshotkey_pos==3))
 						{
 							save_setw_info();
 							UIAudio_HandleKeys(KEY_A, 0);
-							Set_OK = 0;	
-						}			
-						else if(select == 6) 
+							Set_OK = 0;
+						}
+						else if(select == 6)
 						{
 							switch(RTC_pos)
 							{
@@ -1220,16 +1220,16 @@ u32 Setting_window(void)
 									{
 										save_setw_info();
 										UIAudio_HandleKeys(KEY_A, 0);
-										Set_OK = 0;	
+										Set_OK = 0;
 										gl_ingame_RTC_open_status = Read_SET_info(assress_ingame_RTC_open_status);
 										if( (gl_ingame_RTC_open_status != 0x0) && (gl_ingame_RTC_open_status != 0x1))
 										{
 											gl_ingame_RTC_open_status = 0x1;
 										}
-										break;							
+										break;
 									}
-							}	
-						}			
+							}
+						}
 						re_show = 1;
 					}
 
@@ -1240,42 +1240,42 @@ u32 Setting_window(void)
 							UIAudio_HandleKeys(0, KEY_DOWN);
 						}
 					}
-				break	;			
-		}//end switch 		
+				break	;
+		}//end switch
 	}//end while(1)
 }
 //---------------------------------------------------------------------------------
 void save_setw_info(void)
 {
-	u32 address;	
-	if(language_sel == 0x0){//english						
+	u32 address;
+	if(language_sel == 0x0){//english
 		SET_info_buffer[assress_language] = 0xE1E1;
 	}
-	else{					
+	else{
 		SET_info_buffer[assress_language] = 0xE2E2;
 	}
 	SET_info_buffer[assress_v_reset] = v_reset;
 	SET_info_buffer[assress_v_rts] = v_rts;
 	SET_info_buffer[assress_v_sleep] = v_sleep;
-	SET_info_buffer[assress_v_cheat] = v_cheat;	
-	
+	SET_info_buffer[assress_v_cheat] = v_cheat;
+
 	SET_info_buffer[assress_edit_sleephotkey_0] = edit_sleephotkey[0];
-	SET_info_buffer[assress_edit_sleephotkey_1] = edit_sleephotkey[1];	
-	SET_info_buffer[assress_edit_sleephotkey_2] = edit_sleephotkey[2];	
+	SET_info_buffer[assress_edit_sleephotkey_1] = edit_sleephotkey[1];
+	SET_info_buffer[assress_edit_sleephotkey_2] = edit_sleephotkey[2];
 	SET_info_buffer[assress_edit_rtshotkey_0] = edit_rtshotkey[0];
-	SET_info_buffer[assress_edit_rtshotkey_1] = edit_rtshotkey[1];	
-	SET_info_buffer[assress_edit_rtshotkey_2] = edit_rtshotkey[2];	
-	
-	SET_info_buffer[assress_engine_sel] = engine_sel;	
-	
-	SET_info_buffer[assress_show_Thumbnail] = gl_show_Thumbnail;	
-	
+	SET_info_buffer[assress_edit_rtshotkey_1] = edit_rtshotkey[1];
+	SET_info_buffer[assress_edit_rtshotkey_2] = edit_rtshotkey[2];
+
+	SET_info_buffer[assress_engine_sel] = engine_sel;
+
+	SET_info_buffer[assress_show_Thumbnail] = gl_show_Thumbnail;
+
 	SET_info_buffer[assress_ingame_RTC_open_status] = gl_ingame_RTC_open_status;
 
 	for(address=14;address < assress_max;address++)
 	{
 		SET_info_buffer[address] = Read_SET_info(address);
-	}				
-	//save to nor 
+	}
+	//save to nor
 	Save_SET_info(SET_info_buffer,0x200);
 }

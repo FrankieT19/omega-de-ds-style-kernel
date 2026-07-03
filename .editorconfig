@@ -1,11 +1,14 @@
 root = true
 
 [*]
+charset = utf-8
 end_of_line = lf
 insert_final_newline = true
+trim_trailing_whitespace = true
 
-[*.{bat,cmd}]
+[*.bat]
 end_of_line = crlf
 
-[*.{png,jpg,jpeg,gif,ico,bmp,bin,gba,zip,7z,pdf,dll,exe}]
+[*.{bmp,png,jpg,jpeg,ico,bin,gba,elf,o,a,zip,7z,wav}]
 insert_final_newline = false
+trim_trailing_whitespace = false

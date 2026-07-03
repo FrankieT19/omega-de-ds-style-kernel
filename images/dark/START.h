@@ -3,7 +3,7 @@
 
 //======================================================================
 //
-//	gImage_START_DARK, 240x160@16, 
+//	gImage_START_DARK, 240x160@16,
 //	+ bitmap not compressed
 //	Total size: 76800 = 76800
 //

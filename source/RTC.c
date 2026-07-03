@@ -98,15 +98,15 @@ int rtc_gettime(u8 *data)
 	return 0;
 }
 // --------------------------------------------------------------------
-void rtc_set(u8 *data) 
+void rtc_set(u8 *data)
 {
-	int i; 
+	int i;
 	u8 newdata[7];
-	
+
 	for(i=0;i<7;i++) {
 		newdata[i] = _BCD(data[i]);
 	}
-	
+
 	*RTC_ENABLE = 1;
 	*RTC_DATA = 1;
 	*RTC_DATA = 5;

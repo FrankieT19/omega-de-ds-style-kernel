@@ -6,7 +6,7 @@
 
 
 typedef struct FM_NOR_FILE_SECT{////save to nor
-	char filename[100];	
+	char filename[100];
 	u16 rompage ;
 	u16 have_patch ;
 	u16	have_RTS;
@@ -19,12 +19,12 @@ typedef struct FM_NOR_FILE_SECT{////save to nor
 } FM_NOR_FS;
 
 typedef struct FM_Folder_SECT{
-	char filename[100];	
+	char filename[100];
 } FM_Folder_FS;
 
 typedef struct FM_FILE_SECT{
 	char filename[100];
-	u32 filesize;	
+	u32 filesize;
 } FM_FILE_FS;
 
 

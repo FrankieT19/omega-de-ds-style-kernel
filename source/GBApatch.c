@@ -47,8 +47,8 @@ void Write(u32 romaddress, const u8* buffer, u32 size)
 		{
 			for(x=0;x<size/2;x++){
 				((vu16*)(pReadCache+romaddress-windows_offset))[x] = ((vu16*)buffer)[x];
-			}					
-			//DEBUG_printf("NORaddress{%x}:%x %x", romaddress,size ,((vu32*)buffer)[0]);			
+			}
+			//DEBUG_printf("NORaddress{%x}:%x %x", romaddress,size ,((vu32*)buffer)[0]);
 		}
 	}
 	else
@@ -62,10 +62,10 @@ void Write(u32 romaddress, const u8* buffer, u32 size)
 			page+=0x1000;
 		}
 		SetPSRampage(page);
-		
+
 		for(x=0;x<size/2;x++)
 			((vu16*)(PSRAMBase_S98 + Address))[x] = ((vu16*)buffer)[x];//todo ��Ҫ����psram page
-						
+
 		//DEBUG_printf("address{%x}:%x %x %x %x", romaddress,page,Address,size ,((vu32*)buffer)[0]);
 		SetPSRampage(0);
 	}
@@ -103,7 +103,7 @@ bool IWRAM_CODE PatchDragonBallZ(u32 *Data)
 	  0x4a464c41,  //Dragon Ball Z - The Legacy of Goku II International (Japan).gba
 
 	  0x45593241   //1928 - Top Gun - Combat Zones(US).gba
-	  
+
 	};
   const u32 patch_1_offsets[]=
   {
@@ -218,7 +218,7 @@ void IWRAM_CODE CheckNes(u32 *Data)
 			if(Data[Nes_index]==0xe28f503c)
 				is_Nes = 1;
 			else if (Data[Nes_index]==0xe28f5040)
-				is_Nes = 2;    		
+				is_Nes = 2;
 		}
 		else
 			is_Nes = 0;
@@ -237,7 +237,7 @@ bool PatchNes(u32 *Data)
       if(windows_offset == 0)
     	  Nes_index_17_patch=Data[Nes_index+17+is_Nes-1];
       Write(0xff840,(u8*)&Nes_index_17_patch,sizeof(patch));
-      u32 index2=(Nes_index_17_patch-0x08000000)/4; 
+      u32 index2=(Nes_index_17_patch-0x08000000)/4;
       if(Data[index2-1-windows_offset/4]==0x3032)
       {
         patch=0x060000f8;
@@ -254,7 +254,7 @@ void Add2(u32 anOffset, u32 aValue)
 		anOffset = anOffset+ g_Offset ;
 		SPatchInfo2 info = { anOffset,aValue };
 		iPatchInfo2[iCount2++] = info;
-	} 
+	}
 }
 //------------------------------------------------------------------
 void IWRAM_CODE PatchInternal(u32* Data,int iSize,u32 offset)
@@ -265,7 +265,7 @@ void IWRAM_CODE PatchInternal(u32* Data,int iSize,u32 offset)
   {
 	  EA_offset = Data[0] & 0xFFFFFF;
   }
-  
+
   for(u32 ii=0;ii<search_size;ii++)
   {
     switch(Data[ii])
@@ -293,19 +293,19 @@ void SetTrimSize(u8* buffer,u32 romsize,u32 iSize,u32 mode,BYTE saveMODE)
 
 	u32  PATCH_LENGTH;
 
-	if((gl_rts_on==1)/* || (gl_cheat_on==1)*/ )		
+	if((gl_rts_on==1)/* || (gl_cheat_on==1)*/ )
 	{
 		PATCH_LENGTH = 0x1000;
 	}
-	else 
+	else
 	{
-		PATCH_LENGTH = 0x300;	
+		PATCH_LENGTH = 0x300;
 	}
-	
+
 	if(gl_cheat_on==1){
 		PATCH_LENGTH = 0x2000;
 	}
-	
+
   if(0)
   {
 	  iTrimSize = 0x1fff000;
@@ -321,7 +321,7 @@ void SetTrimSize(u8* buffer,u32 romsize,u32 iSize,u32 mode,BYTE saveMODE)
 			top = 0;
 		}
 	  alignedSize=romsize+(16-(romsize&15));
-	  
+
 	  for(u32 ii=bottom;ii>=top;ii--)
 	  {
 			if(buffer[ii]!=byte||ii==top)
@@ -338,7 +338,7 @@ void SetTrimSize(u8* buffer,u32 romsize,u32 iSize,u32 mode,BYTE saveMODE)
 	if(mode ==1)//nor
 	{
 		if( ((iTrimSize&0x1FFFF)+PATCH_LENGTH)  > 0x20000)//Greater than one flash sector
-		{		
+		{
 			iTrimSize = ((romsize+0x1FFFF)/0x20000)*0x20000;
 		}
 		if(romsize <=0x1000000)
@@ -353,7 +353,7 @@ void SetTrimSize(u8* buffer,u32 romsize,u32 iSize,u32 mode,BYTE saveMODE)
   				iTrimSize = 0x1000000; //page
   			}
   		}
-	  }		
+	  }
 	}
 	else
 	{
@@ -394,14 +394,14 @@ void Patch_B_address(void)
 	for (u32 ii = 0; ii<iCount2; ii++)
 	{
 		Write(iPatchInfo2[ii].iOffset*4, (u8*)&(iPatchInfo2[ii].iValue), sizeof(iPatchInfo2[ii].iValue));
-	}	
+	}
 }
 //------------------------------------------------------------------
 void Patch_Reset_Sleep(u32 *Data)
-{	    
+{
 	Patch_B_address();
 	u32 Return_address = 0x8000000+ EA_offset*4 + 8;
-		
+
   u8 * p_patch_start  = (u8*)Sleep_ReplaceIRQ_start;
   u8 * p_patch_end 		= (u8*)Sleep_ReplaceIRQ_end;
   u8 * p_patch_Return_address_L  = (u8*)Return_address_L;
@@ -412,14 +412,14 @@ void Patch_Reset_Sleep(u32 *Data)
   dmaCopy((void*)p_patch_start,patchbuffer, p_patch_end-p_patch_start);
   *(vu32*)(patchbuffer+Return_address_offset) = Return_address;//�޸�gba_sleep_patch_bin����ķ��ص�ַ
 
-	u16 read5 = Read_SET_info(assress_edit_sleephotkey_0); 
-	u16 read6 = Read_SET_info(assress_edit_sleephotkey_1); 
-	u16 read7 = Read_SET_info(assress_edit_sleephotkey_2); 
-	u16 read8 = Read_SET_info(assress_edit_rtshotkey_0); 
-	u16 read9 = Read_SET_info(assress_edit_rtshotkey_1); 
-	u16 read10 = Read_SET_info(assress_edit_rtshotkey_2); 
+	u16 read5 = Read_SET_info(assress_edit_sleephotkey_0);
+	u16 read6 = Read_SET_info(assress_edit_sleephotkey_1);
+	u16 read7 = Read_SET_info(assress_edit_sleephotkey_2);
+	u16 read8 = Read_SET_info(assress_edit_rtshotkey_0);
+	u16 read9 = Read_SET_info(assress_edit_rtshotkey_1);
+	u16 read10 = Read_SET_info(assress_edit_rtshotkey_2);
 	u16 sleep_key = ~((1<< read5) | (1<< read6) | (1<< read7));
-  u16 reset_key = ~((1<< read8) | (1<< read9) | (1<< read10));	
+  u16 reset_key = ~((1<< read8) | (1<< read9) | (1<< read10));
 
   u32 Reset_key_offset = (u8*)Reset_key - p_patch_start;
  	u32 Sleep_key_offset = (u8*)Sleep_key - p_patch_start;
@@ -430,12 +430,12 @@ void Patch_Reset_Sleep(u32 *Data)
   else{
   	*(vu32*)(patchbuffer+Reset_key_offset) = reset_key&0x3FF;
   }
-  
-  if(gl_sleep_on !=1){  
+
+  if(gl_sleep_on !=1){
     *(vu32*)(patchbuffer+Sleep_key_offset) = 0;
   }
   else{
-  	*(vu32*)(patchbuffer+Sleep_key_offset) = sleep_key&0x3FF;	
+  	*(vu32*)(patchbuffer+Sleep_key_offset) = sleep_key&0x3FF;
   }
 
 	Write(iTrimSize, patchbuffer, p_patch_end-p_patch_start);
@@ -445,7 +445,7 @@ void Patch_RTS_Cheat(u32 *Data)
 {
 	Patch_B_address();
 	u32 Return_address = 0x8000000+ EA_offset*4 + 8;
-	
+
   u8 * p_patch_start  = (u8*)RTS_ReplaceIRQ_start;
   u8 * p_patch_end  	= (u8*)RTS_ReplaceIRQ_end;
   u8 * p_patch_Return_address_L  = (u8*)RTS_Return_address_L;
@@ -455,29 +455,29 @@ void Patch_RTS_Cheat(u32 *Data)
 
   dmaCopy((void*)p_patch_start,patchbuffer, p_patch_end-p_patch_start);
   *(vu32*)(patchbuffer+Return_address_offset) = Return_address;//modify gba_sleep_patch_bin return address
-  
+
   if(spend_address != 0x0){
   	*(vu32*)(patchbuffer+Return_address_offset+4) = spend_address;
-	}	
-	
-	u16 read5 = Read_SET_info(assress_edit_sleephotkey_0); 
-	u16 read6 = Read_SET_info(assress_edit_sleephotkey_1); 
-	u16 read7 = Read_SET_info(assress_edit_sleephotkey_2); 
-	u16 read8 = Read_SET_info(assress_edit_rtshotkey_0); 
-	u16 read9 = Read_SET_info(assress_edit_rtshotkey_1); 
-	u16 read10 = Read_SET_info(assress_edit_rtshotkey_2); 
+	}
+
+	u16 read5 = Read_SET_info(assress_edit_sleephotkey_0);
+	u16 read6 = Read_SET_info(assress_edit_sleephotkey_1);
+	u16 read7 = Read_SET_info(assress_edit_sleephotkey_2);
+	u16 read8 = Read_SET_info(assress_edit_rtshotkey_0);
+	u16 read9 = Read_SET_info(assress_edit_rtshotkey_1);
+	u16 read10 = Read_SET_info(assress_edit_rtshotkey_2);
 	u16 RTS_sleep_key_val = ~((1<< read5) | (1<< read6) | (1<< read7));
-  u16 RTS_reset_key_val = ~((1<< read8) | (1<< read9) | (1<< read10));	
-	 
+  u16 RTS_reset_key_val = ~((1<< read8) | (1<< read9) | (1<< read10));
+
   u32 RTS_Reset_key_offset = (u8*)RTS_Reset_key - p_patch_start;
  	u32 RTS_Sleep_key_offset = (u8*)RTS_Sleep_key - p_patch_start;
-  
+
   *(vu32*)(patchbuffer+RTS_Reset_key_offset) = RTS_reset_key_val&0x3FF;
-  if(gl_sleep_on !=1){  
+  if(gl_sleep_on !=1){
     *(vu32*)(patchbuffer+RTS_Sleep_key_offset) = 0;
   }
   else{
-  	*(vu32*)(patchbuffer+RTS_Sleep_key_offset) = RTS_sleep_key_val&0x3FF;	
+  	*(vu32*)(patchbuffer+RTS_Sleep_key_offset) = RTS_sleep_key_val&0x3FF;
   }
 
 	//rts switch
@@ -486,34 +486,34 @@ void Patch_RTS_Cheat(u32 *Data)
 
 	//cheat
 	u8*p_no_cheat_end =  (u8*)no_CHEAT_end;
-	
-	u32 cheat_count_offset = (u8*)Cheat_count - p_patch_start;		
-	*(vu32*)(patchbuffer+cheat_count_offset) = gl_cheat_count;	
-	
+
+	u32 cheat_count_offset = (u8*)Cheat_count - p_patch_start;
+	*(vu32*)(patchbuffer+cheat_count_offset) = gl_cheat_count;
+
 	u32 cheat_offset = (u8*)CHEAT - p_patch_start;
 
 	for (u32 ii = 0; ii<gl_cheat_count; ii++)
 	{
 		if(pCHEAT[ii].address >= 0x40000)
 		{
-			*(vu32*)(patchbuffer+cheat_offset+8*ii) = ((pCHEAT[ii].address)&0x7FFF) + 0x3000000;	
+			*(vu32*)(patchbuffer+cheat_offset+8*ii) = ((pCHEAT[ii].address)&0x7FFF) + 0x3000000;
 		}
 		else
 		{
-			*(vu32*)(patchbuffer+cheat_offset+8*ii) = ((pCHEAT[ii].address)&0x3FFFF) + 0x2000000;	
+			*(vu32*)(patchbuffer+cheat_offset+8*ii) = ((pCHEAT[ii].address)&0x3FFFF) + 0x2000000;
 		}
-		*(vu32*)(patchbuffer+cheat_offset+8*ii+4) = pCHEAT[ii].VAL;	
+		*(vu32*)(patchbuffer+cheat_offset+8*ii+4) = pCHEAT[ii].VAL;
 		//DEBUG_printf("%x=%x", *(vu32*)(patchbuffer+cheat_offset+8*ii),*(vu32*)(patchbuffer+cheat_offset+8*ii+4));
 	}
 
 	u32 copysize = p_no_cheat_end-p_patch_start ;
 	copysize = copysize +  gl_cheat_count*8;
-	
+
 	if(	iTrimSize+copysize > 0x2000000){
 		copysize = 0x2000000 - iTrimSize;
 	}
 	//DEBUG_printf("iTrimSize =%x %x", iTrimSize,copysize);
-		
+
 	Write(iTrimSize, patchbuffer,copysize);
 }
 //------------------------------------------------------------------
@@ -521,7 +521,7 @@ void Patch_RTS_only(u32 *Data)
 {
 	Patch_B_address();
 	u32 Return_address = 0x8000000+ EA_offset*4 + 8;
-	
+
   u8 * p_patch_start  = (u8*)RTS_only_ReplaceIRQ_start;
   u8 * p_patch_end  	= (u8*)RTS_only_ReplaceIRQ_end;
   u8 * p_patch_Return_address_L  = (u8*)RTS_only_Return_address_L;
@@ -531,33 +531,33 @@ void Patch_RTS_only(u32 *Data)
 
   dmaCopy((void*)p_patch_start,patchbuffer, p_patch_end-p_patch_start);
   *(vu32*)(patchbuffer+Return_address_offset) = Return_address;//modify gba_sleep_patch_bin return address
-  
+
   if(spend_address != 0x0){
   	*(vu32*)(patchbuffer+Return_address_offset+4) = spend_address;
-	}	
-	
-	u16 read5 = Read_SET_info(assress_edit_sleephotkey_0); 
-	u16 read6 = Read_SET_info(assress_edit_sleephotkey_1); 
-	u16 read7 = Read_SET_info(assress_edit_sleephotkey_2); 
-	u16 read8 = Read_SET_info(assress_edit_rtshotkey_0); 
-	u16 read9 = Read_SET_info(assress_edit_rtshotkey_1); 
-	u16 read10 = Read_SET_info(assress_edit_rtshotkey_2); 
+	}
+
+	u16 read5 = Read_SET_info(assress_edit_sleephotkey_0);
+	u16 read6 = Read_SET_info(assress_edit_sleephotkey_1);
+	u16 read7 = Read_SET_info(assress_edit_sleephotkey_2);
+	u16 read8 = Read_SET_info(assress_edit_rtshotkey_0);
+	u16 read9 = Read_SET_info(assress_edit_rtshotkey_1);
+	u16 read10 = Read_SET_info(assress_edit_rtshotkey_2);
 	u16 RTS_only_SAVE_key_val = ~((1<< read5) | (1<< read6) | (1<< read7));
-  u16 RTS_only_LOAD_key_val = ~((1<< read8) | (1<< read9) | (1<< read10));	
-	 
+  u16 RTS_only_LOAD_key_val = ~((1<< read8) | (1<< read9) | (1<< read10));
+
   u32 RTS_only_SAVE_key_offset = (u8*)RTS_only_SAVE_key - p_patch_start;
  	u32 RTS_only_LOAD_key_offset = (u8*)RTS_only_LOAD_key - p_patch_start;
-  
+
   *(vu32*)(patchbuffer+RTS_only_SAVE_key_offset) = RTS_only_SAVE_key_val&0x3FF;
-  *(vu32*)(patchbuffer+RTS_only_LOAD_key_offset) = RTS_only_LOAD_key_val&0x3FF;	
+  *(vu32*)(patchbuffer+RTS_only_LOAD_key_offset) = RTS_only_LOAD_key_val&0x3FF;
 
 	u32 copysize = p_patch_end - p_patch_start ;
-	
+
 	if(	iTrimSize+copysize > 0x2000000){
 		copysize = 0x2000000 - iTrimSize; //????
 	}
 	//DEBUG_printf("iTrimSize =%x %x", iTrimSize,copysize);
-		
+
 	Write(iTrimSize, patchbuffer,copysize);
 }
 //------------------------------------------------------------------
@@ -573,11 +573,11 @@ void GBApatch_Cleanrom(u32* address,int filesize)//Only once
 //------------------------------------------------------------------
 u32 Get_spend_address(u32* Data)
 {
-	u32 ii;	
+	u32 ii;
 	u32 offset;
 	u32 updown;
-	
-  u32 search_size=0x5000/4; 
+
+  u32 search_size=0x5000/4;
   for(ii=0;ii<search_size;ii++)
   {
 		u32 word1 = Data[ii] & 0xFFFF001F;
@@ -592,11 +592,11 @@ u32 Get_spend_address(u32* Data)
 			}
 		}
   }
-  if(ii == search_size) 
+  if(ii == search_size)
   {
-  	return 0;//Find_spend_address_SpecialROM(Data); 
+  	return 0;//Find_spend_address_SpecialROM(Data);
   }
-  
+
   u32 address;
   if(updown == 0x00900000)
 		address = ii*4 + offset+16;
@@ -604,14 +604,14 @@ u32 Get_spend_address(u32* Data)
 		address = ii*4 - offset+16;
 	else
 		address = 0;
-  
+
   if(	(Data[address/4] > 0x03007E80) /*|| (Data[address/4] == 0x03007E00)*/ || (Data[address/4] == 0x0203FFFC) )
   {
-  	Data[address/4] = Data[address/4] - 0x80; 
+  	Data[address/4] = Data[address/4] - 0x80;
   	return (Data[address/4]);
   }
-  else 
-  	return 0;	
+  else
+  	return 0;
 }
 //------------------------------------------------------------------
 void GBApatch_PSRAM(u32* address,int filesize)//Only once
@@ -619,25 +619,25 @@ void GBApatch_PSRAM(u32* address,int filesize)//Only once
 	windows_offset = 0;
 	is_NORpatch = 0;
 	EA_offset = address[0] & 0xFFFFFF;
-	
+
 	CheckNes(address);
 	PatchNes(address);
 	PatchDragonBallZ(address);
 	//Check_Fire_Emblem();
 	Patch_somegame(address);
-	
+
 	if( (gl_rts_on==1) && (gl_cheat_on == 0)  && (gl_reset_on == 0)  && (gl_sleep_on == 0)  ) {
 		spend_address = Get_spend_address(address);
-		Patch_RTS_only(address);		
+		Patch_RTS_only(address);
 	}
-	else if((gl_rts_on==1) ||  ((gl_cheat_on==1)&& (gl_cheat_count>0) ) )		
+	else if((gl_rts_on==1) ||  ((gl_cheat_on==1)&& (gl_cheat_count>0) ) )
 	{
 		spend_address = Get_spend_address(address);
 		//DEBUG_printf("spend_address =%x",spend_address);
 		Patch_RTS_Cheat(address);
 	}
 	else
-	{  
+	{
 		Patch_Reset_Sleep(address);
 	}
 }
@@ -663,7 +663,7 @@ void GBApatch_NOR(u32* address,int filesize,u32 offset)
   {
 	  CheckNes(address);
 	  EA_offset = address[0] & 0xFFFFFF;
-	  
+
 		u32 B_install_handler;
 		B_install_handler = 0xEA000000|((iTrimSize-8)/4);
 		Write(0,(u8*)&B_install_handler , 4); //B
@@ -676,14 +676,14 @@ void GBApatch_NOR(u32* address,int filesize,u32 offset)
 	//Check_Fire_Emblem();
 
 	if( (gl_rts_on==1) && (gl_cheat_on == 0)  && (gl_reset_on == 0)  && (gl_sleep_on == 0)  ) {
-		Patch_RTS_only(address);		
+		Patch_RTS_only(address);
 	}
-	else if((gl_rts_on==1) ||  ((gl_cheat_on==1)&& (gl_cheat_count>0) ) )		
+	else if((gl_rts_on==1) ||  ((gl_cheat_on==1)&& (gl_cheat_count>0) ) )
 	{
 		Patch_RTS_Cheat(address);
-	} 
+	}
 	else
-	{  
+	{
 		Patch_Reset_Sleep(address);
 	}
 }
@@ -694,7 +694,7 @@ void make_pat_name(TCHAR*patnamebuf,TCHAR* gamefilename)
 	u32 len=strlen(patnamebuf);
 	patnamebuf[len-3] = 'p';
 	patnamebuf[len-2] = 'a';
-	patnamebuf[len-1] = 't';	
+	patnamebuf[len-1] = 't';
 }
 //------------------------------------------------------------------
 void GBA_patch_init(void)
@@ -708,7 +708,7 @@ void GBA_patch_init(void)
 	iCount2 = 0;
 	iTrimSize = 0;
 	EA_offset = 0;
-	
+
 	w_reset_on = 0;
 	w_rts_on = 0;
 	w_sleep_on = 0;
@@ -721,7 +721,7 @@ void GBA_patch_init_buffer(u32* buffer)
 {
 	memcpy(iPatchInfo2, buffer, sizeof(iPatchInfo2));
 	u32 start = sizeof(iPatchInfo2)/4;
-	 
+
 	is_NORpatch = buffer[start+0];
 	windows_offset = buffer[start+1];
 	is_Nes = buffer[start+2];
@@ -730,7 +730,7 @@ void GBA_patch_init_buffer(u32* buffer)
 	iCount2 = buffer[start+5];
 	iTrimSize = buffer[start+6];
 	EA_offset = buffer[start+7];
-	
+
 	w_reset_on = buffer[start+8];
 	w_rts_on = buffer[start+9];
 	w_sleep_on = buffer[start+10];
@@ -743,21 +743,21 @@ u32 Check_pat(TCHAR* gamefilename)
 	u32 find_the_patfile;
 	u32 patfilesize;
 	u32 res;
-	
-	TCHAR patnamebuf[100];	
+
+	TCHAR patnamebuf[100];
 	make_pat_name(patnamebuf,gamefilename);
 	res=f_chdir("/SYSTEM/PATCH");
 	if(res == FR_OK)
 	{
 		res = f_open(&gfile,patnamebuf, FA_READ);
-		
+
 		if(res == FR_OK)//have a old file
 		{
 			patfilesize = f_size(&gfile);
 			f_read(&gfile, pReadCache, patfilesize, &ret);
 			f_close(&gfile);
 			find_the_patfile = 1;
-		}					
+		}
 		else
 		{
 			find_the_patfile = 0;
@@ -773,17 +773,17 @@ u32 Check_pat(TCHAR* gamefilename)
 	{
 		//read patch information
 		GBA_patch_init_buffer((u32*)pReadCache);
-		
+
 		if( (w_reset_on !=gl_reset_on)  || (w_rts_on !=gl_rts_on)  || (w_sleep_on !=gl_sleep_on) || (w_cheat_on !=gl_cheat_on))
 		{
 			GBA_patch_init();
 			find_the_patfile = 0;
-		}	
+		}
 	}
 	else
 	{
 		GBA_patch_init();
-	}	
+	}
 	return find_the_patfile;
 }
 //------------------------------------------------------------------
@@ -792,19 +792,19 @@ void Make_pat_file(TCHAR* gamefilename)
 	u32 res;
 	u32 written;
 	u32 w_buffer[16];
-	
+
 	res = f_mkdir("/SYSTEM/PATCH");
 	res=f_chdir("/SYSTEM/PATCH");
-	
+
 	memset(w_buffer, 0x00, sizeof(w_buffer));
 
 	if(res == FR_OK){
-		TCHAR patnamebuf[100];	
+		TCHAR patnamebuf[100];
 		make_pat_name(patnamebuf,gamefilename);
 
 		res = f_open(&gfile,patnamebuf, FA_WRITE | FA_OPEN_ALWAYS);
 		if(res == FR_OK)
-		{	
+		{
 			f_lseek(&gfile, 0x0000);
 			res=f_write(&gfile, (void*)iPatchInfo2, sizeof(iPatchInfo2), (UINT*)&written);
 			w_buffer[0] = is_NORpatch;
@@ -820,7 +820,7 @@ void Make_pat_file(TCHAR* gamefilename)
 			w_buffer[9] = gl_rts_on;
 			w_buffer[10] = gl_sleep_on;
 			w_buffer[11] = gl_cheat_on;
-					
+
 			res=f_write(&gfile, (void*)w_buffer, sizeof(w_buffer), (UINT*)&written);
 			f_close(&gfile);
 		}
@@ -834,7 +834,7 @@ void make_mde_name(TCHAR*mdenamebuf,TCHAR* gamefilename)
 	u32 len=strlen(mdenamebuf);
 	mdenamebuf[len-3] = 'm';
 	mdenamebuf[len-2] = 'd';
-	mdenamebuf[len-1] = 'e';	
+	mdenamebuf[len-1] = 'e';
 }
 //------------------------------------------------------------------
 u8 Check_mde_file(TCHAR* gamefilename)
@@ -843,15 +843,15 @@ u8 Check_mde_file(TCHAR* gamefilename)
 	u32 find_the_mdefile;
 	u32 mdefilesize;
 	u32 res;
-	
-	TCHAR mdenamebuf[100];	
+
+	TCHAR mdenamebuf[100];
 	make_mde_name(mdenamebuf,gamefilename);
-	
+
 	res=f_chdir("/SYSTEM/SAVER");
 	if(res == FR_OK)
 	{
 		res = f_open(&gfile,mdenamebuf, FA_OPEN_EXISTING);
-		
+
 		if(res == FR_OK)//have a old file
 		{
 			f_open(&gfile,mdenamebuf, FA_READ);
@@ -859,7 +859,7 @@ u8 Check_mde_file(TCHAR* gamefilename)
 			f_read(&gfile, pReadCache, mdefilesize, &ret);
 			f_close(&gfile);
 			find_the_mdefile = 1;
-		}					
+		}
 		else
 		{
 			find_the_mdefile = 0;
@@ -878,7 +878,7 @@ u8 Check_mde_file(TCHAR* gamefilename)
 	else
 	{
 		return 0;
-	}	
+	}
 }
 //------------------------------------------------------------------
 u8 Make_mde_file(TCHAR* gamefilename,u8 Save_num)
@@ -890,24 +890,24 @@ u8 Make_mde_file(TCHAR* gamefilename,u8 Save_num)
 	TCHAR currentpath[256];
 	memset(currentpath,00,256);
 	res = f_getcwd(currentpath, sizeof currentpath / sizeof *currentpath);
-	
+
 	//res = f_mkdir(SAVER_FOLDER);
 	res=f_chdir(SAVER_FOLDER);
 	if(res != FR_OK){
 			return 2;
 	}
-	
+
 	memset(w_buffer, 0x00, sizeof(w_buffer));
 
 	if(res == FR_OK){
-		TCHAR mdenamebuf[100];	
+		TCHAR mdenamebuf[100];
 		make_mde_name(mdenamebuf,gamefilename);
 
 		res = f_open(&gfile,mdenamebuf, FA_WRITE | FA_OPEN_ALWAYS);
 		if(res == FR_OK)
-		{	
+		{
 			f_lseek(&gfile, 0x0000);
-			
+
 			w_buffer[0] = Save_num;
 			res=f_write(&gfile, (void*)w_buffer, sizeof(w_buffer), (UINT*)&written);
 
@@ -924,27 +924,27 @@ u32 Check_RTS(TCHAR* gamefilename)
 	//u32 find_the_patfile;
 	u32 rtsfilesize;
 	u32 res;
-	
+
 	TCHAR rtsnamebuf[100];
 	memcpy(rtsnamebuf,gamefilename,100);
 	u32 len=strlen(rtsnamebuf);
 	rtsnamebuf[len-3] = 'r';
 	rtsnamebuf[len-2] = 't';
-	rtsnamebuf[len-1] = 's';	
-	
+	rtsnamebuf[len-1] = 's';
+
 	res = f_mkdir("/SYSTEM/RTS");
 	res=f_chdir("/SYSTEM/RTS");
 	if(res != FR_OK){
 		return 0;
 	}
-	
+
 	res = f_open(&gfile,rtsnamebuf, FA_OPEN_EXISTING);
-	
+
 	if(res == FR_OK)//have a old rts file
 	{
 		rtsfilesize = f_size(&gfile);
 		f_close(&gfile);
-	}					
+	}
 	else //make a new one
 	{
 		ShowbootProgress(gl_make_RTS);
@@ -963,7 +963,7 @@ u32 Check_RTS(TCHAR* gamefilename)
 
 	    rtsfilesize = 0x70000;
 		}
-		else 
+		else
 			rtsfilesize = 0;
 	}
 	LoadRTSfile(rtsnamebuf);
@@ -972,9 +972,9 @@ u32 Check_RTS(TCHAR* gamefilename)
 		res = Check_game_RTS_FAT(rtsnamebuf,3);//rts FAT
 		if(res == 0xffffffff){
 			rtsfilesize = 0;
-		}														
+		}
 	}
-	
+
 	return rtsfilesize;
 }
 //------------------------------------------------------------------
@@ -983,26 +983,26 @@ u32 use_internal_engine(u8 gamecode[])
 	u32 i;
 	u32 count0x3007FFC=0;
 	u32 result=0;
-	
+
 	g_Offset = 0;
-	
+
 	dmaCopy((void*)reset_table, (void*)pReadCache, sizeof(reset_table));
 	for(i=0;i<sizeof(reset_table)/4;i++)
 	{
-		count0x3007FFC = ((vu32*)pReadCache)[i+1];				
+		count0x3007FFC = ((vu32*)pReadCache)[i+1];
 
 		if( ((vu32*)pReadCache)[i] == *(vu32*)gamecode )
-		{				
+		{
 			result = 1;
 			break;
 		}
 		i += (count0x3007FFC+1);
-	}	
+	}
 	if(result == 0) return 0;
-		
+
 	#ifdef DEBUG
 		//DEBUG_printf("%d: %X VS %X %x",i,((vu32*)pReadCache)[i],*(vu32*)gamecode,count0x3007FFC);
-		//wait_btn();	
+		//wait_btn();
 	#endif
 	i += 2;
 	iCount2 = 0;
@@ -1079,7 +1079,7 @@ void Patch_SpecialROM_sleepmode(void)
 	case 0x45574C42://1953 - LEGO Star Wars - The Video Game(UE)
 	case 0x4A574C42://2052 - LEGO Star Wars - The Video Game(JP)
 		Add2(0x14C/4, 0x03007FF0);
-		break;	
+		break;
 	case 0x45345442://2079 - Dragon Ball GT - Transformation(US)
 		Add2(0x34FF8/4, 0x63484916);
 		break;
@@ -1168,24 +1168,24 @@ void Patch_SpecialROM_TrimSize(void)
 		iTrimSize = 0xFE3000;
 		break;
 	case 0x4A494442://1176 - Koinu to Issho - Aijou Monogatari(JP)
-	case 0x4A324942://1741 - Koinu to Issho 2(JP)	
+	case 0x4A324942://1741 - Koinu to Issho 2(JP)
 	case 0x454A4142://1864 - Banjo Pilot(US)
-	case 0x504A4142://1899 - Banjo Pilot(EU)		
+	case 0x504A4142://1899 - Banjo Pilot(EU)
 	case 0x4A324D42://2045 - Momotarou Densetsu G - Gold Deck wo Tsukure!(JP)
-	case 0x4A464842://2071 - Twin Series 4 - Hamu Hamu Monster EX + F Puzzle Hamusuta(JP)		
+	case 0x4A464842://2071 - Twin Series 4 - Hamu Hamu Monster EX + F Puzzle Hamusuta(JP)
 	case 0x50514442://2214 - Donkey Kong Country 3(EU)
-	case 0x45514442://2220 - Donkey Kong Country 3(US)	
-	case 0x4A514442://2270 - Super Donkey Kong Country 3(JP)	
+	case 0x45514442://2220 - Donkey Kong Country 3(US)
+	case 0x4A514442://2270 - Super Donkey Kong Country 3(JP)
 	case 0x4A564642://2286 - Twin Series 1 - Mezase Debut! Fashion Designer Monogatari + Kawaii Pet Game Gallery 2(JP)
 	case 0x4A575A42://2335 - Akagi(JP)
 	case 0x50385442://2342 - 2 Games in 1 - Teenage Mutant Ninja Turtles + Teenage Mutant Ninja Turtles 2 - Battle Nexus(EU)
 	case 0x50384E41://2351 - Tales of Phantasia(EU)
 	case 0x4A534842://2457 - Hamster Monogatari 3EX + 4 Special(JP)
-	case 0x45385442://2526 - 2 Games in 1 - Teenage Mutant Ninja Turtles + Teenage Mutant Ninja Turtles 2 - Battle Nexus(US)			
+	case 0x45385442://2526 - 2 Games in 1 - Teenage Mutant Ninja Turtles + Teenage Mutant Ninja Turtles 2 - Battle Nexus(US)
 		iTrimSize = 0xFE4000;
 		break;
 	case 0x45505342://1553 - Spider-Man 2(UE)
-	case 0x58505342://1565 - Spider-Man 2(EU)		
+	case 0x58505342://1565 - Spider-Man 2(EU)
 	case 0x49505342://1657 - Spider-Man 2(IT).zip
 	case 0x45585142://2618 - Superman Returns - Fortress of Solitude(UE)
 		iTrimSize = 0xFE1000;
@@ -1201,16 +1201,16 @@ void Patch_SpecialROM_TrimSize(void)
 		break;
 	case 0x50413542://2053 - 2 Games in 1 - Spyro - Season of Ice + Crash Bandicoot 2 - N-Tranced(EU)
 		iTrimSize = 0x5E3CC0;
-		break;	
+		break;
 	case 0x45533842://2394 - 2 Games in 1 - Spyro - Season of Ice + Spyro 2 - Season of Flame(US)
 		iTrimSize = 0x7CFF00;
-		break;		
+		break;
 	case 0x46425742://2503 - 2 Games in 1 - Disney Princesse + Frere des Ours(FR) cant work
 		iTrimSize = 0x7FF000;
-		break;			
+		break;
 	case 0x49425742://2703 - 2 Games in 1 - Disney Principesse + Koda, Fratello Orso(IT) cant work
 		iTrimSize = 0x7FEC30;
-		break;	
+		break;
 	case 0x44425742://2009 - 2 Games in 1 - Disneys Prinzessinnen + Baren Bruder(DE)
 	case 0x53425742://2012 - 2 Games in 1 - Disney Princesas + Hermano Oso(ES)
 		iTrimSize = 0x731000;
@@ -1219,7 +1219,7 @@ void Patch_SpecialROM_TrimSize(void)
 		iTrimSize = 0xAFF000;
 		break;
 	case 0x50504C42://2745 - 2 Games in 1 - Lion King, The + Disney Princess(EU)
-	case 0x50425742://2780 - 2 Games in 1 - Disney Princess + Brother Bear(EU)		
+	case 0x50425742://2780 - 2 Games in 1 - Disney Princess + Brother Bear(EU)
 		iTrimSize = 0x738000;
 		break;
 	}
@@ -1237,9 +1237,9 @@ void Patch_SpecialROM_TrimSize(void)
 	u8 * p_patch_end;
 	u8 * p_modify_address;
 	u32 modify_val=0;
-	 
+
 	u8 have=0;
-	
+
 	memset(address1,0x00,sizeof(address1));
 	switch(*(u32*)GAMECODE)
 	{
@@ -1275,7 +1275,7 @@ void Patch_SpecialROM_TrimSize(void)
 			code2[4]=Baseaddress+patchaddress+0x3D;
 		  p_patch_start = (u8*)Fire_Emblem_1692_patch_start;
 		  p_patch_end  	= (u8*)Fire_Emblem_1692_patch_end;
-		  have = 1;				
+		  have = 1;
 		}break;
 		case 0x4A374541://0979 - Fire Emblem - Rekka no Ken(JP)
 		{
@@ -1411,28 +1411,28 @@ void Patch_SpecialROM_TrimSize(void)
 		  have = 1;
 		}break;
 	}
-	
+
 	if(have){
     for(u32 i=0;i<5;i++)
     {
     	if(address1[i] != 0){
-    		Write(address1[i],(u8*)&code1 , 4); 
+    		Write(address1[i],(u8*)&code1 , 4);
       	Write(address1[i]+4,(u8*)&code2[i],4);
       }
-    }			
+    }
 
 	  u32 copysize = p_patch_end - p_patch_start ;
-	  dmaCopy((void*)p_patch_start,patchbuffer, copysize);	
+	  dmaCopy((void*)p_patch_start,patchbuffer, copysize);
 	  if( modify_val)
 	  {
 	  	u32 p_modify_address_offset = p_modify_address-p_patch_start;
 	  	*(vu32*)(patchbuffer+p_modify_address_offset) = modify_val;
-	  } 		  
+	  }
 	  Write(patchaddress, patchbuffer,copysize);
 	  Set_AUTO_save(0x00);
 	}
 	else{
 		Set_AUTO_save(0x01);
-	}	
+	}
 }
 */

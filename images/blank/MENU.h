@@ -3,7 +3,7 @@
 
 //======================================================================
 //
-//	gImage_MENU_BLANK, 168x110@16, 
+//	gImage_MENU_BLANK, 168x110@16,
 //	+ bitmap not compressed
 //	Total size: 36960 = 36960
 //

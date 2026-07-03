@@ -62,7 +62,7 @@
 #define assress_v_cheat 4
 #define assress_edit_sleephotkey_0 5
 #define assress_edit_sleephotkey_1 6
-#define assress_edit_sleephotkey_2 7  
+#define assress_edit_sleephotkey_2 7
 #define assress_edit_rtshotkey_0 8
 #define assress_edit_rtshotkey_1 9
 #define assress_edit_rtshotkey_2 10

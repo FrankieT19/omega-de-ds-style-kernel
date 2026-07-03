@@ -4,7 +4,7 @@
 @;-                      Reset                                    -
 @;--------------------------------------------------------------------
 	.section   	.iwram,"ax",%progbits
-		
+
 	.global  Sleep_ReplaceIRQ_start
 	.global  Sleep_ReplaceIRQ_end
 	.global  Return_address_L
@@ -80,7 +80,7 @@ REG_P1			= 0x130
 REG_P1CNT		= 0x132
 REG_WAITCNT		= 0x204
 
-	
+
 	.arm
 Sleep_ReplaceIRQ_start:
 	MOV             R0, #0x4000000
@@ -100,24 +100,24 @@ my_irq:
 	TST             R1, #0x10000
 	TSTEQ           R1, #0x10000000
 	LDREQ           PC, [R0,#-0xC]		@;old_interrupt_handler
-	
+
 
 	ldr r2,[r0,#REG_P1]
 	bic r2,r2,#0xFF000000
 	bic r2,r2,#0x00FF0000
 	@;tst r2,#0x0300	@L+R?
 	@;ldrne pc,[r0,#-(0x04000000-0x03FFFFB4)] @to IRQ routine if not pressed
-	
+
 	adr r3,Reset_key @
 	ldr r3,[r3]
-	cmp r2,r3				
-	beq reset_now	
+	cmp r2,r3
+	beq reset_now
 
 	adr r3,Sleep_key @
 	ldr r3,[r3]
-	cmp r2,r3 			
+	cmp r2,r3
 	beq sleep_now
-	ldr pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine									
+	ldr pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine
 @;--------------------------------------------------------------
 reset_now:
 	adr r1,reset_code

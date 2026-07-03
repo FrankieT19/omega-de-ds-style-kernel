@@ -1,8 +1,8 @@
-typedef struct SAVE_MODE_SECT{	
-	char gamecode[4];		
-	u8 savemode;	
+typedef struct SAVE_MODE_SECT{
+	char gamecode[4];
+	u8 savemode;
 } SAVE_MODE_;
-const SAVE_MODE_  __attribute__((aligned(4))) saveMODE_table[] = { 
+const SAVE_MODE_  __attribute__((aligned(4))) saveMODE_table[] = {
 {"AFZJ",0x11},//0001 - F-Zero(JP).zip
 {"AMAJ",0x21},//0002 - Super Mario Advance(JP).zip
 {"AREJ",0x11},//0003 - Battle Network Rockman EXE(JP).zip

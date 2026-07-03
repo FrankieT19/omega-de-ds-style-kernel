@@ -111,7 +111,16 @@
     "DSTEXT_ERROR_SAVE": "Save error",
     "DSTEXT_ERROR_READ_SAVE": "Read save error",
     "DSTEXT_ERROR_MAKE_SAVE": "Make save error",
-    "DSTEXT_ERROR_RTS": "RTS file error"
+    "DSTEXT_ERROR_RTS": "RTS file error",
+    "DSTEXT_SETTINGS_LIST_FOLDERS": "List folders",
+    "DSTEXT_CATEGORY_INTERFACE": "Interface",
+    "DSTEXT_CATEGORY_GAMES": "Games",
+    "DSTEXT_CATEGORY_HARDWARE": "Hardware",
+    "DSTEXT_HELP_ONLINE": "Online guides",
+    "DSTEXT_HELP_OPERATION": "Using DS Style",
+    "DSTEXT_HELP_ARTWORK": "Artwork",
+    "DSTEXT_HELP_SAVES": "Saves & safety",
+    "DSTEXT_HELP_ABOUT": "About"
   },
   "English (US)": {
     "DSTEXT_LANGUAGE_NAME": "English (US)",
@@ -225,7 +234,16 @@
     "DSTEXT_ERROR_SAVE": "Save error",
     "DSTEXT_ERROR_READ_SAVE": "Read save error",
     "DSTEXT_ERROR_MAKE_SAVE": "Make save error",
-    "DSTEXT_ERROR_RTS": "RTS file error"
+    "DSTEXT_ERROR_RTS": "RTS file error",
+    "DSTEXT_SETTINGS_LIST_FOLDERS": "List folders",
+    "DSTEXT_CATEGORY_INTERFACE": "Interface",
+    "DSTEXT_CATEGORY_GAMES": "Games",
+    "DSTEXT_CATEGORY_HARDWARE": "Hardware",
+    "DSTEXT_HELP_ONLINE": "Online guides",
+    "DSTEXT_HELP_OPERATION": "Using DS Style",
+    "DSTEXT_HELP_ARTWORK": "Artwork",
+    "DSTEXT_HELP_SAVES": "Saves & safety",
+    "DSTEXT_HELP_ABOUT": "About"
   },
   "Español": {
     "DSTEXT_LANGUAGE_NAME": "Español",
@@ -339,7 +357,16 @@
     "DSTEXT_ERROR_SAVE": "Error de partida",
     "DSTEXT_ERROR_READ_SAVE": "Error al leer partida",
     "DSTEXT_ERROR_MAKE_SAVE": "Error al crear partida",
-    "DSTEXT_ERROR_RTS": "Error de archivo RTS"
+    "DSTEXT_ERROR_RTS": "Error de archivo RTS",
+    "DSTEXT_SETTINGS_LIST_FOLDERS": "Lista carpetas",
+    "DSTEXT_CATEGORY_INTERFACE": "Interfaz",
+    "DSTEXT_CATEGORY_GAMES": "Juegos",
+    "DSTEXT_CATEGORY_HARDWARE": "Hardware",
+    "DSTEXT_HELP_ONLINE": "Guias online",
+    "DSTEXT_HELP_OPERATION": "Usar DS Style",
+    "DSTEXT_HELP_ARTWORK": "Arte",
+    "DSTEXT_HELP_SAVES": "Guard. seguro",
+    "DSTEXT_HELP_ABOUT": "Acerca de"
   },
   "Français": {
     "DSTEXT_LANGUAGE_NAME": "Français",
@@ -453,7 +480,16 @@
     "DSTEXT_ERROR_SAVE": "Erreur sauvegarde",
     "DSTEXT_ERROR_READ_SAVE": "Erreur lecture sauvegarde",
     "DSTEXT_ERROR_MAKE_SAVE": "Erreur creation sauvegarde",
-    "DSTEXT_ERROR_RTS": "Erreur fichier RTS"
+    "DSTEXT_ERROR_RTS": "Erreur fichier RTS",
+    "DSTEXT_SETTINGS_LIST_FOLDERS": "Liste dossiers",
+    "DSTEXT_CATEGORY_INTERFACE": "Interface",
+    "DSTEXT_CATEGORY_GAMES": "Jeux",
+    "DSTEXT_CATEGORY_HARDWARE": "Materiel",
+    "DSTEXT_HELP_ONLINE": "Guides web",
+    "DSTEXT_HELP_OPERATION": "Util. DS Style",
+    "DSTEXT_HELP_ARTWORK": "Images",
+    "DSTEXT_HELP_SAVES": "Sauvegardes",
+    "DSTEXT_HELP_ABOUT": "A propos"
   },
   "Português": {
     "DSTEXT_LANGUAGE_NAME": "Português",
@@ -567,7 +603,16 @@
     "DSTEXT_ERROR_SAVE": "Erro de save",
     "DSTEXT_ERROR_READ_SAVE": "Erro ao ler save",
     "DSTEXT_ERROR_MAKE_SAVE": "Erro ao criar save",
-    "DSTEXT_ERROR_RTS": "Erro de ficheiro RTS"
+    "DSTEXT_ERROR_RTS": "Erro de ficheiro RTS",
+    "DSTEXT_SETTINGS_LIST_FOLDERS": "Listar pastas",
+    "DSTEXT_CATEGORY_INTERFACE": "Interface",
+    "DSTEXT_CATEGORY_GAMES": "Jogos",
+    "DSTEXT_CATEGORY_HARDWARE": "Hardware",
+    "DSTEXT_HELP_ONLINE": "Guias online",
+    "DSTEXT_HELP_OPERATION": "Usar DS Style",
+    "DSTEXT_HELP_ARTWORK": "Arte",
+    "DSTEXT_HELP_SAVES": "Guardados",
+    "DSTEXT_HELP_ABOUT": "Sobre"
   },
   "Deutsch": {
     "DSTEXT_LANGUAGE_NAME": "Deutsch",
@@ -681,7 +726,16 @@
     "DSTEXT_ERROR_SAVE": "Save-Fehler",
     "DSTEXT_ERROR_READ_SAVE": "Save-Lesefehler",
     "DSTEXT_ERROR_MAKE_SAVE": "Save-Erstellfehler",
-    "DSTEXT_ERROR_RTS": "RTS-Dateifehler"
+    "DSTEXT_ERROR_RTS": "RTS-Dateifehler",
+    "DSTEXT_SETTINGS_LIST_FOLDERS": "Ordnerliste",
+    "DSTEXT_CATEGORY_INTERFACE": "Oberflache",
+    "DSTEXT_CATEGORY_GAMES": "Spiele",
+    "DSTEXT_CATEGORY_HARDWARE": "Hardware",
+    "DSTEXT_HELP_ONLINE": "Online-Hilfe",
+    "DSTEXT_HELP_OPERATION": "DS Style nutzen",
+    "DSTEXT_HELP_ARTWORK": "Grafiken",
+    "DSTEXT_HELP_SAVES": "Spielstand",
+    "DSTEXT_HELP_ABOUT": "Info"
   },
   "Türkçe": {
     "DSTEXT_LANGUAGE_NAME": "Türkçe",
@@ -795,7 +849,16 @@
     "DSTEXT_ERROR_SAVE": "Kayıt hatası",
     "DSTEXT_ERROR_READ_SAVE": "Kayıt okuma hatası",
     "DSTEXT_ERROR_MAKE_SAVE": "Kayıt oluşturma hatası",
-    "DSTEXT_ERROR_RTS": "RTS dosya hatası"
+    "DSTEXT_ERROR_RTS": "RTS dosya hatası",
+    "DSTEXT_SETTINGS_LIST_FOLDERS": "Klasor liste",
+    "DSTEXT_CATEGORY_INTERFACE": "Arayuz",
+    "DSTEXT_CATEGORY_GAMES": "Oyunlar",
+    "DSTEXT_CATEGORY_HARDWARE": "Donanim",
+    "DSTEXT_HELP_ONLINE": "Cevrimici",
+    "DSTEXT_HELP_OPERATION": "DS Style kullan",
+    "DSTEXT_HELP_ARTWORK": "Gorseller",
+    "DSTEXT_HELP_SAVES": "Kayit guven",
+    "DSTEXT_HELP_ABOUT": "Hakkinda"
   },
   "Italiano": {
     "DSTEXT_LANGUAGE_NAME": "Italiano",
@@ -909,7 +972,16 @@
     "DSTEXT_ERROR_SAVE": "Errore salvataggio",
     "DSTEXT_ERROR_READ_SAVE": "Errore lettura save",
     "DSTEXT_ERROR_MAKE_SAVE": "Errore creazione save",
-    "DSTEXT_ERROR_RTS": "Errore file RTS"
+    "DSTEXT_ERROR_RTS": "Errore file RTS",
+    "DSTEXT_SETTINGS_LIST_FOLDERS": "Lista cartelle",
+    "DSTEXT_CATEGORY_INTERFACE": "Interfaccia",
+    "DSTEXT_CATEGORY_GAMES": "Giochi",
+    "DSTEXT_CATEGORY_HARDWARE": "Hardware",
+    "DSTEXT_HELP_ONLINE": "Guide online",
+    "DSTEXT_HELP_OPERATION": "Usa DS Style",
+    "DSTEXT_HELP_ARTWORK": "Immagini",
+    "DSTEXT_HELP_SAVES": "Salvataggi",
+    "DSTEXT_HELP_ABOUT": "Info"
   },
   "Nederlands": {
     "DSTEXT_LANGUAGE_NAME": "Nederlands",
@@ -1023,7 +1095,16 @@
     "DSTEXT_ERROR_SAVE": "Save-fout",
     "DSTEXT_ERROR_READ_SAVE": "Save leesfout",
     "DSTEXT_ERROR_MAKE_SAVE": "Save maakfout",
-    "DSTEXT_ERROR_RTS": "RTS-bestandsfout"
+    "DSTEXT_ERROR_RTS": "RTS-bestandsfout",
+    "DSTEXT_SETTINGS_LIST_FOLDERS": "Mappenlijst",
+    "DSTEXT_CATEGORY_INTERFACE": "Interface",
+    "DSTEXT_CATEGORY_GAMES": "Games",
+    "DSTEXT_CATEGORY_HARDWARE": "Hardware",
+    "DSTEXT_HELP_ONLINE": "Online gids",
+    "DSTEXT_HELP_OPERATION": "DS Style hulp",
+    "DSTEXT_HELP_ARTWORK": "Afbeelding",
+    "DSTEXT_HELP_SAVES": "Veilig opsl.",
+    "DSTEXT_HELP_ABOUT": "Over"
   },
   "Svenska": {
     "DSTEXT_LANGUAGE_NAME": "Svenska",
@@ -1137,7 +1218,16 @@
     "DSTEXT_ERROR_SAVE": "Save error",
     "DSTEXT_ERROR_READ_SAVE": "Read save error",
     "DSTEXT_ERROR_MAKE_SAVE": "Make save error",
-    "DSTEXT_ERROR_RTS": "RTS file error"
+    "DSTEXT_ERROR_RTS": "RTS file error",
+    "DSTEXT_SETTINGS_LIST_FOLDERS": "Lista mappar",
+    "DSTEXT_CATEGORY_INTERFACE": "Granssnitt",
+    "DSTEXT_CATEGORY_GAMES": "Spel",
+    "DSTEXT_CATEGORY_HARDWARE": "Hardvara",
+    "DSTEXT_HELP_ONLINE": "Onlineguider",
+    "DSTEXT_HELP_OPERATION": "Anvand DS",
+    "DSTEXT_HELP_ARTWORK": "Bilder",
+    "DSTEXT_HELP_SAVES": "Spara sakert",
+    "DSTEXT_HELP_ABOUT": "Om"
   },
   "Suomi": {
     "DSTEXT_LANGUAGE_NAME": "Suomi",
@@ -1251,6 +1341,15 @@
     "DSTEXT_ERROR_SAVE": "Save error",
     "DSTEXT_ERROR_READ_SAVE": "Read save error",
     "DSTEXT_ERROR_MAKE_SAVE": "Make save error",
-    "DSTEXT_ERROR_RTS": "RTS file error"
+    "DSTEXT_ERROR_RTS": "RTS file error",
+    "DSTEXT_SETTINGS_LIST_FOLDERS": "Kansiolista",
+    "DSTEXT_CATEGORY_INTERFACE": "Liittyma",
+    "DSTEXT_CATEGORY_GAMES": "Pelit",
+    "DSTEXT_CATEGORY_HARDWARE": "Laitteisto",
+    "DSTEXT_HELP_ONLINE": "Verkko-opas",
+    "DSTEXT_HELP_OPERATION": "Kayta DS",
+    "DSTEXT_HELP_ARTWORK": "Kuvat",
+    "DSTEXT_HELP_SAVES": "Tall. turva",
+    "DSTEXT_HELP_ABOUT": "Tietoja"
   }
 }

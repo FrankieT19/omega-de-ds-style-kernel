@@ -60,7 +60,7 @@ void IWRAM_CODE SD_Disable(void)
 // --------------------------------------------------------------------
 u16 IWRAM_CODE SD_Response(void)
 {
-	return *(vu16 *)0x9E00000; 
+	return *(vu16 *)0x9E00000;
 }
 // --------------------------------------------------------------------
 u32 IWRAM_CODE Wait_SD_Response()
@@ -74,21 +74,21 @@ u32 IWRAM_CODE Wait_SD_Response()
 		{
 			return 0;
 		}
-			
+
 		count++;
 		if(count>0x100000)
 		{
-			//DEBUG_printf("time out %x",res);	
+			//DEBUG_printf("time out %x",res);
 			//wait_btn();
 			return 1;
 		}
-	}	
+	}
 }
 // --------------------------------------------------------------------
 u32 IWRAM_CODE Read_SD_sectors(u32 address,u16 count,u8* SDbuffer)
 {
 	SD_Enable();
-	
+
 	u16 i;
 	u16 blocks;
 	u32 res;
@@ -96,7 +96,7 @@ u32 IWRAM_CODE Read_SD_sectors(u32 address,u16 count,u8* SDbuffer)
 	for(i=0;i<count;i+=4)
 	{
 		blocks = (count-i>4)?4:(count-i);
-			
+
 	read_again:
 		*(vu16 *)0x9fe0000 = 0xd200;
 		*(vu16 *)0x8000000 = 0x1500;
@@ -107,16 +107,16 @@ u32 IWRAM_CODE Read_SD_sectors(u32 address,u16 count,u8* SDbuffer)
 		*(vu16 *)0x9640000 = blocks;
 		*(vu16 *)0x9fc0000 = 0x1500;
 		SD_Read_state();
-		res = Wait_SD_Response();	
+		res = Wait_SD_Response();
 		SD_Enable();
 		if(res==1)
 		{
 			times--;
-			if(times) 
+			if(times)
 			{
 				delay(5000);
 				goto read_again;
-			}			
+			}
 		}
 		dmaCopy((void*)0x9E00000, SDbuffer+i*512, blocks*512);
 	}
@@ -134,8 +134,8 @@ u32 IWRAM_CODE Write_SD_sectors(u32 address,u16 count, const u8* SDbuffer)
 	for(i=0;i<count;i+=4)
 	{
 		blocks = (count-i>4)?4:(count-i);
-			
-		dmaCopy( SDbuffer+i*512,(void*)0x9E00000, blocks*512);	
+
+		dmaCopy( SDbuffer+i*512,(void*)0x9E00000, blocks*512);
 		*(vu16 *)0x9fe0000 = 0xd200;
 		*(vu16 *)0x8000000 = 0x1500;
 		*(vu16 *)0x8020000 = 0xd200;
@@ -144,7 +144,7 @@ u32 IWRAM_CODE Write_SD_sectors(u32 address,u16 count, const u8* SDbuffer)
 		*(vu16 *)0x9620000 = ((address+i)&0xFFFF0000) >>16;
 		*(vu16 *)0x9640000 = 0x8000+blocks;
 		*(vu16 *)0x9fc0000 = 0x1500;
-				
+
 		res = Wait_SD_Response();
 		if(res==1)
 			return 1;
@@ -157,25 +157,25 @@ u32 IWRAM_CODE Write_SD_sectors(u32 address,u16 count, const u8* SDbuffer)
 u16 IWRAM_CODE Read_S71NOR_ID()
 {
 	u16 ID1;
-	*((vu16 *)(FlashBase_S71)) = 0xF0;	
+	*((vu16 *)(FlashBase_S71)) = 0xF0;
 	*((vu16 *)(FlashBase_S71+0x555*2)) = 0xAA;
 	*((vu16 *)(FlashBase_S71+0x2AA*2)) = 0x55;
 	*((vu16 *)(FlashBase_S71+0x555*2)) = 0x90;
 	ID1 = *((vu16 *)(FlashBase_S71+0xE*2));
 	*((vu16 *)(FlashBase_S71)) = 0xF0;
 	return ID1;
-}	
+}
 // --------------------------------------------------------------------
 u16 Read_S98NOR_ID()
 {
 	u16 ID1;
-	*((vu16 *)(FlashBase_S98)) = 0xF0 ;	
+	*((vu16 *)(FlashBase_S98)) = 0xF0 ;
 	*((vu16 *)(FlashBase_S98+0x555*2)) = 0xAA;
 	*((vu16 *)(FlashBase_S98+0x2AA*2)) = 0x55;
 	*((vu16 *)(FlashBase_S98+0x555*2)) = 0x90;
 	ID1 = *((vu16 *)(FlashBase_S98+0xE*2));
 	return ID1;
-}	
+}
 // --------------------------------------------------------------------
 void IWRAM_CODE SetRompage(u16 page)
 {
@@ -219,7 +219,7 @@ void IWRAM_CODE SetRampage(u16 page)
 // --------------------------------------------------------------------
 // --------------------------------------------------------------------
 void IWRAM_CODE Send_FATbuffer(u32*buffer,u32 mode)
-{	
+{
 	SetbufferControl(1);
 	dmaCopy(buffer,(void*)0x9E00000, 0x400);
 	if(mode==2)
@@ -227,13 +227,13 @@ void IWRAM_CODE Send_FATbuffer(u32*buffer,u32 mode)
 		SetbufferControl(0);
 		return;
 	}
-	SetbufferControl(3);	
+	SetbufferControl(3);
 	if(mode==1)
 	{
 		SetbufferControl(0);
 		return;
 	}
-			
+
 	u16 res;
 	while(1)
 	{
@@ -241,14 +241,14 @@ void IWRAM_CODE Send_FATbuffer(u32*buffer,u32 mode)
 		if(res != 0x0000)
 			break;
 	}
-	
+
 	while(1)
 	{
-		res = SD_Response();	
+		res = SD_Response();
 		if(res != 0x0001)
 			break;
 	}
-	SetbufferControl(0);		
+	SetbufferControl(0);
 }
 // --------------------------------------------------------------------
 #define	RESET_EWRAM		  (1<<0)	/*!< Clear 256K on-board WRAM			*/
@@ -305,7 +305,7 @@ void IWRAM_CODE ReadSram(u32 address, u8* data , u32 size )
 	register unsigned int i ;
 	for(i=0;i<size;i++)
 	{
-		data[i]=*(u8*)(address+i);			
+		data[i]=*(u8*)(address+i);
 	}
 }
 // --------------------------------------------------------------------
@@ -314,7 +314,7 @@ void IWRAM_CODE WriteSram(u32 address, u8* data , u32 size )
 	register unsigned int i ;
 	for(i=0;i<size;i++)
 	{
-		*(vu8*)(address+i)=data[i];		
+		*(vu8*)(address+i)=data[i];
 	}
 }
 // --------------------------------------------------------------------
@@ -323,7 +323,7 @@ void IWRAM_CODE Bank_Switching(u8 bank)
 	*((vu8 *)(SAVE_sram_base+0x5555)) = 0xAA ;
 	*((vu8 *)(SAVE_sram_base+0x2AAA)) = 0x55 ;
 	*((vu8 *)(SAVE_sram_base+0x5555)) = 0xB0 ;
-	*((vu8 *)(SAVE_sram_base+0x0000)) = bank ;	
+	*((vu8 *)(SAVE_sram_base+0x0000)) = bank ;
 }
 // --------------------------------------------------------------------
 void IWRAM_CODE Save_info(u32 info_offset, u16 * info_buffer,u32 buffersize)
@@ -332,23 +332,23 @@ void IWRAM_CODE Save_info(u32 info_offset, u16 * info_buffer,u32 buffersize)
 	vu16* buf = (vu16*)info_buffer ;
 	register u32 loopwrite ;
 	vu16 v1,v2;
-	
+
 	u16 S71id = Read_S71NOR_ID();
-	*((vu16 *)(FlashBase_S71)) = 0xF0 ;	
-	
+	*((vu16 *)(FlashBase_S71)) = 0xF0 ;
+
 	offset= info_offset;//0x7A0000/0x7B0000 ;
-	
+
 	*((vu16 *)(FlashBase_S71+0x555*2)) = 0xAA ;
 	*((vu16 *)(FlashBase_S71+0x2AA*2)) = 0x55 ;
 	*((vu16 *)(FlashBase_S71+0x555*2)) = 0x80 ;
 	*((vu16 *)(FlashBase_S71+0x555*2)) = 0xAA ;
-	*((vu16 *)(FlashBase_S71+0x2AA*2)) = 0x55 ;	
+	*((vu16 *)(FlashBase_S71+0x2AA*2)) = 0x55 ;
 	*((vu16 *)(FlashBase_S71+offset)) = 0x30 ;//erase
 	do
 	{
 		v1 = *((vu16 *)(FlashBase_S71+offset)) ;
 		v2 = *((vu16 *)(FlashBase_S71+offset)) ;
-	}while(v1!=v2);		
+	}while(v1!=v2);
 	//erase finish
 	if(S71id == 0x2202) //PL064
 	{
@@ -363,9 +363,9 @@ void IWRAM_CODE Save_info(u32 info_offset, u16 * info_buffer,u32 buffersize)
 				v1 = *((vu16 *)(FlashBase_S71+offset+loopwrite*2)) ;
 				v2 = *((vu16 *)(FlashBase_S71+offset+loopwrite*2)) ;
 			}while(v1!=v2);
-		}			
+		}
 	}
-	else { //GL064			
+	else { //GL064
 		u32 i;
 		for(loopwrite=0;loopwrite<(buffersize/32);loopwrite++)
 		{
@@ -376,7 +376,7 @@ void IWRAM_CODE Save_info(u32 info_offset, u16 * info_buffer,u32 buffersize)
 			for(i=0;i<=15;i++)
 			{
 				*((vu16 *)(FlashBase_S71+offset+loopwrite*32 +2*i )) = buf[loopwrite*16+i];
-			}	
+			}
 			*((vu16 *)(FlashBase_S71+offset+loopwrite*32)) = 0x29;
 
 			do
@@ -387,7 +387,7 @@ void IWRAM_CODE Save_info(u32 info_offset, u16 * info_buffer,u32 buffersize)
 		}
 	}
 
-	*((vu16 *)(FlashBase_S71)) = 0xF0;	
+	*((vu16 *)(FlashBase_S71)) = 0xF0;
 }
 
 // --------------------------------------------------------------------
@@ -448,8 +448,8 @@ void IWRAM_CODE SPI_Disable(void)
 u16 IWRAM_CODE Read_FPGA_ver(void)
 {
 	u16 Read_SPI;
-	SPI_Enable();	
-	Read_SPI =  *(vu16 *)0x9E00000; 
+	SPI_Enable();
+	Read_SPI =  *(vu16 *)0x9E00000;
 	SPI_Disable();
 	return Read_SPI;
 }
@@ -529,12 +529,12 @@ void IWRAM_CODE Check_FW_update()
 	u32 line_x = 17;
 	char msg[100];
 
-	//DEBUG_printf("Current_FW_ver %x ",Current_FW_ver);	
+	//DEBUG_printf("Current_FW_ver %x ",Current_FW_ver);
 	Clear(0, 0, 240, 160, RGB(0,18,24), 1);
-	
+
 	sprintf(msg,"FIRMWARE UPDATE");
-	DrawHZText12(msg,0,75,offset_Y+0*line_x, 0x7FFF,1);	
-	
+	DrawHZText12(msg,0,75,offset_Y+0*line_x, 0x7FFF,1);
+
 	u16 DEcard_FW_readver = Read_FPGA_ver();
 	u16 DEcard_FW_ver = DEcard_FW_readver & 0x00FF;
 
@@ -683,7 +683,7 @@ static const u32 crc32tab[] = {
  0xbdbdf21cL, 0xcabac28aL, 0x53b39330L, 0x24b4a3a6L,
  0xbad03605L, 0xcdd70693L, 0x54de5729L, 0x23d967bfL,
  0xb3667a2eL, 0xc4614ab8L, 0x5d681b02L, 0x2a6f2b94L,
- 0xb40bbe37L, 0xc30c8ea1L, 0x5a05df1bL, 0x2d02ef8dL 
+ 0xb40bbe37L, 0xc30c8ea1L, 0x5a05df1bL, 0x2d02ef8dL
 };
 u32 crc32(unsigned char *buf, u32 size)
 {
@@ -691,6 +691,6 @@ u32 crc32(unsigned char *buf, u32 size)
 	crc = 0xFFFFFFFF;
 	for (i = 0; i < size; i++)
 		crc = crc32tab[(crc ^ buf[i]) & 0xff] ^ (crc >> 8);
-		
+
 	return crc^0xFFFFFFFF;
 }

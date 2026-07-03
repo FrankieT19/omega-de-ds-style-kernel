@@ -3,7 +3,7 @@
 
 //======================================================================
 //
-//	gImage_icon_gba_BRIGHT_GREEN, 16x14@16, 
+//	gImage_icon_gba_BRIGHT_GREEN, 16x14@16,
 //	+ bitmap not compressed
 //	Total size: 448 = 448
 //

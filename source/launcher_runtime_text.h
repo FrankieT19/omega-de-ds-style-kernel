@@ -19,6 +19,7 @@ typedef enum {
     LTXT_SETTINGS_COLOUR,
     LTXT_SETTINGS_LOAD_STYLE,
     LTXT_SETTINGS_HIDE_SYSTEM,
+    LTXT_SETTINGS_LIST_FOLDERS,
     LTXT_SETTINGS_BOOT_ENGINE,
     LTXT_SETTINGS_AUTO_SAVE,
     LTXT_SETTINGS_RESUME_LAST,
@@ -30,6 +31,14 @@ typedef enum {
     LTXT_SETTINGS_ENABLE_BIOS,
     LTXT_SETTINGS_BACKUP_SAVES,
     LTXT_SETTINGS_HELP,
+    LTXT_CATEGORY_INTERFACE,
+    LTXT_CATEGORY_GAMES,
+    LTXT_CATEGORY_HARDWARE,
+    LTXT_HELP_ONLINE,
+    LTXT_HELP_OPERATION,
+    LTXT_HELP_ARTWORK,
+    LTXT_HELP_SAVES,
+    LTXT_HELP_ABOUT,
     LTXT_SETTINGS_ADDON,
     LTXT_ADDON_RESET,
     LTXT_ADDON_RTS,
@@ -136,6 +145,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Colour",
         "Load style",
         "Hide system",
+        "List folders",
         "Boot engine",
         "Auto save",
         "Resume last",
@@ -147,6 +157,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Enable BIOS",
         "Backup saves",
         "Help",
+        "Interface",
+        "Games",
+        "Hardware",
+        "Online guides",
+        "Using DS Style",
+        "Artwork",
+        "Saves & safety",
+        "About",
         "Addon settings",
         "Reset",
         "RTS",
@@ -250,6 +268,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Color",
         "Load style",
         "Hide system",
+        "List folders",
         "Boot engine",
         "Auto save",
         "Resume last",
@@ -261,6 +280,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Enable BIOS",
         "Backup saves",
         "Help",
+        "Interface",
+        "Games",
+        "Hardware",
+        "Online guides",
+        "Using DS Style",
+        "Artwork",
+        "Saves & safety",
+        "About",
         "Addon settings",
         "Reset",
         "RTS",
@@ -364,6 +391,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Color",
         "Cargar estilo",
         "Ocultar sist.",
+        "Lista carpetas",
         "Motor inicio",
         "Guardado auto",
         "Reanudar",
@@ -375,6 +403,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Activar BIOS",
         "Copia saves",
         "Ayuda",
+        "Interfaz",
+        "Juegos",
+        "Hardware",
+        "Guias online",
+        "Usar DS Style",
+        "Arte",
+        "Guard. seguro",
+        "Acerca de",
         "Ajustes addon",
         "Reinicio",
         "RTS",
@@ -478,6 +514,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Couleur",
         "Charger style",
         "Masquer syst.",
+        "Liste dossiers",
         "Moteur",
         "Save auto",
         "Reprendre",
@@ -489,6 +526,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Activer BIOS",
         "Copie saves",
         "Aide",
+        "Interface",
+        "Jeux",
+        "Materiel",
+        "Guides web",
+        "Util. DS Style",
+        "Images",
+        "Sauvegardes",
+        "A propos",
         "R\303\251glages addon",
         "Reset",
         "RTS",
@@ -592,6 +637,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Cor",
         "Carg. estilo",
         "Ocultar sist.",
+        "Listar pastas",
         "Motor inicio",
         "Guardar auto",
         "Retomar ultimo",
@@ -603,6 +649,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Ativar BIOS",
         "Copiar saves",
         "Ajuda",
+        "Interface",
+        "Jogos",
+        "Hardware",
+        "Guias online",
+        "Usar DS Style",
+        "Arte",
+        "Guardados",
+        "Sobre",
         "Config addon",
         "Reset",
         "RTS",
@@ -706,6 +760,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Farbe",
         "Stil laden",
         "System ausbl.",
+        "Ordnerliste",
         "Start-Engine",
         "Auto speichern",
         "Fortsetzen",
@@ -717,6 +772,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "BIOS an",
         "Saves sichern",
         "Hilfe",
+        "Oberflache",
+        "Spiele",
+        "Hardware",
+        "Online-Hilfe",
+        "DS Style nutzen",
+        "Grafiken",
+        "Spielstand",
+        "Info",
         "Addon-Setup",
         "Reset",
         "RTS",
@@ -820,6 +883,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Renk",
         "Stil y\303\203\302\274kle",
         "Sistemi gizle",
+        "Klasor liste",
         "Ba\305\237lat motoru",
         "Otomatik kay\304\261t",
         "Son oyuna don",
@@ -831,6 +895,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "BIOS ac",
         "Kay\304\261t yedegi",
         "Yard\304\261m",
+        "Arayuz",
+        "Oyunlar",
+        "Donanim",
+        "Cevrimici",
+        "DS Style kullan",
+        "Gorseller",
+        "Kayit guven",
+        "Hakkinda",
         "Addon ayarlari",
         "Reset",
         "RTS",
@@ -934,6 +1006,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Colore",
         "Carica stile",
         "Nascondi sist.",
+        "Lista cartelle",
         "Motore avvio",
         "Auto salva",
         "Riprendi",
@@ -945,6 +1018,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Abilita BIOS",
         "Backup saves",
         "Aiuto",
+        "Interfaccia",
+        "Giochi",
+        "Hardware",
+        "Guide online",
+        "Usa DS Style",
+        "Immagini",
+        "Salvataggi",
+        "Info",
         "Opzioni addon",
         "Reset",
         "RTS",
@@ -1048,6 +1129,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Kleur",
         "Stijl laden",
         "Systeem weg",
+        "Mappenlijst",
         "Start-engine",
         "Auto opslaan",
         "Hervatten",
@@ -1059,6 +1141,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "BIOS aan",
         "Save backup",
         "Help",
+        "Interface",
+        "Games",
+        "Hardware",
+        "Online gids",
+        "DS Style hulp",
+        "Afbeelding",
+        "Veilig opsl.",
+        "Over",
         "Addon opties",
         "Reset",
         "RTS",
@@ -1162,6 +1252,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "F\303\244rg",
         "Ladda stil",
         "D\303\203\302\266lj system",
+        "Lista mappar",
         "Startmotor",
         "Autospara",
         "Forts\303\244tt",
@@ -1173,6 +1264,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "BIOS p\303\245",
         "Backup saves",
         "Hj\303\244lp",
+        "Granssnitt",
+        "Spel",
+        "Hardvara",
+        "Onlineguider",
+        "Anvand DS",
+        "Bilder",
+        "Spara sakert",
+        "Om",
         "Addon-val",
         "Reset",
         "RTS",
@@ -1276,6 +1375,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "V\303\244ri",
         "Lataa tyyli",
         "Piilota syst.",
+        "Kansiolista",
         "K\303\244ynnistin",
         "Autosave",
         "Jatka",
@@ -1287,6 +1387,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "BIOS p\303\244\303\244lle",
         "Backup saves",
         "Ohje",
+        "Liittyma",
+        "Pelit",
+        "Laitteisto",
+        "Verkko-opas",
+        "Kayta DS",
+        "Kuvat",
+        "Tall. turva",
+        "Tietoja",
         "Addon-valinnat",
         "Reset",
         "RTS",
@@ -1390,6 +1498,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "\321\325\311\253",
         "\274\323\324\330\321\371\312\275",
         "\322\376\262\330\317\265\315\263",
+        "\316\304\274\376\274\320\301\320\261\355",
         "\306\364\266\257\322\375\307\346",
         "\327\324\266\257\261\243\264\346",
         "\274\314\320\370\311\317\264\316",
@@ -1401,6 +1510,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "\306\364\323\303BIOS",
         "\261\270\267\335\264\346\265\265",
         "\260\357\326\372",
+        "\275\347\303\346",
+        "\323\316\317\267",
+        "\323\262\274\376",
+        "\324\332\317\337\326\270\304\317",
+        "\312\271\323\303DS Style",
+        "\315\274\306\254",
+        "\264\346\265\265\260\262\310\253",
+        "\271\330\323\332",
         "\262\345\274\376\311\350\326\303",
         "\270\264\316\273",
         "\274\264\312\261\264\346\265\265",
@@ -1505,6 +1622,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
 #undef DSTEXT_SETTINGS_COLOUR
 #undef DSTEXT_SETTINGS_LOAD_STYLE
 #undef DSTEXT_SETTINGS_HIDE_SYSTEM
+#undef DSTEXT_SETTINGS_LIST_FOLDERS
 #undef DSTEXT_SETTINGS_BOOT_ENGINE
 #undef DSTEXT_SETTINGS_AUTO_SAVE
 #undef DSTEXT_SETTINGS_RESUME_LAST
@@ -1516,6 +1634,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
 #undef DSTEXT_SETTINGS_ENABLE_BIOS
 #undef DSTEXT_SETTINGS_BACKUP_SAVES
 #undef DSTEXT_SETTINGS_HELP
+#undef DSTEXT_CATEGORY_INTERFACE
+#undef DSTEXT_CATEGORY_GAMES
+#undef DSTEXT_CATEGORY_HARDWARE
+#undef DSTEXT_HELP_ONLINE
+#undef DSTEXT_HELP_OPERATION
+#undef DSTEXT_HELP_ARTWORK
+#undef DSTEXT_HELP_SAVES
+#undef DSTEXT_HELP_ABOUT
 #undef DSTEXT_SETTINGS_ADDON
 #undef DSTEXT_ADDON_RESET
 #undef DSTEXT_ADDON_RTS
@@ -1617,6 +1743,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
 #define DSTEXT_SETTINGS_COLOUR Launcher_Text(LTXT_SETTINGS_COLOUR)
 #define DSTEXT_SETTINGS_LOAD_STYLE Launcher_Text(LTXT_SETTINGS_LOAD_STYLE)
 #define DSTEXT_SETTINGS_HIDE_SYSTEM Launcher_Text(LTXT_SETTINGS_HIDE_SYSTEM)
+#define DSTEXT_SETTINGS_LIST_FOLDERS Launcher_Text(LTXT_SETTINGS_LIST_FOLDERS)
 #define DSTEXT_SETTINGS_BOOT_ENGINE Launcher_Text(LTXT_SETTINGS_BOOT_ENGINE)
 #define DSTEXT_SETTINGS_AUTO_SAVE Launcher_Text(LTXT_SETTINGS_AUTO_SAVE)
 #define DSTEXT_SETTINGS_RESUME_LAST Launcher_Text(LTXT_SETTINGS_RESUME_LAST)
@@ -1628,6 +1755,14 @@ static const LauncherLanguagePack launcher_language_packs[] = {
 #define DSTEXT_SETTINGS_ENABLE_BIOS Launcher_Text(LTXT_SETTINGS_ENABLE_BIOS)
 #define DSTEXT_SETTINGS_BACKUP_SAVES Launcher_Text(LTXT_SETTINGS_BACKUP_SAVES)
 #define DSTEXT_SETTINGS_HELP Launcher_Text(LTXT_SETTINGS_HELP)
+#define DSTEXT_CATEGORY_INTERFACE Launcher_Text(LTXT_CATEGORY_INTERFACE)
+#define DSTEXT_CATEGORY_GAMES Launcher_Text(LTXT_CATEGORY_GAMES)
+#define DSTEXT_CATEGORY_HARDWARE Launcher_Text(LTXT_CATEGORY_HARDWARE)
+#define DSTEXT_HELP_ONLINE Launcher_Text(LTXT_HELP_ONLINE)
+#define DSTEXT_HELP_OPERATION Launcher_Text(LTXT_HELP_OPERATION)
+#define DSTEXT_HELP_ARTWORK Launcher_Text(LTXT_HELP_ARTWORK)
+#define DSTEXT_HELP_SAVES Launcher_Text(LTXT_HELP_SAVES)
+#define DSTEXT_HELP_ABOUT Launcher_Text(LTXT_HELP_ABOUT)
 #define DSTEXT_SETTINGS_ADDON Launcher_Text(LTXT_SETTINGS_ADDON)
 #define DSTEXT_ADDON_RESET Launcher_Text(LTXT_ADDON_RESET)
 #define DSTEXT_ADDON_RTS Launcher_Text(LTXT_ADDON_RTS)

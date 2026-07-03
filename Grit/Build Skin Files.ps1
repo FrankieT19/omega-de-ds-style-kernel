@@ -324,5 +324,3 @@ $lines.Add("")
 $lines.Add("#endif")
 Set-Content -LiteralPath $assetHeader -Value ($lines -join "`r`n") -Encoding ASCII
 Write-Host "Updated $assetHeader"
-
-

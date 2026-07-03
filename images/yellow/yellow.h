@@ -3,7 +3,7 @@
 
 //======================================================================
 //
-//	gImage_yellow_YELLOW, 240x19@16, 
+//	gImage_yellow_YELLOW, 240x19@16,
 //	+ bitmap not compressed
 //	Total size: 9120 = 9120
 //
