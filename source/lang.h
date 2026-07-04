@@ -118,8 +118,11 @@ extern char* gl_generating_emu;
 // ASCII Font
 extern unsigned char* ASC_DATA;
 extern unsigned short gl_select_lang;
+extern int gl_font_above_extent; /* 1 if active font can draw at y-1 (tonal shift) */
 
 void LoadEnglish(void);
 void LoadChinese(void);
+void LoadThai(void);
 
 #endif
+
