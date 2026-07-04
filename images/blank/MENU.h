@@ -3,11 +3,11 @@
 
 //======================================================================
 //
-//	gImage_MENU_BLANK, 168x110@16,
+//	gImage_MENU_BLANK, 168x110@16, 
 //	+ bitmap not compressed
 //	Total size: 36960 = 36960
 //
-//	Time-stamp: 2026-06-08, 09:51:46
+//	Time-stamp: 2026-07-04, 11:44:18
 //	Exported by Cearn's GBA Image Transmogrifier, v0.8.6
 //	( http://www.coranac.com/projects/#grit )
 //

@@ -4,8 +4,13 @@
 
 - Added a Hide system files setting for keeping kernel, system, and metadata files out of the root file browser.
 - Added Settings > Load style for installing `.bin` kernels from `SYSTEM/KERNELS`.
+- Added 12-hour and 24-hour clock format options.
+- Added an Art border option for drawing a one-pixel outline around the selected carousel artwork.
+- Added empty folder and empty favourites messages.
 - Added thumbnail artwork support for games written to NOR.
 - Reworked the Settings and Help pages into clearer categories and in-kernel guidance screens.
+- Refined splash-screen timing so boot waits for the startup sound without lingering longer than needed.
+- Refined settings tabbing so nested Settings pages are remembered when moving to SD Card or NOR Flash and back.
 
 ## DS Style v6.9
 

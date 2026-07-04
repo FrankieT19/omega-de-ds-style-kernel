@@ -18,6 +18,12 @@
 #ifndef DSTEXT_NO_RECENT_GAME
 #define DSTEXT_NO_RECENT_GAME "No recent game"
 #endif
+#ifndef DSTEXT_EMPTY_FOLDER
+#define DSTEXT_EMPTY_FOLDER "This folder is empty"
+#endif
+#ifndef DSTEXT_NO_FAVOURITES
+#define DSTEXT_NO_FAVOURITES "No favourites yet"
+#endif
 #ifndef DSTEXT_SD_CARD
 #define DSTEXT_SD_CARD "SD Card"
 #endif
@@ -37,11 +43,17 @@
 #ifndef DSTEXT_SETTINGS_TIME
 #define DSTEXT_SETTINGS_TIME "Time settings"
 #endif
+#ifndef DSTEXT_SETTINGS_CLOCK_FORMAT
+#define DSTEXT_SETTINGS_CLOCK_FORMAT "Clock format"
+#endif
 #ifndef DSTEXT_SETTINGS_VIEW_MODE
 #define DSTEXT_SETTINGS_VIEW_MODE "View mode"
 #endif
 #ifndef DSTEXT_SETTINGS_THUMBNAILS
 #define DSTEXT_SETTINGS_THUMBNAILS "Thumbnails"
+#endif
+#ifndef DSTEXT_SETTINGS_ART_BORDER
+#define DSTEXT_SETTINGS_ART_BORDER "Art border"
 #endif
 #ifndef DSTEXT_SETTINGS_SOUNDS
 #define DSTEXT_SETTINGS_SOUNDS "Sounds"
@@ -112,6 +124,24 @@
 #define DSTEXT_SETTINGS_HELP "Help"
 #endif
 
+#ifndef DSTEXT_CLOCK_12H
+#define DSTEXT_CLOCK_12H "12 hour"
+#endif
+#ifndef DSTEXT_CLOCK_24H
+#define DSTEXT_CLOCK_24H "24 hour"
+#endif
+#ifndef DSTEXT_BORDER_ACCENT
+#define DSTEXT_BORDER_ACCENT "Accent"
+#endif
+#ifndef DSTEXT_BORDER_BLACK
+#define DSTEXT_BORDER_BLACK "Black"
+#endif
+#ifndef DSTEXT_BORDER_GREY
+#define DSTEXT_BORDER_GREY "Grey"
+#endif
+#ifndef DSTEXT_BORDER_WHITE
+#define DSTEXT_BORDER_WHITE "White"
+#endif
 #ifndef DSTEXT_VIEW_LIST
 #define DSTEXT_VIEW_LIST "List"
 #endif

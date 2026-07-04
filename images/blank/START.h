@@ -3,11 +3,11 @@
 
 //======================================================================
 //
-//	gImage_START_BLANK, 240x160@16,
+//	gImage_START_BLANK, 240x160@16, 
 //	+ bitmap not compressed
 //	Total size: 76800 = 76800
 //
-//	Time-stamp: 2026-06-08, 09:51:46
+//	Time-stamp: 2026-07-04, 11:44:18
 //	Exported by Cearn's GBA Image Transmogrifier, v0.8.6
 //	( http://www.coranac.com/projects/#grit )
 //

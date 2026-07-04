@@ -3,11 +3,11 @@
 
 //======================================================================
 //
-//	gImage_pale_green_PALE_GREEN, 240x19@16,
+//	gImage_pale_green_PALE_GREEN, 240x19@16, 
 //	+ bitmap not compressed
 //	Total size: 9120 = 9120
 //
-//	Time-stamp: 2026-06-08, 09:51:47
+//	Time-stamp: 2026-07-04, 11:44:19
 //	Exported by Cearn's GBA Image Transmogrifier, v0.8.6
 //	( http://www.coranac.com/projects/#grit )
 //
