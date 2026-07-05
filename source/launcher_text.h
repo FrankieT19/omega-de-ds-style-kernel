@@ -80,6 +80,12 @@
 #ifndef DSTEXT_SETTINGS_LIST_FOLDERS
 #define DSTEXT_SETTINGS_LIST_FOLDERS "List folders"
 #endif
+#ifndef DSTEXT_SETTINGS_CLEAN_LIST
+#define DSTEXT_SETTINGS_CLEAN_LIST "Clean list"
+#endif
+#ifndef DSTEXT_SETTINGS_BOOT_TO
+#define DSTEXT_SETTINGS_BOOT_TO "Boot to"
+#endif
 
 #ifndef DSTEXT_SETTINGS_BOOT_ENGINE
 #define DSTEXT_SETTINGS_BOOT_ENGINE "Boot engine"
@@ -92,6 +98,24 @@
 #endif
 #ifndef DSTEXT_SETTINGS_START_SCREEN
 #define DSTEXT_SETTINGS_START_SCREEN "Start screen"
+#endif
+#ifndef DSTEXT_BOOT_TO_START
+#define DSTEXT_BOOT_TO_START "Start"
+#endif
+#ifndef DSTEXT_BOOT_TO_SD
+#define DSTEXT_BOOT_TO_SD "SD"
+#endif
+#ifndef DSTEXT_BOOT_TO_NOR
+#define DSTEXT_BOOT_TO_NOR "NOR"
+#endif
+#ifndef DSTEXT_BOOT_TO_LAST_GAME
+#define DSTEXT_BOOT_TO_LAST_GAME "Last game"
+#endif
+#ifndef DSTEXT_BOOT_TO_RECENTS
+#define DSTEXT_BOOT_TO_RECENTS "Recents"
+#endif
+#ifndef DSTEXT_BOOT_TO_FAVOURITES
+#define DSTEXT_BOOT_TO_FAVOURITES "Favourites"
 #endif
 #ifndef DSTEXT_SETTINGS_QUICK_START
 #define DSTEXT_SETTINGS_QUICK_START "Quick start"

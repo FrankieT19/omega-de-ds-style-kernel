@@ -300,6 +300,64 @@ static u32 DecodeCp936LatinText12(char *str, u32 l, u32 *hi, u8 c1, u32 *codepoi
 	return 1;
 }
 
+static u32 ThaiIsLeadingVowel(u32 codepoint)
+{
+	return (codepoint >= 0x0E40u) && (codepoint <= 0x0E44u);
+}
+
+static u32 ThaiReadCodepointAt(char *str, u32 l, u32 *hi, u32 *codepoint)
+{
+	u8 c1;
+
+	if(*hi >= l)
+		return 0;
+	c1 = (u8)str[*hi];
+	if(c1 < 0x80)
+		return 0;
+	(*hi)++;
+	return DecodeUtf8Text12(str, l, hi, c1, codepoint);
+}
+
+static void ThaiConsumeMarks(char *str, u32 l, u32 *hi)
+{
+	while(*hi < l)
+	{
+		u32 cp2;
+		u32 hi2 = *hi;
+		if(!ThaiReadCodepointAt(str, l, &hi2, &cp2))
+			break;
+		if(cp2 < THAI_CP_FIRST || cp2 > THAI_CP_LAST ||
+		   THAI_WIDTH[cp2 - THAI_CP_FIRST] > 0)
+			break;
+		*hi = hi2;
+	}
+}
+
+static u32 ThaiConsumeVisibleCluster(char *str, u32 l, u32 *hi, u32 codepoint)
+{
+	if(ThaiIsLeadingVowel(codepoint))
+	{
+		u32 cp2;
+		u32 hi2 = *hi;
+		if(ThaiReadCodepointAt(str, l, &hi2, &cp2) &&
+		   cp2 >= THAI_CP_FIRST && cp2 <= THAI_CP_LAST &&
+		   THAI_WIDTH[cp2 - THAI_CP_FIRST] > 0)
+		{
+			*hi = hi2;
+			ThaiConsumeMarks(str, l, hi);
+			return 1;
+		}
+	}
+
+	if(THAI_WIDTH[codepoint - THAI_CP_FIRST] > 0 || codepoint == 0x0E33u)
+	{
+		ThaiConsumeMarks(str, l, hi);
+		return 1;
+	}
+
+	return 0;
+}
+
 static u32 MapLatinGlyph12(u32 cp, u8 *base, u8 *accent, u8 *special)
 {
 	*accent = TEXT_ACCENT_NONE;
@@ -410,20 +468,10 @@ u16 DrawText12VisibleLength(char *str)
 			   DecodeUtf8Text12(str, l, &hi, c1, &codepoint) &&
 			   codepoint >= THAI_CP_FIRST && codepoint <= THAI_CP_LAST)
 			{
-				if(THAI_WIDTH[codepoint - THAI_CP_FIRST] > 0)
+				if(ThaiConsumeVisibleCluster(str, l, &hi, codepoint))
 				{
-					while(hi < l)
-					{
-						u32 cp2;
-						u32 hi2 = hi;
-						u8 c2b = (u8)str[hi2]; hi2++;
-						if(c2b < 0x80) break;
-						if(!DecodeUtf8Text12(str, l, &hi2, c2b, &cp2)) break;
-						if(cp2 < THAI_CP_FIRST || cp2 > THAI_CP_LAST ||
-						   THAI_WIDTH[cp2 - THAI_CP_FIRST] > 0) break;
-						hi = hi2;
-					}
 					shown++;
+					continue;
 				}
 			}
 			else
@@ -468,20 +516,10 @@ u16 DrawText12ByteOffsetForGlyphs(char *str, u16 glyphs)
 			   DecodeUtf8Text12(str, l, &hi, c1, &codepoint) &&
 			   codepoint >= THAI_CP_FIRST && codepoint <= THAI_CP_LAST)
 			{
-				if(THAI_WIDTH[codepoint - THAI_CP_FIRST] > 0)
+				if(ThaiConsumeVisibleCluster(str, l, &hi, codepoint))
 				{
-					while(hi < l)
-					{
-						u32 cp2;
-						u32 hi2 = hi;
-						u8 c2b = (u8)str[hi2]; hi2++;
-						if(c2b < 0x80) break;
-						if(!DecodeUtf8Text12(str, l, &hi2, c2b, &cp2)) break;
-						if(cp2 < THAI_CP_FIRST || cp2 > THAI_CP_LAST ||
-						   THAI_WIDTH[cp2 - THAI_CP_FIRST] > 0) break;
-						hi = hi2;
-					}
 					shown++;
+					continue;
 				}
 			}
 			else
@@ -564,6 +602,20 @@ void DrawHZText12(char *str, u16 len, u16 x, u16 y, u16 c, u8 isDrawDirect)
 			   codepoint >= THAI_CP_FIRST && codepoint <= THAI_CP_LAST)
 			{
 				const u8 *_tc_pp = (const u8 *)str + hi; /* just after base codepoint */
+				if(ThaiIsLeadingVowel(codepoint))
+				{
+					u32 cp2;
+					u32 hi2 = hi;
+					if(ThaiReadCodepointAt(str, l, &hi2, &cp2) &&
+					   cp2 >= THAI_CP_FIRST && cp2 <= THAI_CP_LAST &&
+					   THAI_WIDTH[cp2 - THAI_CP_FIRST] > 0)
+					{
+						DrawThaiRows12(v, x, y, c, THAI_DATA[codepoint - THAI_CP_FIRST]);
+						x += THAI_WIDTH[codepoint - THAI_CP_FIRST];
+						codepoint = cp2;
+						_tc_pp = (const u8 *)str + hi2;
+					}
+				}
 				#define THAI_R_DRAW(idx, xpos, yoff) DrawThaiRows12(v, (u16)(xpos), (u16)((int)y + (yoff)), c, THAI_DATA[idx])
 				#define THAI_R_WIDTH(idx)      ((int)THAI_WIDTH[idx])
 				#define THAI_R_CP              codepoint

@@ -18,6 +18,13 @@ u8 *pCHTbuffer = (u8*)(pReadCache + 0x2000); //patchbuffer
 
 ST_entry pCHEAT[MAX_CHEAT_ENTRIES]EWRAM_BSS;
 u32 gl_cheat_count;
+u32 gl_cheat_selected_count;
+
+#define CHEAT_SELECTION_CACHE_MAX 64
+static char cheat_selection_key[128];
+static char cheat_active_key[128];
+static u16 cheat_selection_index[CHEAT_SELECTION_CACHE_MAX];
+static u32 cheat_selection_cache_count;
 
 extern u16 gl_select_lang;
 
@@ -36,8 +43,69 @@ extern void UIAudio_UpdateExport(void);
 extern void UIAudio_WaitForCurrentClipExport(u32 max_frames);
 extern void UIAudio_CutOffTrailingClipExport(void);
 extern const char *Launcher_OnOffText(u16 value);
+extern void Launcher_DrawCheatBackground(const char *title);
+extern void Launcher_ClearCheatRegion(u16 x, u16 y, u16 w, u16 h);
+extern void Launcher_DrawCheatCounter(u32 totalcount, u32 select);
+extern void Launcher_MarkTopbarNameDirty(void);
+extern void Launcher_UpdateCheatTitle(void);
 
 static u32 cheat_use_chinese_folder = 0;
+
+static void CheatSelectionMakeKey(char *dst, u32 dst_len, const TCHAR *gamefilename, u32 havecht)
+{
+	snprintf(dst, dst_len, "%08lx:%s", havecht, gamefilename ? gamefilename : "");
+	dst[dst_len - 1] = '\0';
+}
+
+u32 CheatSelectionAppliesTo(TCHAR *gamefilename, u32 havecht)
+{
+	char key[128];
+	CheatSelectionMakeKey(key, sizeof(key), gamefilename, havecht);
+	return (cheat_selection_cache_count && !strcmp(cheat_selection_key, key)) ? 1 : 0;
+}
+
+void CheatSelectionForget(void)
+{
+	cheat_selection_key[0] = '\0';
+	cheat_active_key[0] = '\0';
+	cheat_selection_cache_count = 0;
+	gl_cheat_selected_count = 0;
+}
+
+static void CheatSelectionRestore(u32 total)
+{
+	u32 i;
+	if(strcmp(cheat_selection_key, cheat_active_key))
+	{
+		gl_cheat_selected_count = 0;
+		return;
+	}
+
+	gl_cheat_selected_count = cheat_selection_cache_count;
+	for(i=0;i<cheat_selection_cache_count;i++)
+	{
+		if(cheat_selection_index[i] < total)
+			((FM_CHT_LINE*)pCHTbuffer)[cheat_selection_index[i]].select = 1;
+	}
+}
+
+static void CheatSelectionRemember(u32 total)
+{
+	u32 i;
+
+	cheat_selection_cache_count = 0;
+	strncpy(cheat_selection_key, cheat_active_key, sizeof(cheat_selection_key) - 1);
+	cheat_selection_key[sizeof(cheat_selection_key) - 1] = '\0';
+
+	for(i=0;i<total;i++)
+	{
+		if(((FM_CHT_LINE*)pCHTbuffer)[i].select == 1)
+		{
+			if(cheat_selection_cache_count < CHEAT_SELECTION_CACHE_MAX)
+				cheat_selection_index[cheat_selection_cache_count++] = i;
+		}
+	}
+}
 
 static u32 CheatTextLooksGB2312(const char *str)
 {
@@ -107,6 +175,78 @@ void Trim(char s[])
 			break;
 		s[n] = '\0';
 	}
+}
+
+static void Clean_cheat_title(char s[])
+{
+	char *dash;
+	char *p;
+	char *dot;
+	char temp[128];
+	u32 r;
+	u32 w = 0;
+	u32 paren = 0;
+	u32 bracket = 0;
+
+	Trim(s);
+	dot = strrchr(s, '.');
+	if(dot)
+		*dot = '\0';
+
+	dash = strchr(s, '-');
+	if(dash && (dash - s) <= 16)
+	{
+		u32 i;
+		u32 prefix_ok = 0;
+		for(i = 0; s[i] && (&s[i] < dash); i++)
+		{
+			if((s[i] >= '0') && (s[i] <= '9'))
+				prefix_ok = 1;
+			else if((s[i] != ' ') && (s[i] != '_') && (s[i] != '.'))
+			{
+				prefix_ok = 0;
+				break;
+			}
+		}
+		if(prefix_ok)
+			memmove(s, dash + 1, strlen(dash + 1) + 1);
+	}
+
+	p = s;
+	while((*p == ' ') || (*p == '-') || (*p == '_'))
+		p++;
+	if(p != s)
+		memmove(s, p, strlen(p) + 1);
+
+	memset(temp, 0, sizeof(temp));
+	strncpy(temp, s, sizeof(temp) - 1);
+	for(r = 0; temp[r] && w < sizeof(temp) - 1; r++)
+	{
+		if(temp[r] == '(')
+		{
+			paren = 1;
+			continue;
+		}
+		if(temp[r] == ')')
+		{
+			paren = 0;
+			continue;
+		}
+		if(temp[r] == '[')
+		{
+			bracket = 1;
+			continue;
+		}
+		if(temp[r] == ']')
+		{
+			bracket = 0;
+			continue;
+		}
+		if(!paren && !bracket)
+			s[w++] = temp[r];
+	}
+	s[w] = '\0';
+	Trim(s);
 }
 //------------------------------------------------------------------
 void Get_KEY_val(FIL* file,char*KEY_section,char*KEY_secval,char getbuff[])
@@ -544,7 +684,7 @@ static void Show_KEY_line(u32 line,u32 Select,u32 showoffset)
 	u32 highlight_w;
 	u8 select;
 
-	ClearWithBG((u16*)gImage_SD, X_offset, row_y, 220, 13, 1);
+	Launcher_ClearCheatRegion(X_offset, row_y, 220, 13);
 	if(line== Select)
 		name_color = gl_color_selected;
 	else
@@ -636,6 +776,8 @@ void Analyze_KEYVAL(FIL* file,u32 total)
 
 	//DEBUG_printf("total %x  ",total);
 	gl_cheat_count=0;
+	gl_cheat_selected_count=0;
+	CheatSelectionRemember(total);
 
 	if(total)
 	{
@@ -645,6 +787,7 @@ void Analyze_KEYVAL(FIL* file,u32 total)
 
 		if( ((FM_CHT_LINE*)pCHTbuffer)[tol].select == 1)
 		{
+			gl_cheat_selected_count++;
 			u32 current_select = tol-1;
 			while(((FM_CHT_LINE*)pCHTbuffer)[current_select].is_section != 1)
 			{
@@ -903,11 +1046,30 @@ u32 Check_cheat_file(TCHAR *gamefilename)
 //---------------------------------------------------------------------------------
 void Show_num(u32 totalcount,u32 select)
 {
-	char msg[20];
-	ClearWithBG((u16*)gImage_SD, 186, 3, 7*6, 15, 1);
-	sprintf(msg,"[%03lu/%03lu]",select,totalcount);
+	u32 i;
+	u32 total_sections = 0;
+	u32 selected_section = 0;
+	u32 line = select ? select - 1 : 0;
 
-	DrawHZText12(msg,0,182,3, gl_color_text,1);
+	if(totalcount == 0)
+	{
+		Launcher_DrawCheatCounter(0, 0);
+		return;
+	}
+	if(line >= totalcount)
+		line = totalcount - 1;
+	for(i = 0; i < totalcount; i++)
+	{
+		if(((FM_CHT_LINE*)pCHTbuffer)[i].is_section == 1)
+		{
+			total_sections++;
+			if(i <= line)
+				selected_section = total_sections;
+		}
+	}
+	if(selected_section == 0 && total_sections)
+		selected_section = 1;
+	Launcher_DrawCheatCounter(total_sections, selected_section);
 }
 //------------------------------------------------------------------
 void Open_cht_file(TCHAR *gamefilename,u32 havecht)
@@ -941,12 +1103,16 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 
 	if(res == FR_OK)//have a cht file
 	{
-		ClearWithBG((u16*)gImage_SD, 0, 0, 240, 160, 1);
+		CheatSelectionMakeKey(cheat_active_key, sizeof(cheat_active_key), gamefilename, havecht);
+		if(strcmp(cheat_selection_key, cheat_active_key))
+			gl_cheat_selected_count = 0;
 
-		Get_KEY_val(&gfile,"GameInfo","Name",buffer);
-		sprintf(msg,"%s ",buffer);
+		strncpy(buffer, gamefilename, sizeof(buffer) - 1);
+		buffer[sizeof(buffer) - 1] = '\0';
+		Clean_cheat_title(buffer);
+		sprintf(msg,"%s",buffer);
 
-		DrawCheatText12(msg,30,2,4, gl_color_text,1);
+		Launcher_DrawCheatBackground(msg);
 
 		u32 all_count = Get_all_Section_val(&gfile);
 		u32 Select = 1;
@@ -954,6 +1120,9 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 		u32 re_show = 2;
 		u32 old_select = 1;
 		u32 old_showoffset = 0;
+		u32 cheat_scroll_delay = 0;
+
+		CheatSelectionRestore(all_count);
 
 		if(all_count)
 		{
@@ -968,7 +1137,7 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 				{
 					if(re_show>1)
 					{
-						ClearWithBG((u16*)gImage_SD, 0, 19, 240, 160-19, 1);
+						Launcher_ClearCheatRegion(0, 19, 240, 160-19);
 						Show_KEY_val(all_count,Select,showoffset);
 					}
 					else if(old_showoffset == showoffset)
@@ -984,14 +1153,21 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 					old_showoffset = showoffset;
 					re_show = 0;
 				}
+				else
+				{
+					Launcher_UpdateCheatTitle();
+				}
+				if(cheat_scroll_delay > 0)
+					cheat_scroll_delay--;
 				scanKeys();
 				u16 keysdown  = keysDown();
 				u16 keysup = keysUp();
 				u16 keysrepeat = keysDownRepeat();
 
-				if (keysrepeat & KEY_DOWN) {
+				if ((keysdown & KEY_DOWN) || ((keysrepeat & KEY_DOWN) && cheat_scroll_delay == 0)) {
 					u32 prev_select = Select;
 					u32 prev_showoffset = showoffset;
+					u32 first_press = (keysdown & KEY_DOWN) ? 1 : 0;
 					if (Select + showoffset+1 < (all_count )) {
 		        if ( Select > 8 ){
 		          if ( Select == 9 ) {
@@ -1018,13 +1194,17 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 
 					}
 					if((Select != prev_select) || (showoffset != prev_showoffset))
+					{
 						UIAudio_PlayMove();
+						cheat_scroll_delay = first_press ? 6 : 3;
+					}
 
 				}
-				else if(keysrepeat & KEY_UP)
+				else if((keysdown & KEY_UP) || ((keysrepeat & KEY_UP) && cheat_scroll_delay == 0))
 				{
 					u32 prev_select = Select;
 					u32 prev_showoffset = showoffset;
+					u32 first_press = (keysdown & KEY_UP) ? 1 : 0;
 					if (Select ) {
 						Select--;
   					if((showoffset==0)&& (Select==0)){
@@ -1061,12 +1241,16 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 						}
 					}
 					if((Select != prev_select) || (showoffset != prev_showoffset))
+					{
 						UIAudio_PlayMove();
+						cheat_scroll_delay = first_press ? 6 : 3;
+					}
 				}
-				else if(keysrepeat & KEY_LEFT)
+				else if((keysdown & KEY_LEFT) || ((keysrepeat & KEY_LEFT) && cheat_scroll_delay == 0))
 				{
 			    u32 prev_select = Select;
 			    u32 prev_showoffset = showoffset;
+			    u32 first_press = (keysdown & KEY_LEFT) ? 1 : 0;
 			    if ( showoffset )
 			    {
 			      if ( showoffset > 9 )
@@ -1086,11 +1270,15 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 			   	 	}
 			    }
 			    if((Select != prev_select) || (showoffset != prev_showoffset))
+			    {
 			    	UIAudio_PlayMove();
+			    	cheat_scroll_delay = first_press ? 6 : 3;
+			    }
 				}
-				else if(keysrepeat & KEY_RIGHT)
+				else if((keysdown & KEY_RIGHT) || ((keysrepeat & KEY_RIGHT) && cheat_scroll_delay == 0))
 				{
 		      u32 prev_showoffset = showoffset;
+		      u32 first_press = (keysdown & KEY_RIGHT) ? 1 : 0;
 		      if ( showoffset + 10 < all_count )
 		      {
 		        if ( showoffset + 20 <= all_count )
@@ -1104,7 +1292,10 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 						re_show=2;
 		      }
 		      if(showoffset != prev_showoffset)
+		      {
 		      	UIAudio_PlayMove();
+		      	cheat_scroll_delay = first_press ? 6 : 3;
+		      }
 				}
 				else if(keysdown & KEY_A)
 				{
@@ -1139,4 +1330,5 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 		}
 	}
 	f_close(&gfile);
+	Launcher_MarkTopbarNameDirty();
 }

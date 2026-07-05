@@ -56,7 +56,7 @@ For normal users, the recommended route is **DS Style Customiser**, which create
 - Original kernel source by EZ-FLASH
 - SimpleLight custom kernel by Sterophonick
 - DS Style custom kernel by FrankieT19
-- Thai localisation, font and renderer support by Phanumas Siriwongphaisan (aidiadayo)
+- Thai language support by aidiadayo
 - Case-sensitive `HZK12.h` include fix by Adrien Plazas (Kekun)
 - FatFs by ChaN, as used by the upstream kernel
 

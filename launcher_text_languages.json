@@ -131,7 +131,18 @@
     "DSTEXT_ERROR_SAVE": "Save error",
     "DSTEXT_ERROR_READ_SAVE": "Read save error",
     "DSTEXT_ERROR_MAKE_SAVE": "Make save error",
-    "DSTEXT_ERROR_RTS": "RTS file error"
+    "DSTEXT_ERROR_RTS": "RTS file error",
+    "DSTEXT_SETTINGS_VERTICAL_SIDE": "Vertical side",
+    "DSTEXT_SETTINGS_HORIZONTAL_SIDE": "Horizontal side",
+    "DSTEXT_ALIGN_CENTER": "Center",
+    "DSTEXT_ALIGN_LEFT": "Left",
+    "DSTEXT_ALIGN_RIGHT": "Right",
+    "DSTEXT_ALIGN_TOP": "Top",
+    "DSTEXT_ALIGN_BOTTOM": "Bottom",
+    "DSTEXT_ALIGN_CUSTOM": "Custom",
+    "DSTEXT_ROUNDED_FULL": "Full",
+    "DSTEXT_ROUNDED_NO_START": "No Start",
+    "DSTEXT_SETTINGS_CLEAN_LIST": "Clean list"
   },
   "English (US)": {
     "DSTEXT_LANGUAGE_NAME": "English (US)",
@@ -265,7 +276,18 @@
     "DSTEXT_ERROR_SAVE": "Save error",
     "DSTEXT_ERROR_READ_SAVE": "Read save error",
     "DSTEXT_ERROR_MAKE_SAVE": "Make save error",
-    "DSTEXT_ERROR_RTS": "RTS file error"
+    "DSTEXT_ERROR_RTS": "RTS file error",
+    "DSTEXT_SETTINGS_VERTICAL_SIDE": "Vertical side",
+    "DSTEXT_SETTINGS_HORIZONTAL_SIDE": "Horizontal side",
+    "DSTEXT_ALIGN_CENTER": "Center",
+    "DSTEXT_ALIGN_LEFT": "Left",
+    "DSTEXT_ALIGN_RIGHT": "Right",
+    "DSTEXT_ALIGN_TOP": "Top",
+    "DSTEXT_ALIGN_BOTTOM": "Bottom",
+    "DSTEXT_ALIGN_CUSTOM": "Custom",
+    "DSTEXT_ROUNDED_FULL": "Full",
+    "DSTEXT_ROUNDED_NO_START": "No Start",
+    "DSTEXT_SETTINGS_CLEAN_LIST": "Clean list"
   },
   "Español": {
     "DSTEXT_LANGUAGE_NAME": "Español",
@@ -399,7 +421,8 @@
     "DSTEXT_ERROR_SAVE": "Error de partida",
     "DSTEXT_ERROR_READ_SAVE": "Error al leer partida",
     "DSTEXT_ERROR_MAKE_SAVE": "Error al crear partida",
-    "DSTEXT_ERROR_RTS": "Error de archivo RTS"
+    "DSTEXT_ERROR_RTS": "Error de archivo RTS",
+    "DSTEXT_SETTINGS_CLEAN_LIST": "Clean list"
   },
   "Français": {
     "DSTEXT_LANGUAGE_NAME": "Français",
@@ -533,7 +556,8 @@
     "DSTEXT_ERROR_SAVE": "Erreur sauvegarde",
     "DSTEXT_ERROR_READ_SAVE": "Erreur lecture sauvegarde",
     "DSTEXT_ERROR_MAKE_SAVE": "Erreur creation sauvegarde",
-    "DSTEXT_ERROR_RTS": "Erreur fichier RTS"
+    "DSTEXT_ERROR_RTS": "Erreur fichier RTS",
+    "DSTEXT_SETTINGS_CLEAN_LIST": "Clean list"
   },
   "Português": {
     "DSTEXT_LANGUAGE_NAME": "Português",
@@ -667,7 +691,8 @@
     "DSTEXT_ERROR_SAVE": "Erro de save",
     "DSTEXT_ERROR_READ_SAVE": "Erro ao ler save",
     "DSTEXT_ERROR_MAKE_SAVE": "Erro ao criar save",
-    "DSTEXT_ERROR_RTS": "Erro de ficheiro RTS"
+    "DSTEXT_ERROR_RTS": "Erro de ficheiro RTS",
+    "DSTEXT_SETTINGS_CLEAN_LIST": "Clean list"
   },
   "Deutsch": {
     "DSTEXT_LANGUAGE_NAME": "Deutsch",
@@ -801,7 +826,8 @@
     "DSTEXT_ERROR_SAVE": "Save-Fehler",
     "DSTEXT_ERROR_READ_SAVE": "Save-Lesefehler",
     "DSTEXT_ERROR_MAKE_SAVE": "Save-Erstellfehler",
-    "DSTEXT_ERROR_RTS": "RTS-Dateifehler"
+    "DSTEXT_ERROR_RTS": "RTS-Dateifehler",
+    "DSTEXT_SETTINGS_CLEAN_LIST": "Clean list"
   },
   "Türkçe": {
     "DSTEXT_LANGUAGE_NAME": "Türkçe",
@@ -935,7 +961,8 @@
     "DSTEXT_ERROR_SAVE": "Kayıt hatası",
     "DSTEXT_ERROR_READ_SAVE": "Kayıt okuma hatası",
     "DSTEXT_ERROR_MAKE_SAVE": "Kayıt oluşturma hatası",
-    "DSTEXT_ERROR_RTS": "RTS dosya hatası"
+    "DSTEXT_ERROR_RTS": "RTS dosya hatası",
+    "DSTEXT_SETTINGS_CLEAN_LIST": "Clean list"
   },
   "Italiano": {
     "DSTEXT_LANGUAGE_NAME": "Italiano",
@@ -1069,7 +1096,8 @@
     "DSTEXT_ERROR_SAVE": "Errore salvataggio",
     "DSTEXT_ERROR_READ_SAVE": "Errore lettura save",
     "DSTEXT_ERROR_MAKE_SAVE": "Errore creazione save",
-    "DSTEXT_ERROR_RTS": "Errore file RTS"
+    "DSTEXT_ERROR_RTS": "Errore file RTS",
+    "DSTEXT_SETTINGS_CLEAN_LIST": "Clean list"
   },
   "Nederlands": {
     "DSTEXT_LANGUAGE_NAME": "Nederlands",
@@ -1203,7 +1231,8 @@
     "DSTEXT_ERROR_SAVE": "Save-fout",
     "DSTEXT_ERROR_READ_SAVE": "Save leesfout",
     "DSTEXT_ERROR_MAKE_SAVE": "Save maakfout",
-    "DSTEXT_ERROR_RTS": "RTS-bestandsfout"
+    "DSTEXT_ERROR_RTS": "RTS-bestandsfout",
+    "DSTEXT_SETTINGS_CLEAN_LIST": "Clean list"
   },
   "Svenska": {
     "DSTEXT_LANGUAGE_NAME": "Svenska",
@@ -1337,7 +1366,8 @@
     "DSTEXT_ERROR_SAVE": "Save error",
     "DSTEXT_ERROR_READ_SAVE": "Read save error",
     "DSTEXT_ERROR_MAKE_SAVE": "Make save error",
-    "DSTEXT_ERROR_RTS": "RTS file error"
+    "DSTEXT_ERROR_RTS": "RTS file error",
+    "DSTEXT_SETTINGS_CLEAN_LIST": "Clean list"
   },
   "Suomi": {
     "DSTEXT_LANGUAGE_NAME": "Suomi",
@@ -1471,6 +1501,7 @@
     "DSTEXT_ERROR_SAVE": "Save error",
     "DSTEXT_ERROR_READ_SAVE": "Read save error",
     "DSTEXT_ERROR_MAKE_SAVE": "Make save error",
-    "DSTEXT_ERROR_RTS": "RTS file error"
+    "DSTEXT_ERROR_RTS": "RTS file error",
+    "DSTEXT_SETTINGS_CLEAN_LIST": "Clean list"
   }
 }
