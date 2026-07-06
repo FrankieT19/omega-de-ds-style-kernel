@@ -9480,6 +9480,23 @@ static void Launcher_DrawHelpPageNumber(u32 page, u32 total)
     DrawHZText12(msg, 0, 218 - DrawText12VisibleLength(msg) * 6, 3, gl_color_topbar_text, 1);
 }
 
+static int Launcher_HelpLineShouldCenter(const char *line)
+{
+    if(!line || !line[0])
+        return 0;
+    if(strncmp(line, "DS Style ", 9) == 0)
+        return 1;
+    return (strcmp(line, "Interface") == 0) ||
+           (strcmp(line, "Artwork display") == 0) ||
+           (strcmp(line, "Start screen") == 0) ||
+           (strcmp(line, "Games") == 0) ||
+           (strcmp(line, "In-game options") == 0) ||
+           (strcmp(line, "Hardware") == 0) ||
+           (strcmp(line, "Artwork folders") == 0) ||
+           (strcmp(line, "Custom artwork") == 0) ||
+           (strcmp(line, "Credits") == 0);
+}
+
 static void Launcher_DrawHelpTextPage(const char *title, const char *const *lines, u32 line_count, u32 page)
 {
     const u32 lines_per_page = 9;
@@ -9497,7 +9514,7 @@ static void Launcher_DrawHelpTextPage(const char *title, const char *const *line
     {
         const char *line = lines[start + i];
         int x = 14;
-        if((i == 0) && line && line[0])
+        if(Launcher_HelpLineShouldCenter(line))
         {
             int w = DrawText12VisibleLength((char*)line) * 6;
             x = (240 - w) / 2;
@@ -9638,7 +9655,7 @@ static void Launcher_ShowHelpTopic(u32 topic)
 {
     static const char *const operation_lines[] =
     {
-        "Interface settings",
+        "Interface",
         "- Time sets the cartridge",
         "  clock shown in the top bar.",
         "- Clock format chooses a",
@@ -9650,43 +9667,37 @@ static void Launcher_ShowHelpTopic(u32 topic)
         "- Hide system keeps kernel,",
         "  SYSTEM and computer files",
         "  out of the SD browser.",
-        "Interface settings",
         "- List folders keeps non-game",
         "  folders in list view.",
         "- Clean list removes file",
         "  extensions and details.",
         "- Theme changes Light, Dark",
         "  or a custom theme.",
-        "Interface settings",
         "- Colour changes accent",
         "  colours across DS Style.",
         "- Load style prepares another",
         "  kernel from SYSTEM/KERNELS.",
         "- View mode chooses List,",
         "  Horizontal or Vertical.",
-        "Interface settings",
         "- Thumbnails chooses Title",
         "  or Box artwork.",
+        "",
+        "Artwork display",
         "- Art border draws a fine",
         "  outline around selected art.",
         "- Rounded corners softens",
         "  artwork corners.",
-        "Interface settings",
         "- Vertical side aligns the",
         "  small artwork above and",
         "  below the selected item.",
+        "",
         "- Horizontal side aligns the",
         "  small artwork left and",
         "  right of the selected item.",
-        "Interface settings",
         "- Boot to chooses Start, SD,",
         "  NOR, Last game, Recents",
         "  or Favourites at startup.",
-        "",
-        "",
-        "",
-        "",
-        "Start screen settings",
+        "Start screen",
         "- Start screen turns the",
         "  opening screen on or off.",
         "- The second Start screen",
@@ -9695,7 +9706,7 @@ static void Launcher_ShowHelpTopic(u32 topic)
         "- Quick start chooses the",
         "  boot hotkey for instantly",
         "  launching the last game.",
-        "Games settings",
+        "Games",
         "- Boot engine changes launch",
         "  handling for games.",
         "- Auto save controls save",
@@ -9704,7 +9715,7 @@ static void Launcher_ShowHelpTopic(u32 topic)
         "  RTS, Sleep and Cheats.",
         "- Boot mode chooses Clean,",
         "  Addon or Menu by default.",
-        "Games settings",
+        "In-game options",
         "- Sleep hotkey chooses the",
         "  in-game sleep command.",
         "- Addon hotkey chooses the",
@@ -9713,7 +9724,9 @@ static void Launcher_ShowHelpTopic(u32 topic)
         "  intro before a game starts.",
         "- Backup saves keeps copies",
         "  of save files in BACKUP.",
-        "Hardware settings",
+        "",
+        "",
+        "Hardware",
         "- Mode B chooses Rumble, RAM",
         "  or Link behaviour for the",
         "  DE side switch.",

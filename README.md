@@ -57,7 +57,7 @@ For normal users, the recommended route is **DS Style Customiser**, which create
 - SimpleLight custom kernel by Sterophonick
 - DS Style custom kernel by FrankieT19
 - Thai language support by aidiadayo
-- Case-sensitive `HZK12.h` include fix by Adrien Plazas (Kekun)
+- Case-sensitive `HZK12.h` include fix by Kekun
 - FatFs by ChaN, as used by the upstream kernel
 
 ## License
