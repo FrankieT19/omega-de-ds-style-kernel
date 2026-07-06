@@ -13,7 +13,9 @@
 - Added thumbnail artwork support for games written to NOR.
 - Added Thai language support.
 - Reworked the Settings and Help pages into clearer categories and in-kernel guidance screens.
-- Expanded the built-in Using DS Style help pages with clearer setting explanations.
+- Added built-in Using DS Style help pages with clear setting explanations.
+- Overhauled the cheat screen and cheat selection behaviour.
+- Added general user-interface refinements across menus, pop-ups and carousel views.
 - Refined splash-screen timing so boot waits for the startup sound without lingering longer than needed.
 - Refined settings tabbing so nested Settings pages are remembered when moving to SD Card or NOR Flash and back.
 
