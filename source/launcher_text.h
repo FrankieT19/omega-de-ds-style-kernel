@@ -178,6 +178,12 @@
 #ifndef DSTEXT_VIEW_VERTICAL
 #define DSTEXT_VIEW_VERTICAL "Vertical"
 #endif
+#ifndef DSTEXT_VIEW_LIST_ART
+#define DSTEXT_VIEW_LIST_ART "List + art"
+#endif
+#ifndef DSTEXT_SETTINGS_LIST_ART
+#define DSTEXT_SETTINGS_LIST_ART "List art"
+#endif
 #ifndef DSTEXT_THUMB_TITLE
 #define DSTEXT_THUMB_TITLE "Title"
 #endif

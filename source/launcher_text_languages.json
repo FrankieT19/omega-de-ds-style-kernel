@@ -149,7 +149,9 @@
     "DSTEXT_ERROR_SAVE": "Save error",
     "DSTEXT_ERROR_READ_SAVE": "Read save error",
     "DSTEXT_ERROR_MAKE_SAVE": "Make save error",
-    "DSTEXT_ERROR_RTS": "RTS file error"
+    "DSTEXT_ERROR_RTS": "RTS file error",
+    "DSTEXT_SETTINGS_LIST_ART": "List art",
+    "DSTEXT_VIEW_LIST_ART": "List + art"
   },
   "English (US)": {
     "DSTEXT_LANGUAGE_NAME": "English (US)",
@@ -301,7 +303,9 @@
     "DSTEXT_ERROR_SAVE": "Save error",
     "DSTEXT_ERROR_READ_SAVE": "Read save error",
     "DSTEXT_ERROR_MAKE_SAVE": "Make save error",
-    "DSTEXT_ERROR_RTS": "RTS file error"
+    "DSTEXT_ERROR_RTS": "RTS file error",
+    "DSTEXT_SETTINGS_LIST_ART": "List art",
+    "DSTEXT_VIEW_LIST_ART": "List + art"
   },
   "Español": {
     "DSTEXT_LANGUAGE_NAME": "Español",
@@ -453,7 +457,9 @@
     "DSTEXT_ERROR_SAVE": "Error de partida",
     "DSTEXT_ERROR_READ_SAVE": "Error al leer partida",
     "DSTEXT_ERROR_MAKE_SAVE": "Error al crear partida",
-    "DSTEXT_ERROR_RTS": "Error de archivo RTS"
+    "DSTEXT_ERROR_RTS": "Error de archivo RTS",
+    "DSTEXT_SETTINGS_LIST_ART": "Arte en lista",
+    "DSTEXT_VIEW_LIST_ART": "Lista + arte"
   },
   "Français": {
     "DSTEXT_LANGUAGE_NAME": "Français",
@@ -605,7 +611,9 @@
     "DSTEXT_ERROR_SAVE": "Erreur sauvegarde",
     "DSTEXT_ERROR_READ_SAVE": "Erreur lecture sauvegarde",
     "DSTEXT_ERROR_MAKE_SAVE": "Erreur creation sauvegarde",
-    "DSTEXT_ERROR_RTS": "Erreur fichier RTS"
+    "DSTEXT_ERROR_RTS": "Erreur fichier RTS",
+    "DSTEXT_SETTINGS_LIST_ART": "Art en liste",
+    "DSTEXT_VIEW_LIST_ART": "Liste + art"
   },
   "Português": {
     "DSTEXT_LANGUAGE_NAME": "Português",
@@ -757,7 +765,9 @@
     "DSTEXT_ERROR_SAVE": "Erro de save",
     "DSTEXT_ERROR_READ_SAVE": "Erro ao ler save",
     "DSTEXT_ERROR_MAKE_SAVE": "Erro ao criar save",
-    "DSTEXT_ERROR_RTS": "Erro de ficheiro RTS"
+    "DSTEXT_ERROR_RTS": "Erro de ficheiro RTS",
+    "DSTEXT_SETTINGS_LIST_ART": "Arte na lista",
+    "DSTEXT_VIEW_LIST_ART": "Lista + arte"
   },
   "Deutsch": {
     "DSTEXT_LANGUAGE_NAME": "Deutsch",
@@ -909,7 +919,9 @@
     "DSTEXT_ERROR_SAVE": "Save-Fehler",
     "DSTEXT_ERROR_READ_SAVE": "Save-Lesefehler",
     "DSTEXT_ERROR_MAKE_SAVE": "Save-Erstellfehler",
-    "DSTEXT_ERROR_RTS": "RTS-Dateifehler"
+    "DSTEXT_ERROR_RTS": "RTS-Dateifehler",
+    "DSTEXT_SETTINGS_LIST_ART": "Listenbild",
+    "DSTEXT_VIEW_LIST_ART": "Liste + Bild"
   },
   "Türkçe": {
     "DSTEXT_LANGUAGE_NAME": "Türkçe",
@@ -1061,7 +1073,9 @@
     "DSTEXT_ERROR_SAVE": "Kayıt hatası",
     "DSTEXT_ERROR_READ_SAVE": "Kayıt okuma hatası",
     "DSTEXT_ERROR_MAKE_SAVE": "Kayıt oluşturma hatası",
-    "DSTEXT_ERROR_RTS": "RTS dosya hatası"
+    "DSTEXT_ERROR_RTS": "RTS dosya hatası",
+    "DSTEXT_SETTINGS_LIST_ART": "Liste görseli",
+    "DSTEXT_VIEW_LIST_ART": "Liste + görsel"
   },
   "Italiano": {
     "DSTEXT_LANGUAGE_NAME": "Italiano",
@@ -1213,7 +1227,9 @@
     "DSTEXT_ERROR_SAVE": "Errore salvataggio",
     "DSTEXT_ERROR_READ_SAVE": "Errore lettura save",
     "DSTEXT_ERROR_MAKE_SAVE": "Errore creazione save",
-    "DSTEXT_ERROR_RTS": "Errore file RTS"
+    "DSTEXT_ERROR_RTS": "Errore file RTS",
+    "DSTEXT_SETTINGS_LIST_ART": "Arte in lista",
+    "DSTEXT_VIEW_LIST_ART": "Lista + arte"
   },
   "Nederlands": {
     "DSTEXT_LANGUAGE_NAME": "Nederlands",
@@ -1365,7 +1381,9 @@
     "DSTEXT_ERROR_SAVE": "Save-fout",
     "DSTEXT_ERROR_READ_SAVE": "Save leesfout",
     "DSTEXT_ERROR_MAKE_SAVE": "Save maakfout",
-    "DSTEXT_ERROR_RTS": "RTS-bestandsfout"
+    "DSTEXT_ERROR_RTS": "RTS-bestandsfout",
+    "DSTEXT_SETTINGS_LIST_ART": "Lijstafbeeld.",
+    "DSTEXT_VIEW_LIST_ART": "Lijst + beeld"
   },
   "Svenska": {
     "DSTEXT_LANGUAGE_NAME": "Svenska",
@@ -1517,7 +1535,9 @@
     "DSTEXT_ERROR_SAVE": "Save error",
     "DSTEXT_ERROR_READ_SAVE": "Read save error",
     "DSTEXT_ERROR_MAKE_SAVE": "Make save error",
-    "DSTEXT_ERROR_RTS": "RTS file error"
+    "DSTEXT_ERROR_RTS": "RTS file error",
+    "DSTEXT_SETTINGS_LIST_ART": "Listbild",
+    "DSTEXT_VIEW_LIST_ART": "Lista + bild"
   },
   "Suomi": {
     "DSTEXT_LANGUAGE_NAME": "Suomi",
@@ -1669,6 +1689,8 @@
     "DSTEXT_ERROR_SAVE": "Save error",
     "DSTEXT_ERROR_READ_SAVE": "Read save error",
     "DSTEXT_ERROR_MAKE_SAVE": "Make save error",
-    "DSTEXT_ERROR_RTS": "RTS file error"
+    "DSTEXT_ERROR_RTS": "RTS file error",
+    "DSTEXT_SETTINGS_LIST_ART": "Listakuva",
+    "DSTEXT_VIEW_LIST_ART": "Lista + kuva"
   }
 }

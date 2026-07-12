@@ -21,6 +21,7 @@ typedef enum {
     LTXT_SETTINGS_ROUNDED_CORNERS,
     LTXT_SETTINGS_VERTICAL_SIDE,
     LTXT_SETTINGS_HORIZONTAL_SIDE,
+    LTXT_SETTINGS_LIST_ART,
     LTXT_SETTINGS_SOUNDS,
     LTXT_SETTINGS_LANGUAGE,
     LTXT_SETTINGS_THEME,
@@ -89,6 +90,7 @@ typedef enum {
     LTXT_VIEW_LIST,
     LTXT_VIEW_HORIZONTAL,
     LTXT_VIEW_VERTICAL,
+    LTXT_VIEW_LIST_ART,
     LTXT_THUMB_TITLE,
     LTXT_THUMB_BOX,
     LTXT_ENGINE_FAST,
@@ -176,6 +178,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Round corners",
         "Vertical side",
         "Horz. side",
+        "List art",
         "Sounds",
         "Language",
         "Theme",
@@ -244,6 +247,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "List",
         "Horizontal",
         "Vertical",
+        "List + art",
         "Title",
         "Box",
         "Fast",
@@ -328,6 +332,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Round corners",
         "Vertical side",
         "Horz. side",
+        "List art",
         "Sounds",
         "Language",
         "Theme",
@@ -396,6 +401,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "List",
         "Horizontal",
         "Vertical",
+        "List + art",
         "Title",
         "Box",
         "Fast",
@@ -480,6 +486,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Bordes red.",
         "Lado vertical",
         "Lado horiz.",
+        "Arte en lista",
         "Sonidos",
         "Idioma",
         "Tema",
@@ -548,6 +555,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Lista",
         "Horizontal",
         "Vertical",
+        "Lista + arte",
         "T\303\255tulo",
         "Caja",
         "R\303\241pido",
@@ -632,6 +640,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Coins arrondis",
         "Cote vertical",
         "Cote horiz.",
+        "Art en liste",
         "Sons",
         "Langue",
         "Theme",
@@ -700,6 +709,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Liste",
         "Horizontal",
         "Vertical",
+        "Liste + art",
         "Titre",
         "Boite",
         "Rapide",
@@ -784,6 +794,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Cantos red.",
         "Lado vertical",
         "Lado horiz.",
+        "Arte na lista",
         "Sons",
         "Idioma",
         "Tema",
@@ -852,6 +863,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Lista",
         "Horizontal",
         "Vertical",
+        "Lista + arte",
         "T\303\255tulo",
         "Caixa",
         "R\303\241pido",
@@ -936,6 +948,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Runde Ecken",
         "Seite vert.",
         "Seite horiz.",
+        "Listenbild",
         "Sounds",
         "Sprache",
         "Theme",
@@ -1004,6 +1017,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Liste",
         "Horizontal",
         "Vertikal",
+        "Liste + Bild",
         "Titel",
         "Box",
         "Schnell",
@@ -1088,6 +1102,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Yuvarlak kenar",
         "Dikey yan",
         "Yatay yan",
+        "Liste g\303\266rseli",
         "Sesler",
         "Dil",
         "Tema",
@@ -1156,6 +1171,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Liste",
         "Yatay",
         "Dikey",
+        "Liste + g\303\266rsel",
         "Ba\305\237l\304\261k",
         "Kutu",
         "H\304\261zl\304\261",
@@ -1240,6 +1256,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Angoli tondi",
         "Lato vert.",
         "Lato orizz.",
+        "Arte in lista",
         "Suoni",
         "Lingua",
         "Tema",
@@ -1308,6 +1325,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Lista",
         "Orizzontale",
         "Verticale",
+        "Lista + arte",
         "Titolo",
         "Scatola",
         "Rapido",
@@ -1392,6 +1410,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Ronde hoeken",
         "Zij vert.",
         "Zij horiz.",
+        "Lijstafbeeld.",
         "Geluiden",
         "Taal",
         "Thema",
@@ -1460,6 +1479,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Lijst",
         "Horizontaal",
         "Verticaal",
+        "Lijst + beeld",
         "Titel",
         "Doos",
         "Snel",
@@ -1544,6 +1564,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Runda horn",
         "Sida vert.",
         "Sida horis.",
+        "Listbild",
         "Ljud",
         "Spr\303\245k",
         "Tema",
@@ -1612,6 +1633,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Lista",
         "Horisontell",
         "Vertikal",
+        "Lista + bild",
         "Titel",
         "Box",
         "Snabb",
@@ -1696,6 +1718,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Pyoreat kulmat",
         "Pystysivu",
         "Vaakasivu",
+        "Listakuva",
         "\303\204\303\244net",
         "Kieli",
         "Teema",
@@ -1764,6 +1787,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "Lista",
         "Vaaka",
         "Pysty",
+        "Lista + kuva",
         "Nimi",
         "Kotelo",
         "Nopea",
@@ -1848,6 +1872,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "\324\262\275\307",
         "\327\335\317\362\262\340\315\274",
         "\272\341\317\362\262\340\315\274",
+        "\301\320\261\355\315\274\306\254",
         "\311\371\322\364",
         "\323\357\321\324",
         "\326\367\314\342",
@@ -1916,6 +1941,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "\301\320\261\355",
         "\272\341\317\362",
         "\327\335\317\362",
+        "\301\320\261\355 + \315\274\306\254",
         "\261\352\314\342",
         "\272\320\315\274",
         "\277\354\313\331",
@@ -2000,6 +2026,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "\340\270\241\340\270\270\340\270\241\340\271\202\340\270\204\340\271\211\340\270\207",
         "\340\270\240\340\270\262\340\270\236\340\270\202\340\271\211\340\270\262\340\270\207\340\270\225\340\270\261\340\271\211\340\270\207",
         "\340\270\240\340\270\262\340\270\236\340\270\202\340\271\211\340\270\262\340\270\207\340\270\231\340\270\255\340\270\231",
+        "\340\270\240\340\270\262\340\270\236\340\270\243\340\270\262\340\270\242\340\270\201\340\270\262\340\270\243",
         "\340\271\200\340\270\252\340\270\265\340\270\242\340\270\207",
         "\340\270\240\340\270\262\340\270\251\340\270\262",
         "\340\270\230\340\270\265\340\270\241",
@@ -2068,6 +2095,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
         "\340\270\243\340\270\262\340\270\242\340\270\201\340\270\262\340\270\243",
         "\340\271\201\340\270\231\340\270\247\340\270\231\340\270\255\340\270\231",
         "\340\271\201\340\270\231\340\270\247\340\270\225\340\270\261\340\271\211\340\270\207",
+        "\340\270\243\340\270\262\340\270\242\340\270\201\340\270\262\340\270\243 + \340\270\240\340\270\262\340\270\236",
         "\340\270\212\340\270\267\340\271\210\340\270\255",
         "\340\270\201\340\270\245\340\271\210\340\270\255\340\270\207",
         "\340\271\200\340\270\243\340\271\207\340\270\247",
@@ -2153,6 +2181,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
 #undef DSTEXT_SETTINGS_ROUNDED_CORNERS
 #undef DSTEXT_SETTINGS_VERTICAL_SIDE
 #undef DSTEXT_SETTINGS_HORIZONTAL_SIDE
+#undef DSTEXT_SETTINGS_LIST_ART
 #undef DSTEXT_SETTINGS_SOUNDS
 #undef DSTEXT_SETTINGS_LANGUAGE
 #undef DSTEXT_SETTINGS_THEME
@@ -2221,6 +2250,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
 #undef DSTEXT_VIEW_LIST
 #undef DSTEXT_VIEW_HORIZONTAL
 #undef DSTEXT_VIEW_VERTICAL
+#undef DSTEXT_VIEW_LIST_ART
 #undef DSTEXT_THUMB_TITLE
 #undef DSTEXT_THUMB_BOX
 #undef DSTEXT_ENGINE_FAST
@@ -2303,6 +2333,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
 #define DSTEXT_SETTINGS_ROUNDED_CORNERS Launcher_Text(LTXT_SETTINGS_ROUNDED_CORNERS)
 #define DSTEXT_SETTINGS_VERTICAL_SIDE Launcher_Text(LTXT_SETTINGS_VERTICAL_SIDE)
 #define DSTEXT_SETTINGS_HORIZONTAL_SIDE Launcher_Text(LTXT_SETTINGS_HORIZONTAL_SIDE)
+#define DSTEXT_SETTINGS_LIST_ART Launcher_Text(LTXT_SETTINGS_LIST_ART)
 #define DSTEXT_SETTINGS_SOUNDS Launcher_Text(LTXT_SETTINGS_SOUNDS)
 #define DSTEXT_SETTINGS_LANGUAGE Launcher_Text(LTXT_SETTINGS_LANGUAGE)
 #define DSTEXT_SETTINGS_THEME Launcher_Text(LTXT_SETTINGS_THEME)
@@ -2371,6 +2402,7 @@ static const LauncherLanguagePack launcher_language_packs[] = {
 #define DSTEXT_VIEW_LIST Launcher_Text(LTXT_VIEW_LIST)
 #define DSTEXT_VIEW_HORIZONTAL Launcher_Text(LTXT_VIEW_HORIZONTAL)
 #define DSTEXT_VIEW_VERTICAL Launcher_Text(LTXT_VIEW_VERTICAL)
+#define DSTEXT_VIEW_LIST_ART Launcher_Text(LTXT_VIEW_LIST_ART)
 #define DSTEXT_THUMB_TITLE Launcher_Text(LTXT_THUMB_TITLE)
 #define DSTEXT_THUMB_BOX Launcher_Text(LTXT_THUMB_BOX)
 #define DSTEXT_ENGINE_FAST Launcher_Text(LTXT_ENGINE_FAST)

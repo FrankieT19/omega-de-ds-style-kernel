@@ -14,10 +14,10 @@ Read the complete [DS Style User Guide](https://frankiet19.github.io/omega-de-ds
 - DS-style launcher interface
 - Multiple colour themes and light/dark presentation support
 - Customisable launcher assets through DS Style Customiser
-- List, horizontal carousel, and vertical carousel file views
+- List, List + Art, horizontal carousel, and vertical carousel file views
 - Title and box-art thumbnail modes
 - Favourite and recent game support
-- Multi-language launcher text
+- Multi-language launcher text, including Chinese and Thai
 - UI sounds
 - Runtime settings stored in readable `SYSTEM/SETTINGS.TXT`
 

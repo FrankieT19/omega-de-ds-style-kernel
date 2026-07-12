@@ -557,21 +557,12 @@ void DrawText12CopyVisible(char *dst, u16 dst_size, char *src, u16 glyphs)
 	dst[offset] = 0;
 }
 
-void DrawHZText12(char *str, u16 len, u16 x, u16 y, u16 c, u8 isDrawDirect)
+static void DrawHZText12Surface(char *str, u16 len, u16 x, u16 y, u16 c, u16 *v)
 {
   u32 i,l,hi=0,shown=0;
   u32 location;
 	u8 cc,c1,c2;
-	u16 *v;
-	u16 *p1 = Vcache;
-	u16 *p2 = VideoBuffer;
 	u16 yy;
-	
-
-	if(isDrawDirect)
-		v = p2;
-	else
-		v = p1;
 
 	l=strlen(str);
 
@@ -711,6 +702,17 @@ void DrawHZText12(char *str, u16 len, u16 x, u16 y, u16 c, u8 isDrawDirect)
 			shown += 2;
 		}
 	}
+}
+
+void DrawHZText12(char *str, u16 len, u16 x, u16 y, u16 c, u8 isDrawDirect)
+{
+	DrawHZText12Surface(str, len, x, y, c, isDrawDirect ? VideoBuffer : Vcache);
+}
+
+void DrawHZText12ToBuffer(char *str, u16 len, u16 x, u16 y, u16 c, u16 *buffer)
+{
+	if(buffer)
+		DrawHZText12Surface(str, len, x, y, c, buffer);
 }
 //---------------------------------------------------------------------------------
 void DEBUG_printf(const char *format, ...)

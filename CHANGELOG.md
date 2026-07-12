@@ -1,5 +1,14 @@
 # Changelog
 
+## DS Style v7.1
+
+- Added List + Art view, combining list navigation with a floating thumbnail at the top, centre or bottom of the screen.
+- Refined list, carousel and pop-up redraw behaviour for smoother menu navigation and less flicker.
+- Fixed translated text handling in game-launch pop-up menus, including Chinese text.
+- Improved input handling while artwork loads and when moving between Settings, SD Card and NOR Flash.
+- Kept the launcher clock independent from the In-game RTC option, matching the official kernel behaviour.
+- Added general menu refinements and updated the built-in guidance.
+
 ## DS Style v7.0
 
 - Added a Hide system files setting for keeping kernel, system, and metadata files out of the root file browser.
