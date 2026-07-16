@@ -1,5 +1,10 @@
 # Changelog
 
+## DS Style v7.2
+
+- Fixed Chinese text rendering on the game loading screen.
+- Fixed custom backgrounds being shifted or repeated while scrolling in List and List + Art views.
+
 ## DS Style v7.1
 
 - Added List + Art view, combining list navigation with a floating thumbnail at the top, centre or bottom of the screen.

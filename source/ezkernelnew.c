@@ -1726,7 +1726,7 @@ static void Launcher_PreScaleListArtCache(void);
 static void Launcher_DrawListArtImageOnly(u32 show_offset, u32 file_select);
 static void Launcher_DrawCurrentListArtImageOnly(void);
 static void Launcher_InvalidateListArtScaledCache(void);
-static void Launcher_ScrollSDListBody(int direction);
+static void Launcher_DrawScrolledSDListBody(u32 show_offset, u32 file_select);
 static void Launcher_GetDisplayTitleBounded(const TCHAR *src, char *dst, u32 dst_size);
 static u32 Launcher_IsFavouritePathName(const TCHAR *path, const TCHAR *name);
 
@@ -2537,7 +2537,7 @@ static void Launcher_CopyListArtScrollLine(int dest_y, int source_y,
 	}
 }
 
-static void Launcher_ScrollListArtBodySegmented(int direction,
+static void __attribute__((unused)) Launcher_ScrollListArtBodySegmented(int direction,
 	u32 old_has_art,
 	u32 new_has_art)
 {
@@ -2606,11 +2606,14 @@ static void Launcher_ScrollListArtBodySegmented(int direction,
 	}
 }
 
-static void Launcher_CopyAllCachedListRows(void)
+static void Launcher_CopyAllCachedListRows(u32 preserve_art, u32 skip_line)
 {
 	u32 line;
 	for(line = 0; line < LAUNCHER_LIST_ROW_COUNT; line++)
-		Launcher_CopyCachedListRow(line);
+	{
+		if(line != skip_line)
+			Launcher_CopyCachedListRowAroundArt(line, preserve_art);
+	}
 }
 
 static void Launcher_CopyCachedRowsBehindArt(void)
@@ -2623,7 +2626,7 @@ static void Launcher_CopyCachedRowsBehindArt(void)
 	}
 }
 
-static void Launcher_RotateCachedListRows(int direction)
+static void __attribute__((unused)) Launcher_RotateCachedListRows(int direction)
 {
 	u32 line;
 	u8 recycled;
@@ -2657,8 +2660,8 @@ static void Launcher_DrawListBodyFromCache(u32 show_offset, u32 file_select, u32
 		haveThumbnail = selected_has_art;
 	}
 	Launcher_BuildAllCachedListRows(show_offset, file_select, haveThumbnail);
-	Launcher_CopyAllCachedListRows();
 	Launcher_BuildSelectedListRowScratch(show_offset, file_select, haveThumbnail);
+	Launcher_CopyAllCachedListRows(0, file_select);
 	Launcher_CopySelectedListRowScratch(file_select, haveThumbnail);
 	if(haveThumbnail && Launcher_IsListArtMode())
 		Launcher_DrawListArtImageOnly(show_offset, file_select);
@@ -2771,7 +2774,9 @@ static void Launcher_DrawListArtScrolledBody(u32 show_offset, u32 file_select, i
 	u32 selected_has_art = 0;
 	u32 old_screen_has_art = launcher_list_art_screen_has_art;
 	u32 art_ready = 1;
-	u32 expected_cache_offset;
+	u32 preserve_art;
+
+	(void)direction;
 
 	if(Launcher_IsListArtMode())
 	{
@@ -2783,27 +2788,15 @@ static void Launcher_DrawListArtScrolledBody(u32 show_offset, u32 file_select, i
 		Launcher_ListArtPrepareSpanCache();
 	}
 
-	expected_cache_offset = (direction > 0) ? (show_offset - 1) : (show_offset + 1);
-	if(!Launcher_ListRowCacheMatches(expected_cache_offset, file_select))
-	{
-		Launcher_DrawListBodyFromCache(show_offset, file_select, selected_has_art);
-		return;
-	}
-
-	Launcher_RotateCachedListRows(direction);
-	if(direction > 0)
-		Launcher_BuildCachedListRow(show_offset, 9, file_select, selected_has_art);
-	else
-		Launcher_BuildCachedListRow(show_offset, 0, file_select, selected_has_art);
-	launcher_list_row_cache_show_offset = show_offset;
-	launcher_list_row_cache_file_select = file_select;
-	Launcher_ScrollListArtBodySegmented(direction, old_screen_has_art, selected_has_art);
-	if(direction > 0)
-		Launcher_CopyCachedListRowAroundArt(8, selected_has_art);
-	else
-		Launcher_CopyCachedListRowAroundArt(1, selected_has_art);
+	/* Background artwork belongs to fixed screen coordinates. Recompose every
+	   visible row from its absolute background slice instead of moving pixels
+	   already drawn in VRAM. Keep the old artwork overlay only while a pending
+	   thumbnail is resolved, then replace it as the final drawing operation. */
+	preserve_art = old_screen_has_art && selected_has_art;
+	Launcher_BuildAllCachedListRows(show_offset, file_select, selected_has_art);
 	Launcher_BuildSelectedListRowScratch(show_offset, file_select, selected_has_art);
-	Launcher_CopySelectedListRowScratch(file_select, selected_has_art);
+	Launcher_CopyAllCachedListRows(preserve_art, file_select);
+	Launcher_CopySelectedListRowScratch(file_select, preserve_art);
 	if(selected_has_art && art_ready)
 		Launcher_DrawCurrentListArtImageOnly();
 	launcher_list_art_screen_has_art = (u8)selected_has_art;
@@ -2838,24 +2831,12 @@ static void Launcher_DrawSDListRowClip(u32 show_offset, u32 line, u32 file_selec
 	Launcher_CopySDListRowBuffer(row_buffer, showy, line, haveThumbnail, copy_x, copy_w);
 }
 
-static void Launcher_ScrollSDListBody(int direction)
+static void Launcher_DrawScrolledSDListBody(u32 show_offset, u32 file_select)
 {
-	int y;
-
-	if(direction > 0)
-	{
-		/* Keep the selected bottom row out of the shift. Rows 1-8 move up to
-		rows 0-7; rows 8 and 9 are then rebuilt in their final states. */
-		for(y = 20; y < 132; y++)
-			dmaCopy(VideoBuffer + (y + 14) * 240, VideoBuffer + y * 240, 240 * 2);
-	}
-	else
-	{
-		/* Keep the selected top row out of the shift. Rows 1-8 move down to
-		rows 2-9; rows 1 and 0 are then rebuilt in their final states. */
-		for(y = 159; y >= 48; y--)
-			dmaCopy(VideoBuffer + (y - 14) * 240, VideoBuffer + y * 240, 240 * 2);
-	}
+	/* Build every visible row against its absolute background coordinates
+	   before updating VRAM. Moving composited rows is only correct for a
+	   vertically repeating background and corrupts custom list artwork. */
+	Launcher_DrawListBodyFromCache(show_offset, file_select, 0);
 }
 
 //---------------------------------------------------------------------------------
@@ -14302,17 +14283,7 @@ re_showfile:
 			}
 			else
 			{
-				Launcher_ScrollSDListBody((updata == 4) ? 1 : -1);
-				if(updata == 4)
-				{
-					Launcher_DrawSDListRow(show_offset, 8, file_select, 0);
-					Launcher_DrawSDListRow(show_offset, 9, file_select, 0);
-				}
-				else
-				{
-					Launcher_DrawSDListRow(show_offset, 1, file_select, 0);
-					Launcher_DrawSDListRow(show_offset, 0, file_select, 0);
-				}
+				Launcher_DrawScrolledSDListBody(show_offset, file_select);
 			}
 			Show_game_num(file_select+show_offset+1,page_num,0);
 		}
