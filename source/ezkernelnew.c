@@ -2739,6 +2739,14 @@ static void Launcher_DrawListArtSelectionChange(u32 show_offset, u32 file_select
 	if(old_screen_has_art && !selected_has_art)
 	{
 		Launcher_CopyCachedRowsBehindArt();
+		/* Restoring the old artwork footprint is not enough when the previous
+		   selection row sits elsewhere on the screen.  Restore that row too so
+		   its highlight cannot survive an artwork-to-no-art transition. */
+		if((cached_old_line < LAUNCHER_LIST_ROW_COUNT) && (cached_old_line != file_select))
+			Launcher_CopyCachedListRow(cached_old_line);
+		if((old_line < LAUNCHER_LIST_ROW_COUNT) && (old_line != file_select) &&
+		(old_line != cached_old_line))
+			Launcher_CopyCachedListRow(old_line);
 	}
 	else
 	{
@@ -7578,16 +7586,22 @@ static s32 Launcher_GetListArtCachedState(u32 absolute_index, int *x, int *y, in
 static void Launcher_DrawCurrentListArtImageOnly(void)
 {
 	int x, y, w, h;
+	u32 slot = launcher_list_art_scaled_selected_slot;
 
 	if(!launcher_list_art_selected_has_art ||
-	launcher_list_art_scaled_selected_slot >= LAUNCHER_LIST_ART_CACHE_COUNT ||
-	!launcher_list_art_scaled_valid[launcher_list_art_scaled_selected_slot] ||
-	!launcher_list_art_scaled_has_art[launcher_list_art_scaled_selected_slot])
+	slot >= LAUNCHER_LIST_ART_CACHE_COUNT ||
+	!launcher_list_art_scaled_valid[slot] ||
+	!launcher_list_art_scaled_has_art[slot] ||
+	!launcher_cache_selected.valid ||
+	!launcher_cache_selected.has_thumbnail ||
+	launcher_cache_selected.absolute_index != launcher_cache_center_index ||
+	launcher_list_art_scaled_index[slot] != launcher_cache_selected.absolute_index ||
+	launcher_list_art_scaled_sig_style[slot] != (u8)launcher_thumbnail_style)
 		return;
 
 	Launcher_GetListArtRect(&x, &y, &w, &h);
 	launcher_carousel_art_draw = 1;
-	Launcher_DrawPreparedThumbMasked(Launcher_ListArtScaledBuffer(launcher_list_art_scaled_selected_slot), w, x, y, w, h);
+	Launcher_DrawPreparedThumbMasked(Launcher_ListArtScaledBuffer(slot), w, x, y, w, h);
 	Launcher_DrawThumbBorder(x, y, w, h);
 	launcher_carousel_art_draw = 0;
 }
