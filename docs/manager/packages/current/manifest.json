@@ -1,0 +1,292 @@
+﻿{
+    "schema":  1,
+    "version":  "7.2",
+    "directories":  [
+                        "SYSTEM/BACKUP/SAVER",
+                        "SYSTEM/CHEAT",
+                        "SYSTEM/IMGS/CUSTOM",
+                        "SYSTEM/IMGS2/CUSTOM",
+                        "SYSTEM/KERNELS",
+                        "SYSTEM/PATCH",
+                        "SYSTEM/PLUG",
+                        "SYSTEM/RTS",
+                        "SYSTEM/SAVER"
+                    ],
+    "files":  [
+                  {
+                      "source":  "common/SYSTEM/NAME.TXT",
+                      "target":  "SYSTEM/NAME.TXT",
+                      "size":  65,
+                      "sha256":  "2b5d2d1c5a470689e5809e21871220aec517059ff29b232574976d8aef4d54f6",
+                      "policy":  "preserve"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/ap.mb",
+                      "target":  "SYSTEM/PLUG/ap.mb",
+                      "size":  128864,
+                      "sha256":  "d86c27fd0f0bd101e8e1c213fa710c0f1c1cf83f40d79da761ffdbd950788a09",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/arc.mb",
+                      "target":  "SYSTEM/PLUG/arc.mb",
+                      "size":  87044,
+                      "sha256":  "f5abb6ca3cec0fa94580a753645fa87aeb909d6e8e89bc243cbb1d090dbcec6a",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/bgf.mb",
+                      "target":  "SYSTEM/PLUG/bgf.mb",
+                      "size":  58748,
+                      "sha256":  "c0e39768511239f22310e04ce8b5ce2cd7c3f35c8acc6833ed506b76c2ce7de9",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/bmp.mb",
+                      "target":  "SYSTEM/PLUG/bmp.mb",
+                      "size":  12584,
+                      "sha256":  "a886337eb42c3fb372caecb886732108f9f42f241d86cd330cb03e4e066a3696",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/c8.mb",
+                      "target":  "SYSTEM/PLUG/c8.mb",
+                      "size":  64828,
+                      "sha256":  "4f109d8de87a3cbfb9c9a90cd71f7860ca77c1c4b512c9c09395e63ed18fd1cc",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/cwz.bin",
+                      "target":  "SYSTEM/PLUG/cwz.bin",
+                      "size":  27156,
+                      "sha256":  "e2e2d0327cc8d5c67ec4daa91ff1ce039af53020f365b8232dfdffd0698632a5",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/gg.mb",
+                      "target":  "SYSTEM/PLUG/gg.mb",
+                      "size":  60128,
+                      "sha256":  "221fca086ab02ad34a4950695d81d71d12454a0d9bceb9af58c1299c3e4aecb3",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/jpeg.bin",
+                      "target":  "SYSTEM/PLUG/jpeg.bin",
+                      "size":  82868,
+                      "sha256":  "a15af48ad3763050dc51233ecfb98e4dd8c43ddd9e58cd43c5d2c9a70e669480",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/jpg.bin",
+                      "target":  "SYSTEM/PLUG/jpg.bin",
+                      "size":  82868,
+                      "sha256":  "a15af48ad3763050dc51233ecfb98e4dd8c43ddd9e58cd43c5d2c9a70e669480",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/k3m.bin",
+                      "target":  "SYSTEM/PLUG/k3m.bin",
+                      "size":  26152,
+                      "sha256":  "bcce887ec9370b501b9b384df4235adeccd5dd90887c9b85d331dee9424e002d",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/lz.mb",
+                      "target":  "SYSTEM/PLUG/lz.mb",
+                      "size":  14612,
+                      "sha256":  "90e534a65b50a4e042e286e93c1fceac77f8104e2066c44f9c70e566fe7157f1",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/mda.bin",
+                      "target":  "SYSTEM/PLUG/mda.bin",
+                      "size":  141856,
+                      "sha256":  "91c76b1636304caf53e38b07c1bb67aeb0fcb1443411538861571b2702da46f2",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/mid.bin",
+                      "target":  "SYSTEM/PLUG/mid.bin",
+                      "size":  79431,
+                      "sha256":  "fa557fcf96af4cb7fbd7c4d4816bd859ecfb1ce07a86e77ce0921ecc834155e6",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/mod.bin",
+                      "target":  "SYSTEM/PLUG/mod.bin",
+                      "size":  27156,
+                      "sha256":  "e2e2d0327cc8d5c67ec4daa91ff1ce039af53020f365b8232dfdffd0698632a5",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/nes.gba",
+                      "target":  "SYSTEM/PLUG/nes.gba",
+                      "size":  144552,
+                      "sha256":  "5f30a78c52fcbb7fe0d15fcd15ce5c35a9bfc0e126733e0252b7ea2039c88a1d",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/ngc.mb",
+                      "target":  "SYSTEM/PLUG/ngc.mb",
+                      "size":  83928,
+                      "sha256":  "a1771503b9a7653441066f4e97e26f13702af1c78d2e7289bea90519ba980f24",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/ngp.mb",
+                      "target":  "SYSTEM/PLUG/ngp.mb",
+                      "size":  83928,
+                      "sha256":  "a1771503b9a7653441066f4e97e26f13702af1c78d2e7289bea90519ba980f24",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/ngpc.mb",
+                      "target":  "SYSTEM/PLUG/ngpc.mb",
+                      "size":  83928,
+                      "sha256":  "a1771503b9a7653441066f4e97e26f13702af1c78d2e7289bea90519ba980f24",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/nsf.mbz",
+                      "target":  "SYSTEM/PLUG/nsf.mbz",
+                      "size":  12480,
+                      "sha256":  "af40a69c8fba43762010b7bd87bf3678695ca4734cf1f7e0d9f14ca32c5da89d",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/pce.mb",
+                      "target":  "SYSTEM/PLUG/pce.mb",
+                      "size":  47880,
+                      "sha256":  "c4b356da9dd3853b7be74af949a66a0f72ac36541fa4bf4293e7efb5bba35a60",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/pcx.mb",
+                      "target":  "SYSTEM/PLUG/pcx.mb",
+                      "size":  14644,
+                      "sha256":  "9117bc404db9726ef4f89d57ca523c4912521d40dc5caea732fd6e61b030c87e",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/raw.mb",
+                      "target":  "SYSTEM/PLUG/raw.mb",
+                      "size":  14612,
+                      "sha256":  "b7df7c78759ec9d3faee5bcd7b641209b6a5a9343afa376a05df2c59c509b274",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/rom.gba",
+                      "target":  "SYSTEM/PLUG/rom.gba",
+                      "size":  87732,
+                      "sha256":  "bf006385068ecff05b608e8a17e6841746f5200dafaa5b4af415b4df6422499f",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/sb.gba",
+                      "target":  "SYSTEM/PLUG/sb.gba",
+                      "size":  13832,
+                      "sha256":  "e42dd8f3e743962f3d18c77acef8c56924bdff7568fef0a9a49c0203e4267e92",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/sc.mb",
+                      "target":  "SYSTEM/PLUG/sc.mb",
+                      "size":  60128,
+                      "sha256":  "221fca086ab02ad34a4950695d81d71d12454a0d9bceb9af58c1299c3e4aecb3",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/sg.mb",
+                      "target":  "SYSTEM/PLUG/sg.mb",
+                      "size":  60128,
+                      "sha256":  "221fca086ab02ad34a4950695d81d71d12454a0d9bceb9af58c1299c3e4aecb3",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/sms.mb",
+                      "target":  "SYSTEM/PLUG/sms.mb",
+                      "size":  60128,
+                      "sha256":  "221fca086ab02ad34a4950695d81d71d12454a0d9bceb9af58c1299c3e4aecb3",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/sv.mb",
+                      "target":  "SYSTEM/PLUG/sv.mb",
+                      "size":  36660,
+                      "sha256":  "573edb7cb61861133e85308841d869610b813eefe617c8d5968032c97bed99b1",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/txt.bin",
+                      "target":  "SYSTEM/PLUG/txt.bin",
+                      "size":  433552,
+                      "sha256":  "d162308048e7cf79de7a95cbe9be516e6bfba499ac605217ec3e06d12a64ddcf",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/vga.gba",
+                      "target":  "SYSTEM/PLUG/vga.gba",
+                      "size":  15104,
+                      "sha256":  "ee849c7ba9f8312aba845f819cae08f5430f38f5460faf70c23e124ec32bc27d",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/vgl.gba",
+                      "target":  "SYSTEM/PLUG/vgl.gba",
+                      "size":  15104,
+                      "sha256":  "ee849c7ba9f8312aba845f819cae08f5430f38f5460faf70c23e124ec32bc27d",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/vgm.gba",
+                      "target":  "SYSTEM/PLUG/vgm.gba",
+                      "size":  15104,
+                      "sha256":  "ee849c7ba9f8312aba845f819cae08f5430f38f5460faf70c23e124ec32bc27d",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/wav.bin",
+                      "target":  "SYSTEM/PLUG/wav.bin",
+                      "size":  42220,
+                      "sha256":  "87afccaf5c71180d156de39794b727908fbe2ee097c54fe55554864454c2f018",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/ws.mb",
+                      "target":  "SYSTEM/PLUG/ws.mb",
+                      "size":  60984,
+                      "sha256":  "c3297d1d8a6ebf98adbd9897bdadbf977b06ad7325ecb587f9cc15bb10b86477",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/wsc.mb",
+                      "target":  "SYSTEM/PLUG/wsc.mb",
+                      "size":  60984,
+                      "sha256":  "c3297d1d8a6ebf98adbd9897bdadbf977b06ad7325ecb587f9cc15bb10b86477",
+                      "policy":  "replace"
+                  },
+                  {
+                      "source":  "common/SYSTEM/PLUG/z80.gba",
+                      "target":  "SYSTEM/PLUG/z80.gba",
+                      "size":  189221,
+                      "sha256":  "c8740b513601db0cd4bb18470d832f92a7b29f5d2fccbb17b2c1f8f66280ce7a",
+                      "policy":  "replace"
+                  }
+              ],
+    "kernels":  {
+                    "omega_de":  {
+                                     "source":  "kernels/ezkernelnew.bin",
+                                     "target":  "ezkernelnew.bin",
+                                     "size":  2089304,
+                                     "sha256":  "fd30611d0fdc3e7be192dd2cc3d2affc535d427f4e551303398a4a987074ce90",
+                                     "policy":  "replace"
+                                 },
+                    "original":  {
+                                     "source":  "kernels/ezkernel.bin",
+                                     "target":  "ezkernel.bin",
+                                     "size":  2089216,
+                                     "sha256":  "c082ee20d41b6adc4e99f9c78f9baebe38eb6d9da7e9b0f93c2939155c708263",
+                                     "policy":  "replace"
+                                 }
+                }
+}

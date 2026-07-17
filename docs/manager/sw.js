@@ -1,4 +1,4 @@
-const CACHE_NAME = "ds-style-manager-v1";
+const CACHE_NAME = "ds-style-manager-v3";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -7,7 +7,8 @@ const CORE_ASSETS = [
   "./js/artwork.js",
   "./js/filesystem.js",
   "./js/images.js",
-  "./js/projects.js",
+  "./js/installer.js",
+  "./packages/current/manifest.json",
   "./manifest.webmanifest",
   "../project/assets/Logo.png",
   "../project/assets/favicon.png"

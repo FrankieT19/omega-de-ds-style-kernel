@@ -1,28 +1,57 @@
 import {
-  chooseFiles,
   copyBrowserFile,
   countFiles,
   ensurePermission,
   findEntryCaseInsensitive,
   getDirectory,
   listDirectory,
-  pathExists,
   removeEntry,
   supportsFileSystemAccess,
 } from "./filesystem.js";
-import { downloadBlob } from "./images.js";
 import { ArtworkController } from "./artwork.js";
-import { ProjectController } from "./projects.js";
+import { installDsStyle, loadInstallManifest, loadPersonalisation } from "./installer.js";
 
 const state = {
   sdRoot: null,
   sdModel: null,
+  sdDetectedModel: null,
+  manualSdModel: null,
   sdSummary: null,
+  installManifest: null,
+  setupRoot: null,
+  setupDirty: false,
+  personalisation: {
+    name: "",
+    theme: "Light",
+    colour: "Pale Blue",
+    boot: "Start",
+    clock: "24 hour",
+    sounds: "On",
+  },
 };
 
 const MODEL_INFO = {
   omega_de: { label: "Omega Definitive Edition", kernel: "ezkernelnew.bin" },
   original: { label: "Original Omega", kernel: "ezkernel.bin" },
+};
+
+const COLOUR_SWATCHES = {
+  "Pale Blue": "#52738c",
+  "Light Blue": "#299cce",
+  "Blue": "#005af7",
+  "Dark Blue": "#000094",
+  "Green": "#00a439",
+  "Pale Green": "#4ac57b",
+  "Bright Green": "#00c500",
+  "Lime": "#94d600",
+  "Yellow": "#d6c500",
+  "Red": "#ff0010",
+  "Orange": "#ff9400",
+  "Brown": "#bd4a00",
+  "Pink": "#ff19a4",
+  "Pale Pink": "#d673d6",
+  "Magenta": "#d600ef",
+  "Purple": "#8c00d6",
 };
 
 function $(selector) {
@@ -49,15 +78,76 @@ function formatBytes(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function requestConfirmation(title, copy, actionLabel = "Continue") {
+function setSetupState(copy) {
+  $("#setup-state").textContent = copy;
+}
+
+function setSegmentedValue(control, value) {
+  document.querySelectorAll(`[data-setup-control="${control}"] [data-value]`).forEach((button) => {
+    const active = button.dataset.value === value;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+}
+
+function renderPersonalisation() {
+  const preferences = state.personalisation;
+  $("#setup-name").value = preferences.name;
+  $("#setup-colour").value = preferences.colour;
+  $("#setup-boot").value = preferences.boot;
+  $("#setup-sounds").checked = preferences.sounds === "On";
+  $("#setup-colour-swatch").style.background = COLOUR_SWATCHES[preferences.colour] || COLOUR_SWATCHES["Pale Blue"];
+  setSegmentedValue("theme", preferences.theme);
+  setSegmentedValue("clock", preferences.clock);
+}
+
+function markPersonalisationDirty() {
+  state.setupDirty = true;
+  setSetupState("Ready to apply");
+}
+
+async function loadCardPersonalisation() {
+  if (!state.sdRoot || state.setupRoot === state.sdRoot || state.setupDirty) return;
+  state.personalisation = await loadPersonalisation(state.sdRoot);
+  state.setupRoot = state.sdRoot;
+  state.setupDirty = false;
+  renderPersonalisation();
+  setSetupState("Current settings loaded");
+}
+
+function collectPersonalisation() {
+  state.personalisation.name = [...$("#setup-name").value.replace(/[\0\r\n]/g, "").trim()].slice(0, 11).join("");
+  state.personalisation.colour = $("#setup-colour").value;
+  state.personalisation.boot = $("#setup-boot").value;
+  state.personalisation.sounds = $("#setup-sounds").checked ? "On" : "Off";
+  return { ...state.personalisation };
+}
+
+function requestConfirmation(title, copy, actionLabel = "Continue", options = {}) {
   const dialog = $("#confirm-dialog");
+  const action = $("#confirm-action");
   $("#confirm-title").textContent = title;
   $("#confirm-copy").textContent = copy;
-  $("#confirm-action").textContent = actionLabel;
+  action.textContent = actionLabel;
+  action.className = `button ${options.danger ? "danger" : "primary"}`;
+  dialog.querySelector(".dialog-icon").innerHTML = `<i data-lucide="${options.danger ? "triangle-alert" : "package-check"}"></i>`;
+  window.lucide?.createIcons();
   return new Promise((resolve) => {
     const onClose = () => {
       dialog.removeEventListener("close", onClose);
       resolve(dialog.returnValue === "confirm");
+    };
+    dialog.addEventListener("close", onClose);
+    dialog.showModal();
+  });
+}
+
+function requestCartridgeChoice() {
+  const dialog = $("#cartridge-dialog");
+  return new Promise((resolve) => {
+    const onClose = () => {
+      dialog.removeEventListener("close", onClose);
+      resolve(MODEL_INFO[dialog.returnValue] ? dialog.returnValue : null);
     };
     dialog.addEventListener("close", onClose);
     dialog.showModal();
@@ -85,12 +175,13 @@ async function findRootFile(root, filename) {
 }
 
 async function detectSdModel(root) {
-  const deKernel = await findRootFile(root, MODEL_INFO.omega_de.kernel);
-  const originalKernel = await findRootFile(root, MODEL_INFO.original.kernel);
-  if (deKernel && !originalKernel) return { key: "omega_de", kernelHandle: deKernel };
-  if (originalKernel && !deKernel) return { key: "original", kernelHandle: originalKernel };
-  if (deKernel && originalKernel) return { key: "ambiguous", kernelHandle: null };
-  return { key: "unknown", kernelHandle: null };
+  const omegaDe = await findRootFile(root, MODEL_INFO.omega_de.kernel);
+  const original = await findRootFile(root, MODEL_INFO.original.kernel);
+  let key = "unknown";
+  if (omegaDe && !original) key = "omega_de";
+  else if (original && !omegaDe) key = "original";
+  else if (omegaDe && original) key = "ambiguous";
+  return { key, handles: { omega_de: omegaDe, original } };
 }
 
 async function countStyles(root) {
@@ -106,8 +197,14 @@ async function countStyles(root) {
 async function scanSd() {
   if (!state.sdRoot) return;
   const root = state.sdRoot;
-  const model = await detectSdModel(root);
-  state.sdModel = model.key;
+  const detection = await detectSdModel(root);
+  state.sdDetectedModel = detection.key;
+  if (MODEL_INFO[detection.key]) {
+    state.sdModel = detection.key;
+    state.manualSdModel = null;
+  } else {
+    state.sdModel = MODEL_INFO[state.manualSdModel] ? state.manualSdModel : null;
+  }
 
   const [wideCount, squareCount, styleCount] = await Promise.all([
     countFiles(root, "SYSTEM/IMGS", { extensions: [".bmp"], maxDepth: 4, maxFiles: 50000, includeHidden: false }),
@@ -116,14 +213,15 @@ async function scanSd() {
   ]);
 
   let kernelText = "Not found";
-  if (model.kernelHandle) {
-    const file = await model.kernelHandle.getFile();
+  if (MODEL_INFO[detection.key]) {
+    const file = await detection.handles[detection.key].getFile();
     kernelText = `${file.name} (${formatBytes(file.size)})`;
-  } else if (model.key === "ambiguous") {
+  } else if (detection.key === "ambiguous") {
     kernelText = "Two kernel files found";
   }
 
-  state.sdSummary = { model, wideCount, squareCount, styleCount, kernelText };
+  state.sdSummary = { detection, wideCount, squareCount, styleCount, kernelText };
+  await loadCardPersonalisation();
   renderSdSummary();
   await refreshStyles();
   artwork.onSdChanged();
@@ -132,8 +230,11 @@ async function scanSd() {
 function renderSdSummary() {
   const summary = state.sdSummary;
   if (!summary) return;
-  const info = MODEL_INFO[summary.model.key];
-  const modelLabel = info?.label || (summary.model.key === "ambiguous" ? "Check card root" : "Not detected");
+  const info = MODEL_INFO[state.sdModel];
+  const modelLabel = info?.label || "Choose cartridge";
+  const canChoose = Boolean(state.sdRoot) && !MODEL_INFO[summary.detection.key];
+  const cartridgeButton = $("#choose-cartridge");
+
   $("#sd-model").textContent = modelLabel;
   $("#sd-kernel").textContent = summary.kernelText;
   $("#sd-wide-count").textContent = summary.wideCount.toLocaleString();
@@ -141,13 +242,28 @@ function renderSdSummary() {
   $("#sd-style-count").textContent = summary.styleCount.toLocaleString();
   $("#sd-connection-title").textContent = state.sdRoot.name;
   $("#sd-connection-copy").textContent = info
-    ? "Ready for artwork, styles and kernel maintenance."
-    : "The card is connected, but its cartridge model could not be identified from the root kernel file.";
-  $("#sd-model-pill").textContent = modelLabel;
-  $("#sd-connection-banner").dataset.state = info ? "connected" : "error";
-  for (const selector of ["#prepare-folders", "#install-kernel", "#refresh-sd", "#add-style"]) {
-    $(selector).disabled = false;
-  }
+    ? "Ready to install DS Style and manage artwork or styles."
+    : "Choose the cartridge that will use this SD card to continue.";
+  $("#sd-model-pill").textContent = info ? modelLabel : "Choose cartridge";
+  $("#sd-connection-banner").dataset.state = info ? "connected" : "choice";
+
+  cartridgeButton.disabled = !canChoose;
+  cartridgeButton.classList.toggle("is-selectable", canChoose);
+  cartridgeButton.title = canChoose ? "Choose cartridge" : "Detected from the kernel file at the SD-card root";
+  $("#quick-install").disabled = false;
+  $("#refresh-sd").disabled = false;
+  $("#add-style").disabled = false;
+}
+
+async function chooseCartridge() {
+  if (!state.sdRoot || MODEL_INFO[state.sdDetectedModel]) return state.sdModel;
+  const model = await requestCartridgeChoice();
+  if (!model) return null;
+  state.manualSdModel = model;
+  state.sdModel = model;
+  renderSdSummary();
+  toast(`${MODEL_INFO[model].label} selected.`, "success");
+  return model;
 }
 
 async function connectSd() {
@@ -159,8 +275,15 @@ async function connectSd() {
     const handle = await window.showDirectoryPicker({ id: "ds-style-sd", mode: "readwrite" });
     if (!await ensurePermission(handle, "readwrite")) throw new Error("Write access was not granted.");
     state.sdRoot = handle;
+    state.sdModel = null;
+    state.sdDetectedModel = null;
+    state.manualSdModel = null;
+    state.sdSummary = null;
+    state.setupRoot = null;
+    state.setupDirty = false;
+    $("#quick-install").disabled = true;
     $("#sd-connection-title").textContent = "Reading card...";
-    $("#sd-connection-copy").textContent = "Checking artwork and kernel folders.";
+    $("#sd-connection-copy").textContent = "Checking the kernel, artwork and style folders.";
     await scanSd();
     toast("SD card connected.", "success");
   } catch (error) {
@@ -168,41 +291,70 @@ async function connectSd() {
   }
 }
 
-async function prepareFolders() {
-  if (!state.sdRoot) return;
-  try {
-    for (const path of ["SYSTEM", "SYSTEM/IMGS", "SYSTEM/IMGS/CUSTOM", "SYSTEM/IMGS2", "SYSTEM/IMGS2/CUSTOM", "SYSTEM/KERNELS"]) {
-      await getDirectory(state.sdRoot, path, true);
-    }
-    toast("DS Style folders are ready.", "success");
-    await scanSd();
-  } catch (error) {
-    toast(error.message, "error");
-  }
+function showInstallProgress(detail) {
+  const wrapper = $("#install-progress");
+  wrapper.hidden = false;
+  $("#install-progress-bar").style.width = `${Math.max(0, Math.min(100, detail.percent || 0))}%`;
+  if (detail.title) $("#install-progress-title").textContent = detail.title;
+  if (detail.copy) $("#install-progress-copy").textContent = detail.copy;
 }
 
-async function installKernelFile(file) {
-  if (!state.sdRoot || !file) return;
+function showInstallResult(stateName, title, copy) {
+  const result = $("#install-result");
+  result.dataset.state = stateName;
+  result.querySelector("svg, i")?.remove();
+  result.insertAdjacentHTML("afterbegin", `<i data-lucide="${stateName === "success" ? "circle-check" : "circle-alert"}"></i>`);
+  $("#install-result-title").textContent = title;
+  $("#install-result-copy").textContent = copy;
+  result.hidden = false;
+  window.lucide?.createIcons();
+}
+
+async function startQuickInstall() {
+  if (!state.sdRoot) return;
   let model = state.sdModel;
-  const lowerName = file.name.toLocaleLowerCase();
-  if (lowerName === MODEL_INFO.omega_de.kernel) model = "omega_de";
-  if (lowerName === MODEL_INFO.original.kernel) model = "original";
-  if (!MODEL_INFO[model]) {
-    toast("Name the file ezkernel.bin or ezkernelnew.bin, or connect a card with an existing kernel first.", "error", 6500);
+  if (!MODEL_INFO[model]) model = await chooseCartridge();
+  if (!MODEL_INFO[model]) return;
+
+  let manifest = state.installManifest;
+  try {
+    manifest ||= await loadInstallManifest();
+    state.installManifest = manifest;
+  } catch (error) {
+    toast(error.message, "error", 6500);
     return;
   }
-  const target = MODEL_INFO[model].kernel;
-  const exists = await pathExists(state.sdRoot, target, "file");
-  if (exists) {
-    const confirmed = await requestConfirmation("Replace the installed kernel?", `${target} already exists at the root of this card. It will be replaced with ${file.name}.`, "Replace");
-    if (!confirmed) return;
-  }
+
+  const info = MODEL_INFO[model];
+  const confirmed = await requestConfirmation(
+    `Install DS Style v${manifest.version}?`,
+    `The card will be prepared for the ${info.label}. Recognised stock or Simple folders will be moved into SYSTEM, and existing personal files will be preserved.`,
+    "Install",
+  );
+  if (!confirmed) return;
+
+  const button = $("#quick-install");
+  button.disabled = true;
+  $("#install-result").hidden = true;
   try {
-    await copyBrowserFile(state.sdRoot, target, file);
-    toast(`${target} installed. Hold R while the cartridge boots to apply it.`, "success", 6500);
+    const result = await installDsStyle(state.sdRoot, model, collectPersonalisation(), showInstallProgress);
+    const backupNote = result.backedUp
+      ? ` ${result.backedUp} existing file${result.backedUp === 1 ? " was" : "s were"} preserved in SYSTEM/BACKUP/WEB INSTALL BACKUP.`
+      : "";
+    showInstallResult(
+      "success",
+      `DS Style v${result.version} is ready`,
+      `Safely eject the SD card, insert it into the cartridge, then hold R while the cartridge boots. Keep the console powered on until the update finishes.${backupNote}`,
+    );
+    toast("DS Style was installed on the SD card.", "success", 6500);
+    state.setupDirty = false;
+    setSetupState("Saved to SD card");
     await scanSd();
   } catch (error) {
-    toast(error.message, "error");
+    showInstallResult("error", "Installation stopped", `${error.message} It is safe to reconnect the card and try again.`);
+    toast(error.message, "error", 7000);
+  } finally {
+    button.disabled = false;
   }
 }
 
@@ -246,7 +398,12 @@ async function refreshStyles() {
     row.querySelector("strong").textContent = entry.name.replace(/\.bin$/i, "");
     row.querySelector("small").textContent = `${entry.name} - ${formatBytes(file.size)}`;
     row.querySelector(".remove-style").addEventListener("click", async () => {
-      const confirmed = await requestConfirmation("Remove this style?", `${entry.name} will be deleted from SYSTEM/KERNELS.`, "Remove");
+      const confirmed = await requestConfirmation(
+        "Remove this style?",
+        `${entry.name} will be deleted from SYSTEM/KERNELS.`,
+        "Remove",
+        { danger: true },
+      );
       if (!confirmed) return;
       try {
         await removeEntry(state.sdRoot, `SYSTEM/KERNELS/${entry.name}`);
@@ -272,7 +429,12 @@ async function addStyles(files) {
     if (!safeFilename) continue;
     const existing = await findEntryCaseInsensitive(directory, safeFilename, "file");
     if (existing) {
-      const confirmed = await requestConfirmation("Replace an existing style?", `${safeFilename} already exists in SYSTEM/KERNELS.`, "Replace");
+      const confirmed = await requestConfirmation(
+        "Replace an existing style?",
+        `${safeFilename} already exists in SYSTEM/KERNELS.`,
+        "Replace",
+        { danger: true },
+      );
       if (!confirmed) continue;
     }
     await copyBrowserFile(state.sdRoot, `SYSTEM/KERNELS/${safeFilename}`, file);
@@ -282,114 +444,67 @@ async function addStyles(files) {
   await scanSd();
 }
 
-function updateBuildSummary() {
-  const summary = project.currentSummary();
-  $("#build-project-name").textContent = summary?.name || "No project open";
-  $("#build-project-model").textContent = summary
-    ? `${summary.model.label} - DS Style v${summary.version}`
-    : "Open a Customiser project first.";
-  $("#start-web-build").disabled = !summary;
-}
-
-function normalizeServiceUrl(value) {
-  return String(value || "").trim().replace(/\/+$/, "");
-}
-
-async function checkBuildService(showSuccess = true) {
-  const url = normalizeServiceUrl($("#build-service-url").value);
-  if (!url) throw new Error("Enter a build service address.");
-  localStorage.setItem("ds-style-build-service", url);
-  const response = await fetch(`${url}/health`, { headers: { Accept: "application/json" } });
-  if (!response.ok) throw new Error(`The build service returned ${response.status}.`);
-  const result = await response.json();
-  if (!result.ready) throw new Error(result.message || "The build service is not ready.");
-  if (showSuccess) toast("Build service is ready.", "success");
-  return { url, result };
-}
-
-function showBuildProgress(percent, title, copy) {
-  const wrapper = $("#build-progress");
-  wrapper.hidden = false;
-  $("#build-progress-bar").style.width = `${Math.max(0, Math.min(100, percent))}%`;
-  if (title) $("#build-progress-title").textContent = title;
-  if (copy) $("#build-progress-copy").textContent = copy;
-}
-
-async function startBuild() {
-  const summary = project.currentSummary();
-  if (!summary) return;
-  const resultBox = $("#build-result");
-  resultBox.hidden = true;
-  $("#start-web-build").disabled = true;
+async function loadInstallerInfo() {
   try {
-    showBuildProgress(5, "Checking service", "Confirming that the compiler is available...");
-    const { url } = await checkBuildService(false);
-    const payload = await project.collectBuildPayload((percent, copy) => showBuildProgress(percent, "Preparing project", copy));
-    showBuildProgress(72, "Building kernel", "The compiler is processing the project...");
-    const response = await fetch(`${url}/api/build`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/octet-stream,application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      let message = `Build failed (${response.status}).`;
-      try { message = (await response.json()).detail || message; } catch { /* Keep fallback. */ }
-      throw new Error(message);
-    }
-    const blob = await response.blob();
-    const filename = response.headers.get("X-DS-Style-Filename") || MODEL_INFO[summary.model.key]?.kernel || "ezkernel.bin";
-    showBuildProgress(100, "Build complete", `${filename} is ready.`);
-    downloadBlob(blob, filename);
-    resultBox.dataset.state = "success";
-    resultBox.innerHTML = `<strong>Build complete.</strong><p>${filename} has been downloaded. Put it at the root of your SD card and hold R as the cartridge boots.</p>`;
-    resultBox.hidden = false;
-    toast("Kernel build complete.", "success");
-  } catch (error) {
-    showBuildProgress(100, "Build stopped", error.message);
-    resultBox.dataset.state = "error";
-    resultBox.innerHTML = `<strong>Build failed.</strong><p></p>`;
-    resultBox.querySelector("p").textContent = error.message;
-    resultBox.hidden = false;
-    toast(error.message, "error", 6500);
-  } finally {
-    $("#start-web-build").disabled = !project.currentSummary();
+    state.installManifest = await loadInstallManifest();
+    $("#installer-version").textContent = `DS Style v${state.installManifest.version}`;
+  } catch {
+    $("#installer-version").textContent = "Installer temporarily unavailable";
   }
 }
 
 document.querySelectorAll("[data-view-target]").forEach((button) => {
   button.addEventListener("click", () => showView(button.dataset.viewTarget));
 });
-for (const selector of ["#connect-sd-header", "#connect-sd-main"]) $(selector).addEventListener("click", connectSd);
-$("#prepare-folders").addEventListener("click", prepareFolders);
-$("#refresh-sd").addEventListener("click", () => scanSd().catch((error) => toast(error.message, "error")));
-$("#install-kernel").addEventListener("click", () => $("#kernel-file-input").click());
-$("#kernel-file-input").addEventListener("change", (event) => {
-  const file = event.target.files?.[0];
-  if (file) installKernelFile(file);
-  event.target.value = "";
+document.querySelectorAll("[data-setup-control] [data-value]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const control = button.closest("[data-setup-control]").dataset.setupControl;
+    state.personalisation[control === "clock" ? "clock" : "theme"] = button.dataset.value;
+    setSegmentedValue(control, button.dataset.value);
+    markPersonalisationDirty();
+  });
 });
+$("#setup-name").addEventListener("input", (event) => {
+  state.personalisation.name = [...event.target.value.replace(/[\0\r\n]/g, "")].slice(0, 11).join("");
+  if (event.target.value !== state.personalisation.name) event.target.value = state.personalisation.name;
+  markPersonalisationDirty();
+});
+$("#setup-colour").addEventListener("change", (event) => {
+  state.personalisation.colour = event.target.value;
+  $("#setup-colour-swatch").style.background = COLOUR_SWATCHES[event.target.value] || COLOUR_SWATCHES["Pale Blue"];
+  markPersonalisationDirty();
+});
+$("#setup-boot").addEventListener("change", (event) => {
+  state.personalisation.boot = event.target.value;
+  markPersonalisationDirty();
+});
+$("#setup-sounds").addEventListener("change", (event) => {
+  state.personalisation.sounds = event.target.checked ? "On" : "Off";
+  markPersonalisationDirty();
+});
+for (const selector of ["#connect-sd-header", "#connect-sd-main"]) $(selector).addEventListener("click", connectSd);
+$("#choose-cartridge").addEventListener("click", chooseCartridge);
+$("#quick-install").addEventListener("click", startQuickInstall);
+$("#refresh-sd").addEventListener("click", () => scanSd().catch((error) => toast(error.message, "error")));
 $("#add-style").addEventListener("click", () => $("#style-file-input").click());
 $("#style-file-input").addEventListener("change", (event) => {
   addStyles([...event.target.files]).catch((error) => toast(error.message, "error"));
   event.target.value = "";
 });
-$("#check-build-service").addEventListener("click", () => checkBuildService().catch((error) => toast(error.message, "error")));
-$("#start-web-build").addEventListener("click", startBuild);
 
 const artwork = new ArtworkController({
   getSdRoot: () => state.sdRoot,
   toast,
   onSaved: scanSd,
 });
-const project = new ProjectController({ toast, onChanged: updateBuildSummary });
 
-$("#build-service-url").value = localStorage.getItem("ds-style-build-service") || "";
-updateBuildSummary();
+loadInstallerInfo();
+renderPersonalisation();
 artwork.onSdChanged();
 window.lucide?.createIcons();
 
 if (!supportsFileSystemAccess()) {
-  toast("Direct SD-card and project access needs desktop Chrome or Edge. Artwork downloads still work.", "info", 9000);
+  toast("Direct SD-card access needs desktop Chrome or Edge. Artwork downloads still work.", "info", 9000);
 }
 
 if ("serviceWorker" in navigator && location.protocol !== "file:") {

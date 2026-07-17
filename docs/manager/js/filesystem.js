@@ -87,15 +87,6 @@ export async function findEntryCaseInsensitive(directory, name, kind = "any") {
   return null;
 }
 
-export async function readFile(root, path) {
-  const handle = await getFileHandle(root, path, false);
-  return handle.getFile();
-}
-
-export async function readText(root, path) {
-  return (await readFile(root, path)).text();
-}
-
 export async function writeFile(root, path, data) {
   const handle = await getFileHandle(root, path, true);
   const writable = await handle.createWritable();
@@ -107,8 +98,9 @@ export async function writeFile(root, path, data) {
   return handle;
 }
 
-export async function writeText(root, path, text) {
-  return writeFile(root, path, new Blob([text], { type: "text/plain;charset=utf-8" }));
+export async function readText(root, path) {
+  const handle = await getFileHandle(root, path, false);
+  return (await handle.getFile()).text();
 }
 
 export async function removeEntry(root, path, options = {}) {
@@ -177,38 +169,4 @@ export async function countFiles(root, path, options = {}) {
 
 export async function copyBrowserFile(root, path, file) {
   return writeFile(root, path, file);
-}
-
-export async function collectProjectFiles(root, allowedMatchers, options = {}) {
-  const { maxFiles = 1000, maxBytes = 32 * 1024 * 1024 } = options;
-  const all = await listFilesRecursive(root, { maxDepth: 12, maxFiles: maxFiles + 1, includeHidden: false });
-  const selected = all.filter((item) => allowedMatchers.some((matcher) => matcher(item.path)));
-  if (selected.length > maxFiles) throw new Error(`The project contains more than ${maxFiles} editable files.`);
-
-  let total = 0;
-  const output = [];
-  for (const item of selected) {
-    const file = await item.handle.getFile();
-    total += file.size;
-    if (total > maxBytes) throw new Error("The editable project files are too large for a web build.");
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    output.push({ path: item.path.replaceAll("\\", "/"), data: bytesToBase64(bytes) });
-  }
-  return output;
-}
-
-export function bytesToBase64(bytes) {
-  const chunkSize = 0x8000;
-  let binary = "";
-  for (let index = 0; index < bytes.length; index += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
-  }
-  return btoa(binary);
-}
-
-export function base64ToBytes(value) {
-  const binary = atob(value);
-  const bytes = new Uint8Array(binary.length);
-  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
-  return bytes;
 }

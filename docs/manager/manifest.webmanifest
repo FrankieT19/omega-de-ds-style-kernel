@@ -1,7 +1,7 @@
 {
   "name": "DS Style Manager",
   "short_name": "DS Style",
-  "description": "Manage DS Style artwork, projects, styles and SD-card files.",
+  "description": "Install DS Style, choose starting preferences, and manage artwork and styles directly on an SD card.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0b0d16",

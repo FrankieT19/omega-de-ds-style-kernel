@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Manage DS Style artwork, styles, projects and SD-card files in your browser.">
+  <meta name="description" content="Install DS Style, choose starting preferences, and manage artwork and styles directly on an SD card.">
   <meta name="theme-color" content="#0b0d16">
   <link rel="icon" type="image/png" href="../project/assets/favicon.png">
   <link rel="apple-touch-icon" href="../project/assets/favicon.png">
@@ -34,23 +34,20 @@
 
   <div class="app-shell">
     <nav class="app-nav" aria-label="Manager sections">
-      <button class="nav-item is-active" type="button" data-view-target="sd-card" aria-current="page" aria-label="SD card">
-        <i data-lucide="hard-drive"></i><span>SD card</span>
+      <button class="nav-item is-active" type="button" data-view-target="sd-card" aria-current="page" aria-label="Install">
+        <i data-lucide="download"></i><span>Install</span>
       </button>
       <button class="nav-item" type="button" data-view-target="artwork" aria-label="Artwork">
         <i data-lucide="image"></i><span>Artwork</span>
       </button>
-      <button class="nav-item" type="button" data-view-target="project" aria-label="Customise">
-        <i data-lucide="palette"></i><span>Customise</span>
-      </button>
       <button class="nav-item" type="button" data-view-target="styles" aria-label="Styles">
         <i data-lucide="layers-3"></i><span>Styles</span>
       </button>
-      <button class="nav-item" type="button" data-view-target="build" aria-label="Build">
-        <i data-lucide="hammer"></i><span>Build</span>
-      </button>
 
       <div class="nav-spacer"></div>
+      <a class="nav-item nav-link" href="https://github.com/FrankieT19/ds-style-customiser/releases/latest" target="_blank" rel="noopener noreferrer" aria-label="Desktop Customiser">
+        <i data-lucide="palette"></i><span>Customiser</span>
+      </a>
       <a class="nav-item nav-link" href="../" target="_blank" rel="noopener noreferrer" aria-label="User guide">
         <i data-lucide="book-open"></i><span>User guide</span>
       </a>
@@ -63,9 +60,9 @@
       <section class="view is-active" id="view-sd-card" data-view="sd-card">
         <div class="view-heading">
           <div>
-            <p class="eyebrow">Local storage</p>
-            <h1>SD card</h1>
-            <p>Install kernels, prepare artwork folders and check the card without uploading its contents.</p>
+            <p class="eyebrow">Guided setup</p>
+            <h1>Install DS Style</h1>
+            <p>Prepare a blank, stock or Simple SD card in one guided step. Existing games, saves and artwork are preserved.</p>
           </div>
           <button class="button primary" id="connect-sd-main" type="button">
             <i data-lucide="folder-open"></i><span>Connect SD card</span>
@@ -78,14 +75,19 @@
             <strong id="sd-connection-title">No SD card connected</strong>
             <span id="sd-connection-copy">Choose the root of your microSD card to begin.</span>
           </div>
-          <span class="status-pill" id="sd-model-pill">Not connected</span>
+          <div class="connection-actions">
+            <span class="status-pill" id="sd-model-pill">Not connected</span>
+            <button class="icon-button" id="refresh-sd" type="button" title="Refresh card summary" disabled>
+              <i data-lucide="refresh-cw"></i><span class="sr-only">Refresh card summary</span>
+            </button>
+          </div>
         </div>
 
         <div class="metric-grid" aria-label="SD card summary">
-          <div class="metric">
+          <button class="metric metric-button" id="choose-cartridge" type="button" disabled aria-haspopup="dialog">
             <span>Cartridge</span>
-            <strong id="sd-model">-</strong>
-          </div>
+            <span class="metric-value"><strong id="sd-model">-</strong><i data-lucide="chevron-right"></i></span>
+          </button>
           <div class="metric">
             <span>Kernel</span>
             <strong id="sd-kernel">-</strong>
@@ -104,50 +106,119 @@
           </div>
         </div>
 
-        <div class="section-block">
-          <div class="section-title">
+        <section class="setup-card" aria-labelledby="setup-title">
+          <div class="setup-heading">
+            <div class="setup-symbol"><i data-lucide="sliders-horizontal"></i></div>
             <div>
-              <h2>Quick actions</h2>
-              <p>Common card maintenance, kept deliberately small and predictable.</p>
+              <span class="section-kicker">Optional</span>
+              <h2 id="setup-title">Make it yours</h2>
+              <p>Choose a few starting preferences. Existing settings not shown here are left untouched.</p>
+            </div>
+            <span class="setup-state" id="setup-state">Applied during install</span>
+          </div>
+
+          <div class="setup-grid">
+            <label class="setup-field">
+              <span>Name</span>
+              <input id="setup-name" type="text" maxlength="11" autocomplete="off" placeholder="Your name">
+              <small>Shown in the top bar, up to 11 characters.</small>
+            </label>
+
+            <fieldset class="setup-field">
+              <legend>Appearance</legend>
+              <div class="setup-segmented" data-setup-control="theme">
+                <button class="is-active" type="button" data-value="Light" aria-pressed="true"><i data-lucide="sun"></i> Light</button>
+                <button type="button" data-value="Dark" aria-pressed="false"><i data-lucide="moon"></i> Dark</button>
+              </div>
+            </fieldset>
+
+            <label class="setup-field">
+              <span>Accent colour</span>
+              <span class="colour-select">
+                <i id="setup-colour-swatch" aria-hidden="true"></i>
+                <select id="setup-colour">
+                  <option>Pale Blue</option>
+                  <option>Light Blue</option>
+                  <option>Blue</option>
+                  <option>Dark Blue</option>
+                  <option>Green</option>
+                  <option>Pale Green</option>
+                  <option>Bright Green</option>
+                  <option>Lime</option>
+                  <option>Yellow</option>
+                  <option>Red</option>
+                  <option>Orange</option>
+                  <option>Brown</option>
+                  <option>Pink</option>
+                  <option>Pale Pink</option>
+                  <option>Magenta</option>
+                  <option>Purple</option>
+                </select>
+              </span>
+            </label>
+
+            <label class="setup-field">
+              <span>Start on</span>
+              <select id="setup-boot">
+                <option value="Start">Start screen</option>
+                <option value="SD">SD Card</option>
+                <option value="NOR">NOR Flash</option>
+                <option value="Last game">Last game</option>
+                <option value="Recents">Recently played</option>
+                <option value="Favourites">Favourites</option>
+              </select>
+            </label>
+
+            <fieldset class="setup-field">
+              <legend>Clock</legend>
+              <div class="setup-segmented" data-setup-control="clock">
+                <button class="is-active" type="button" data-value="24 hour" aria-pressed="true">24 hour</button>
+                <button type="button" data-value="12 hour" aria-pressed="false">12 hour</button>
+              </div>
+            </fieldset>
+
+            <label class="setup-field setup-toggle">
+              <span class="toggle-copy"><strong>Menu sounds</strong><small>Play sounds while navigating DS Style.</small></span>
+              <input id="setup-sounds" type="checkbox" checked>
+              <span class="toggle-track" aria-hidden="true"><i></i></span>
+            </label>
+          </div>
+        </section>
+
+        <div class="installer-card">
+          <div class="installer-lead">
+            <div class="installer-symbol"><i data-lucide="package-check"></i></div>
+            <div>
+              <span class="recommend-tag">Recommended</span>
+              <h2>Quick install</h2>
+              <p>Installs the correct kernel and support files, creates the DS Style folders, and moves recognised EZ-Flash folders into <strong>SYSTEM</strong>.</p>
+            </div>
+            <div class="installer-action">
+              <span id="installer-version">Checking current release...</span>
+              <button class="button primary" id="quick-install" type="button" disabled>
+                <i data-lucide="sparkles"></i><span>Install DS Style</span>
+              </button>
             </div>
           </div>
 
-          <div class="action-list">
-            <article class="action-row">
-              <div class="action-symbol"><i data-lucide="folders"></i></div>
-              <div class="action-copy">
-                <h3>Prepare DS Style folders</h3>
-                <p>Create any missing artwork, custom artwork and style folders.</p>
-              </div>
-              <button class="button secondary" id="prepare-folders" type="button" disabled>
-                <i data-lucide="folder-plus"></i><span>Prepare</span>
-              </button>
-            </article>
+          <div class="install-progress" id="install-progress" hidden aria-live="polite">
+            <div class="progress-track"><span id="install-progress-bar"></span></div>
+            <div>
+              <strong id="install-progress-title">Preparing installer</strong>
+              <span id="install-progress-copy">Checking the DS Style package...</span>
+            </div>
+          </div>
 
-            <article class="action-row">
-              <div class="action-symbol"><i data-lucide="package-plus"></i></div>
-              <div class="action-copy">
-                <h3>Install a kernel</h3>
-                <p>Copy a kernel to the root using the correct filename for the connected cartridge.</p>
-              </div>
-              <button class="button secondary" id="install-kernel" type="button" disabled>
-                <i data-lucide="upload"></i><span>Choose .bin</span>
-              </button>
-              <input id="kernel-file-input" type="file" accept=".bin,application/octet-stream" hidden>
-            </article>
-
-            <article class="action-row">
-              <div class="action-symbol"><i data-lucide="refresh-cw"></i></div>
-              <div class="action-copy">
-                <h3>Refresh card summary</h3>
-                <p>Read the folder counts again after making changes elsewhere.</p>
-              </div>
-              <button class="icon-button" id="refresh-sd" type="button" title="Refresh card summary" disabled>
-                <i data-lucide="refresh-cw"></i><span class="sr-only">Refresh card summary</span>
-              </button>
-            </article>
+          <div class="install-result" id="install-result" hidden>
+            <i data-lucide="circle-check"></i>
+            <div>
+              <strong id="install-result-title">Ready to update</strong>
+              <p id="install-result-copy"></p>
+            </div>
           </div>
         </div>
+
+        <p class="installer-note"><i data-lucide="shield-check"></i> Files stay on this device. Existing files that need replacing during migration are backed up first.</p>
       </section>
 
       <section class="view" id="view-artwork" data-view="artwork" hidden>
@@ -307,95 +378,6 @@
         </div>
       </section>
 
-      <section class="view" id="view-project" data-view="project" hidden>
-        <div class="view-heading">
-          <div>
-            <p class="eyebrow">Project editor</p>
-            <h1>Customise</h1>
-            <p>Open an existing DS Style Customiser project and edit its common colours, images and sounds in place.</p>
-          </div>
-          <button class="button primary" id="connect-project" type="button">
-            <i data-lucide="folder-cog"></i><span>Open project</span>
-          </button>
-        </div>
-
-        <div class="connection-banner compact-banner" id="project-connection-banner" data-state="idle">
-          <div class="connection-icon"><i data-lucide="palette"></i></div>
-          <div>
-            <strong id="project-title">No project open</strong>
-            <span id="project-copy">Choose a project made by DS Style Customiser.</span>
-          </div>
-          <span class="status-pill" id="project-model-pill">Not connected</span>
-        </div>
-
-        <div id="project-editor" hidden>
-          <div class="tabs" role="tablist" aria-label="Project editors">
-            <button class="is-active" type="button" role="tab" data-project-tab="colours" aria-selected="true">Colours</button>
-            <button type="button" role="tab" data-project-tab="images" aria-selected="false">Images</button>
-            <button type="button" role="tab" data-project-tab="sounds" aria-selected="false">Sounds</button>
-          </div>
-
-          <section class="project-pane" data-project-pane="colours">
-            <div class="pane-heading">
-              <div>
-                <h2>Theme colours</h2>
-                <p>Values are snapped to the Game Boy Advance's 15-bit colour range.</p>
-              </div>
-              <label class="field compact-field">
-                <span>Colour set</span>
-                <select id="project-colour-theme"></select>
-              </label>
-            </div>
-            <div class="colour-grid" id="project-colour-grid"></div>
-            <div class="sticky-actions">
-              <span id="colour-save-status" class="save-status" aria-live="polite"></span>
-              <button class="button primary" id="save-project-colours" type="button">
-                <i data-lucide="save"></i><span>Save colours</span>
-              </button>
-            </div>
-          </section>
-
-          <section class="project-pane" data-project-pane="images" hidden>
-            <div class="asset-browser">
-              <div class="asset-list-column">
-                <label class="field">
-                  <span>Find an asset</span>
-                  <input id="asset-search" type="search" placeholder="Background, splash, icon...">
-                </label>
-                <div class="asset-list" id="project-asset-list"></div>
-              </div>
-              <div class="asset-preview-column">
-                <div class="asset-preview-frame">
-                  <img id="project-asset-preview" alt="Selected project asset preview">
-                  <div class="empty-preview" id="project-asset-empty">
-                    <i data-lucide="image"></i><span>Select an image asset</span>
-                  </div>
-                </div>
-                <div class="asset-meta">
-                  <strong id="project-asset-name">No asset selected</strong>
-                  <span id="project-asset-size">-</span>
-                </div>
-                <div class="preview-actions">
-                  <button class="button primary" id="replace-project-asset" type="button" disabled>
-                    <i data-lucide="replace"></i><span>Replace selected</span>
-                  </button>
-                  <button class="button secondary" id="undo-project-asset" type="button" disabled>
-                    <i data-lucide="undo-2"></i><span>Undo</span>
-                  </button>
-                  <input id="project-asset-file" type="file" accept="image/png,image/jpeg,image/bmp,.png,.jpg,.jpeg,.bmp" hidden>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section class="project-pane" data-project-pane="sounds" hidden>
-            <div class="sound-list" id="project-sound-list"></div>
-            <p class="field-note">Browser-supported audio files are converted to 22,050 Hz mono signed 8-bit audio. Interface sounds are capped at 0.35 seconds; Boot is capped at 1.70 seconds.</p>
-            <input id="project-sound-file" type="file" accept="audio/*,.wav,.mp3,.ogg,.m4a" hidden>
-          </section>
-        </div>
-      </section>
-
       <section class="view" id="view-styles" data-view="styles" hidden>
         <div class="view-heading">
           <div>
@@ -417,73 +399,42 @@
         <div class="style-list" id="style-list" hidden></div>
       </section>
 
-      <section class="view" id="view-build" data-view="build" hidden>
-        <div class="view-heading">
-          <div>
-            <p class="eyebrow">Kernel compiler</p>
-            <h1>Build</h1>
-            <p>Send the open project to a compatible DS Style build service and receive the correct kernel file.</p>
-          </div>
-        </div>
-
-        <div class="build-layout">
-          <div class="build-main">
-            <div class="build-project-summary">
-              <div class="action-symbol"><i data-lucide="folder-cog"></i></div>
-              <div>
-                <span>Current project</span>
-                <strong id="build-project-name">No project open</strong>
-                <small id="build-project-model">Open a Customiser project first.</small>
-              </div>
-            </div>
-
-            <label class="field">
-              <span>Build service address</span>
-              <input id="build-service-url" type="url" placeholder="https://build.example.com">
-              <small>The address is saved only in this browser. The public manager does not include a shared compiler by default.</small>
-            </label>
-
-            <div class="build-controls">
-              <button class="button secondary" id="check-build-service" type="button">
-                <i data-lucide="activity"></i><span>Check service</span>
-              </button>
-              <button class="button primary" id="start-web-build" type="button" disabled>
-                <i data-lucide="hammer"></i><span>Build kernel</span>
-              </button>
-            </div>
-
-            <div class="build-progress" id="build-progress" hidden>
-              <div class="progress-track"><span id="build-progress-bar"></span></div>
-              <div>
-                <strong id="build-progress-title">Preparing project</strong>
-                <span id="build-progress-copy">Collecting editable project files...</span>
-              </div>
-            </div>
-
-            <div class="build-result" id="build-result" hidden></div>
-          </div>
-
-          <aside class="build-note">
-            <i data-lucide="server-cog"></i>
-            <h2>Why a build service?</h2>
-            <p>The kernel still uses the official devkitPro toolchain. Artwork and SD-card work stays entirely on your device; only a project build is sent to the compiler you choose.</p>
-            <a href="https://github.com/FrankieT19/ds-style-customiser" target="_blank" rel="noopener noreferrer">Use the desktop Customiser instead <i data-lucide="external-link"></i></a>
-          </aside>
-        </div>
-      </section>
     </main>
   </div>
 
   <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
 
+  <dialog class="cartridge-dialog" id="cartridge-dialog">
+    <form method="dialog">
+      <div class="dialog-icon"><i data-lucide="gamepad-2"></i></div>
+      <h2>Choose your cartridge</h2>
+      <p>Select the cartridge that will use this SD card. The newest Omega Definitive Edition B is not currently supported.</p>
+      <div class="cartridge-options">
+        <button type="submit" value="omega_de">
+          <i data-lucide="badge-check"></i>
+          <span><strong>Omega Definitive Edition</strong><small>Original model, including Rev.A and Rev.B</small></span>
+          <i data-lucide="chevron-right"></i>
+        </button>
+        <button type="submit" value="original">
+          <i data-lucide="badge-check"></i>
+          <span><strong>Original Omega</strong><small>Uses the ezkernel.bin update file</small></span>
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </div>
+      <div class="dialog-actions">
+        <button class="button secondary" value="cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog class="confirm-dialog" id="confirm-dialog">
     <form method="dialog">
-      <div class="dialog-icon"><i data-lucide="triangle-alert"></i></div>
+      <div class="dialog-icon"><i id="confirm-icon" data-lucide="package-check"></i></div>
       <h2 id="confirm-title">Confirm action</h2>
       <p id="confirm-copy"></p>
       <div class="dialog-actions">
         <button class="button secondary" value="cancel">Cancel</button>
-        <button class="button danger" id="confirm-action" value="confirm">Continue</button>
+        <button class="button primary" id="confirm-action" value="confirm">Continue</button>
       </div>
     </form>
   </dialog>
