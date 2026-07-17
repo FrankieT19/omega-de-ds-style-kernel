@@ -302,6 +302,10 @@ u32 Check_file_type(TCHAR *pfilename);
 #define LAUNCHER_BOOT_SOUND_ENABLED 1
 #endif
 
+#ifndef LAUNCHER_TOP_BAR_OVERLAY_ENABLED
+#define LAUNCHER_TOP_BAR_OVERLAY_ENABLED 1
+#endif
+
 #ifndef LAUNCHER_CUSTOM_THEME_DARK_STYLE
 #define LAUNCHER_CUSTOM_THEME_DARK_STYLE 0
 #endif
@@ -1011,6 +1015,10 @@ const unsigned short *Launcher_ImageIconChip(void) { return launcher_dark_mode ?
 
 static const u16 *Launcher_GetThemeTopForBase(const u16 *base)
 {
+#if !LAUNCHER_TOP_BAR_OVERLAY_ENABLED
+	(void)base;
+	return 0;
+#else
 	const LauncherTheme *theme = Launcher_ActiveTheme();
 
 	if(!base)
@@ -1057,9 +1065,11 @@ static const u16 *Launcher_GetThemeTopForBase(const u16 *base)
 	if(base == (const u16*)theme->help)
 		return (const u16*)theme->help_top;
 	return 0;
+#endif
 }
 
 static const u16 *launcher_current_topbar_bg = 0;
+static const u16 *launcher_current_theme_bg = 0;
 static char launcher_counter_last_msg[20] = "";
 static u16 launcher_counter_last_x = 185;
 static u32 launcher_counter_last_list = 0xFFFFFFFF;
@@ -1125,6 +1135,14 @@ static void Launcher_DrawThemeBGFull(const u16 *base)
 	{
 		ClearWithBG((u16*)base, 0, LAUNCHER_TOP_BAR_HEIGHT, 240, 160 - LAUNCHER_TOP_BAR_HEIGHT, 1);
 		ClearWithBG((u16*)top, 70, 2, 170, 15, 1);
+		launcher_current_theme_bg = base;
+		return;
+	}
+
+	if(!top && (base == launcher_current_theme_bg))
+	{
+		ClearWithBG((u16*)base, 0, LAUNCHER_TOP_BAR_HEIGHT, 240, 160 - LAUNCHER_TOP_BAR_HEIGHT, 1);
+		ClearWithBG((u16*)base, 70, 2, 170, 15, 1);
 		return;
 	}
 
@@ -1132,6 +1150,7 @@ static void Launcher_DrawThemeBGFull(const u16 *base)
 	if(top)
 		DrawPic((u16*)top, 0, 0, 240, LAUNCHER_TOP_BAR_HEIGHT, 0, 0, 1);
 	launcher_current_topbar_bg = top;
+	launcher_current_theme_bg = base;
 	launcher_counter_valid = 0;
 }
 
@@ -4045,6 +4064,7 @@ void Launcher_MarkTopbarNameDirty(void)
 {
 	launcher_system_name_dirty = 1;
 	launcher_current_topbar_bg = 0;
+	launcher_current_theme_bg = 0;
 }
 
 void Launcher_UpdateCheatTitle(void)
@@ -11263,7 +11283,7 @@ static void Launcher_DrawHelpPageNumber(u32 page, u32 total)
 {
     char msg[12];
     snprintf(msg, sizeof(msg), "%lu/%lu", page + 1, total);
-    Launcher_ClearWithThemeBG(Launcher_GetTopbarBG(HELP), 184, 2, 54, 15);
+    Launcher_ClearWithThemeBG((const u16*)gImage_SD_LIST, 184, 2, 54, 15);
     DrawHZText12(msg, 0, 218 - DrawText12VisibleLength(msg) * 6, 3, gl_color_topbar_text, 1);
 }
 
@@ -11418,7 +11438,7 @@ static void Launcher_DrawSnakeScore(void)
     int x;
     snprintf(score, sizeof(score), "%lu", launcher_snake_length - 4);
     x = 237 - DrawText12VisibleLength(score) * 6;
-    Launcher_ClearWithThemeBG(Launcher_GetTopbarBG(HELP), 190, 2, 48, 15);
+    Launcher_ClearWithThemeBG((const u16*)gImage_SD_LIST, 190, 2, 48, 15);
     DrawHZText12(score, 0, x, 3, gl_color_topbar_text, 1);
 }
 
@@ -15807,6 +15827,7 @@ load_file:
 						Set_saveMODE(SAVEMODE);
 					}
 					launcher_current_topbar_bg = 0;
+					launcher_current_theme_bg = 0;
 					return 2;
 				}
 				else if(res==2)
@@ -15850,6 +15871,7 @@ load_file:
 						Set_saveMODE(SAVEMODE);
 					}
 					launcher_current_topbar_bg = 0;
+					launcher_current_theme_bg = 0;
 					return 2;
 				}
 				else if(res==2)
