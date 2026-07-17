@@ -1,0 +1,17 @@
+{
+  "name": "DS Style Manager",
+  "short_name": "DS Style",
+  "description": "Manage DS Style artwork, projects, styles and SD-card files.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b0d16",
+  "theme_color": "#0b0d16",
+  "icons": [
+    {
+      "src": "../project/assets/favicon.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

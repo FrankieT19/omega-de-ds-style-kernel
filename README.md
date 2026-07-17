@@ -9,6 +9,11 @@ DS Style is a custom kernel for the **EZ-FLASH OMEGA Definitive Edition**. It is
 
 Read the complete [DS Style User Guide](https://frankiet19.github.io/omega-de-ds-style-kernel/) for installation, everyday use, artwork, customisation and troubleshooting.
 
+## Web
+
+- [DS Style homepage](https://frankiet19.github.io/omega-de-ds-style-kernel/project/)
+- [DS Style Manager (Beta)](https://frankiet19.github.io/omega-de-ds-style-kernel/manager/) - browser-based SD-card, artwork, style and project tools
+
 ## Features
 
 - DS-style launcher interface

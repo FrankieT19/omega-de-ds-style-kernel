@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Manage DS Style artwork, styles, projects and SD-card files in your browser.">
+  <meta name="theme-color" content="#0b0d16">
+  <link rel="icon" type="image/png" href="../project/assets/favicon.png">
+  <link rel="apple-touch-icon" href="../project/assets/favicon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <title>DS Style Manager</title>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to workspace</a>
+
+  <header class="app-header">
+    <a class="brand" href="../project/" aria-label="Return to the DS Style homepage">
+      <img src="../project/assets/Logo.png" alt="DS Style">
+      <span class="brand-copy">
+        <strong>Manager <span class="beta-tag">Beta</span></strong>
+        <small>Browser tools</small>
+      </span>
+    </a>
+
+    <div class="header-status">
+      <span class="privacy-label"><i data-lucide="shield-check"></i> Runs locally</span>
+      <button class="button primary" id="connect-sd-header" type="button" aria-label="Connect SD card">
+        <i data-lucide="folder-open"></i>
+        <span>Connect SD card</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <nav class="app-nav" aria-label="Manager sections">
+      <button class="nav-item is-active" type="button" data-view-target="sd-card" aria-current="page" aria-label="SD card">
+        <i data-lucide="hard-drive"></i><span>SD card</span>
+      </button>
+      <button class="nav-item" type="button" data-view-target="artwork" aria-label="Artwork">
+        <i data-lucide="image"></i><span>Artwork</span>
+      </button>
+      <button class="nav-item" type="button" data-view-target="project" aria-label="Customise">
+        <i data-lucide="palette"></i><span>Customise</span>
+      </button>
+      <button class="nav-item" type="button" data-view-target="styles" aria-label="Styles">
+        <i data-lucide="layers-3"></i><span>Styles</span>
+      </button>
+      <button class="nav-item" type="button" data-view-target="build" aria-label="Build">
+        <i data-lucide="hammer"></i><span>Build</span>
+      </button>
+
+      <div class="nav-spacer"></div>
+      <a class="nav-item nav-link" href="../" target="_blank" rel="noopener noreferrer" aria-label="User guide">
+        <i data-lucide="book-open"></i><span>User guide</span>
+      </a>
+      <a class="nav-item nav-link" href="../project/" target="_blank" rel="noopener noreferrer" aria-label="DS Style homepage">
+        <i data-lucide="external-link"></i><span>DS Style</span>
+      </a>
+    </nav>
+
+    <main id="workspace" class="workspace">
+      <section class="view is-active" id="view-sd-card" data-view="sd-card">
+        <div class="view-heading">
+          <div>
+            <p class="eyebrow">Local storage</p>
+            <h1>SD card</h1>
+            <p>Install kernels, prepare artwork folders and check the card without uploading its contents.</p>
+          </div>
+          <button class="button primary" id="connect-sd-main" type="button">
+            <i data-lucide="folder-open"></i><span>Connect SD card</span>
+          </button>
+        </div>
+
+        <div class="connection-banner" id="sd-connection-banner" data-state="idle">
+          <div class="connection-icon"><i data-lucide="hard-drive"></i></div>
+          <div>
+            <strong id="sd-connection-title">No SD card connected</strong>
+            <span id="sd-connection-copy">Choose the root of your microSD card to begin.</span>
+          </div>
+          <span class="status-pill" id="sd-model-pill">Not connected</span>
+        </div>
+
+        <div class="metric-grid" aria-label="SD card summary">
+          <div class="metric">
+            <span>Cartridge</span>
+            <strong id="sd-model">-</strong>
+          </div>
+          <div class="metric">
+            <span>Kernel</span>
+            <strong id="sd-kernel">-</strong>
+          </div>
+          <div class="metric">
+            <span>Wide artwork</span>
+            <strong id="sd-wide-count">-</strong>
+          </div>
+          <div class="metric">
+            <span>Square artwork</span>
+            <strong id="sd-square-count">-</strong>
+          </div>
+          <div class="metric">
+            <span>Installed styles</span>
+            <strong id="sd-style-count">-</strong>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-title">
+            <div>
+              <h2>Quick actions</h2>
+              <p>Common card maintenance, kept deliberately small and predictable.</p>
+            </div>
+          </div>
+
+          <div class="action-list">
+            <article class="action-row">
+              <div class="action-symbol"><i data-lucide="folders"></i></div>
+              <div class="action-copy">
+                <h3>Prepare DS Style folders</h3>
+                <p>Create any missing artwork, custom artwork and style folders.</p>
+              </div>
+              <button class="button secondary" id="prepare-folders" type="button" disabled>
+                <i data-lucide="folder-plus"></i><span>Prepare</span>
+              </button>
+            </article>
+
+            <article class="action-row">
+              <div class="action-symbol"><i data-lucide="package-plus"></i></div>
+              <div class="action-copy">
+                <h3>Install a kernel</h3>
+                <p>Copy a kernel to the root using the correct filename for the connected cartridge.</p>
+              </div>
+              <button class="button secondary" id="install-kernel" type="button" disabled>
+                <i data-lucide="upload"></i><span>Choose .bin</span>
+              </button>
+              <input id="kernel-file-input" type="file" accept=".bin,application/octet-stream" hidden>
+            </article>
+
+            <article class="action-row">
+              <div class="action-symbol"><i data-lucide="refresh-cw"></i></div>
+              <div class="action-copy">
+                <h3>Refresh card summary</h3>
+                <p>Read the folder counts again after making changes elsewhere.</p>
+              </div>
+              <button class="icon-button" id="refresh-sd" type="button" title="Refresh card summary" disabled>
+                <i data-lucide="refresh-cw"></i><span class="sr-only">Refresh card summary</span>
+              </button>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-artwork" data-view="artwork" hidden>
+        <div class="view-heading">
+          <div>
+            <p class="eyebrow">Thumbnail maker</p>
+            <h1>Artwork</h1>
+            <p>Create wide and square DS Style thumbnails from your own images or the Libretro library.</p>
+          </div>
+          <div class="view-actions">
+            <button class="button secondary" id="choose-art-image" type="button">
+              <i data-lucide="image-plus"></i><span>Choose image</span>
+            </button>
+            <input id="art-image-input" type="file" accept="image/png,image/jpeg,image/bmp,.png,.jpg,.jpeg,.bmp" hidden>
+          </div>
+        </div>
+
+        <div class="artwork-layout">
+          <div class="controls-column">
+            <div class="segmented" role="group" aria-label="Artwork source">
+              <button class="is-active" type="button" data-art-source="local">My image</button>
+              <button type="button" data-art-source="libretro">Libretro</button>
+            </div>
+
+            <div class="control-panel" id="local-art-panel">
+              <div class="drop-zone" id="art-drop-zone" tabindex="0">
+                <i data-lucide="image-up"></i>
+                <strong>Drop an image here</strong>
+                <span>PNG, JPG or BMP</span>
+              </div>
+            </div>
+
+            <div class="control-panel" id="libretro-art-panel" hidden>
+              <div class="field-row split">
+                <label class="field">
+                  <span>Artwork type</span>
+                  <select id="libretro-source">
+                    <option value="Named_Boxarts">Box art</option>
+                    <option value="Named_Titles">Title screen</option>
+                    <option value="Named_Snaps">Gameplay screenshot</option>
+                  </select>
+                </label>
+                <label class="field grow">
+                  <span>Search</span>
+                  <span class="input-with-button">
+                    <input id="libretro-query" type="search" autocomplete="off" placeholder="Game name">
+                    <button class="icon-button compact" id="libretro-search" type="button" title="Search Libretro">
+                      <i data-lucide="search"></i><span class="sr-only">Search</span>
+                    </button>
+                  </span>
+                </label>
+              </div>
+              <p class="field-note" id="libretro-status">Search the public Game Boy Advance artwork library.</p>
+              <div class="search-results" id="libretro-results" aria-live="polite"></div>
+            </div>
+
+            <div class="form-section">
+              <h2>Output</h2>
+              <div class="field-row split">
+                <label class="field grow">
+                  <span>Match artwork by</span>
+                  <select id="art-match-mode">
+                    <option value="custom">Exact file or folder name</option>
+                    <option value="gba">GBA header code</option>
+                  </select>
+                </label>
+                <label class="field grow">
+                  <span>Sizes</span>
+                  <select id="art-size-mode">
+                    <option value="both">Wide and square</option>
+                    <option value="wide">Wide, 120 x 80</option>
+                    <option value="square">Square, 80 x 80</option>
+                  </select>
+                </label>
+              </div>
+
+              <div id="custom-name-fields">
+                <label class="field">
+                  <span>Exact name</span>
+                  <span class="input-with-button">
+                    <input id="custom-art-name" type="text" maxlength="96" placeholder="Pokemon Emerald Rogue">
+                    <button class="icon-button compact" id="pick-art-target-file" type="button" title="Use a file name">
+                      <i data-lucide="file"></i><span class="sr-only">Use a file name</span>
+                    </button>
+                    <button class="icon-button compact" id="pick-art-target-folder" type="button" title="Use a folder name">
+                      <i data-lucide="folder"></i><span class="sr-only">Use a folder name</span>
+                    </button>
+                  </span>
+                  <small>Use the name exactly as it appears on the SD card, without the extension.</small>
+                </label>
+              </div>
+
+              <div id="gba-code-fields" hidden>
+                <label class="field">
+                  <span>GBA header code</span>
+                  <span class="input-with-button">
+                    <input id="gba-art-code" type="text" maxlength="4" placeholder="BPEE">
+                    <button class="button inline" id="read-gba-code" type="button">
+                      <i data-lucide="gamepad-2"></i><span>Read ROM</span>
+                    </button>
+                  </span>
+                  <small id="gba-code-note">Four letters or numbers from the ROM header.</small>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h2>Position</h2>
+              <label class="range-field">
+                <span><b>Zoom</b><output id="zoom-output">100%</output></span>
+                <input id="art-zoom" type="range" min="100" max="240" value="100" step="1">
+              </label>
+              <label class="range-field">
+                <span><b>Horizontal</b><output id="pan-x-output">0</output></span>
+                <input id="art-pan-x" type="range" min="-100" max="100" value="0" step="1">
+              </label>
+              <label class="range-field">
+                <span><b>Vertical</b><output id="pan-y-output">0</output></span>
+                <input id="art-pan-y" type="range" min="-100" max="100" value="0" step="1">
+              </label>
+              <button class="text-button" id="reset-art-position" type="button"><i data-lucide="rotate-ccw"></i> Reset position</button>
+            </div>
+          </div>
+
+          <div class="preview-column">
+            <div class="preview-heading">
+              <div>
+                <span class="section-kicker">Preview</span>
+                <strong id="art-preview-name">No image selected</strong>
+              </div>
+              <span class="format-label">GBA BGR555</span>
+            </div>
+
+            <div class="preview-stage">
+              <div class="preview-item">
+                <span>Wide</span>
+                <canvas id="wide-preview" width="120" height="80" aria-label="120 by 80 artwork preview"></canvas>
+                <small>120 x 80</small>
+              </div>
+              <div class="preview-item">
+                <span>Square</span>
+                <canvas id="square-preview" width="80" height="80" aria-label="80 by 80 artwork preview"></canvas>
+                <small>80 x 80</small>
+              </div>
+            </div>
+
+            <div class="preview-actions">
+              <button class="button primary" id="save-art-to-sd" type="button" disabled>
+                <i data-lucide="save"></i><span>Save to SD card</span>
+              </button>
+              <button class="button secondary" id="download-art" type="button" disabled>
+                <i data-lucide="download"></i><span>Download</span>
+              </button>
+            </div>
+            <p class="field-note">Each CUSTOM folder supports up to 256 images. Existing names are replaced safely.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-project" data-view="project" hidden>
+        <div class="view-heading">
+          <div>
+            <p class="eyebrow">Project editor</p>
+            <h1>Customise</h1>
+            <p>Open an existing DS Style Customiser project and edit its common colours, images and sounds in place.</p>
+          </div>
+          <button class="button primary" id="connect-project" type="button">
+            <i data-lucide="folder-cog"></i><span>Open project</span>
+          </button>
+        </div>
+
+        <div class="connection-banner compact-banner" id="project-connection-banner" data-state="idle">
+          <div class="connection-icon"><i data-lucide="palette"></i></div>
+          <div>
+            <strong id="project-title">No project open</strong>
+            <span id="project-copy">Choose a project made by DS Style Customiser.</span>
+          </div>
+          <span class="status-pill" id="project-model-pill">Not connected</span>
+        </div>
+
+        <div id="project-editor" hidden>
+          <div class="tabs" role="tablist" aria-label="Project editors">
+            <button class="is-active" type="button" role="tab" data-project-tab="colours" aria-selected="true">Colours</button>
+            <button type="button" role="tab" data-project-tab="images" aria-selected="false">Images</button>
+            <button type="button" role="tab" data-project-tab="sounds" aria-selected="false">Sounds</button>
+          </div>
+
+          <section class="project-pane" data-project-pane="colours">
+            <div class="pane-heading">
+              <div>
+                <h2>Theme colours</h2>
+                <p>Values are snapped to the Game Boy Advance's 15-bit colour range.</p>
+              </div>
+              <label class="field compact-field">
+                <span>Colour set</span>
+                <select id="project-colour-theme"></select>
+              </label>
+            </div>
+            <div class="colour-grid" id="project-colour-grid"></div>
+            <div class="sticky-actions">
+              <span id="colour-save-status" class="save-status" aria-live="polite"></span>
+              <button class="button primary" id="save-project-colours" type="button">
+                <i data-lucide="save"></i><span>Save colours</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="project-pane" data-project-pane="images" hidden>
+            <div class="asset-browser">
+              <div class="asset-list-column">
+                <label class="field">
+                  <span>Find an asset</span>
+                  <input id="asset-search" type="search" placeholder="Background, splash, icon...">
+                </label>
+                <div class="asset-list" id="project-asset-list"></div>
+              </div>
+              <div class="asset-preview-column">
+                <div class="asset-preview-frame">
+                  <img id="project-asset-preview" alt="Selected project asset preview">
+                  <div class="empty-preview" id="project-asset-empty">
+                    <i data-lucide="image"></i><span>Select an image asset</span>
+                  </div>
+                </div>
+                <div class="asset-meta">
+                  <strong id="project-asset-name">No asset selected</strong>
+                  <span id="project-asset-size">-</span>
+                </div>
+                <div class="preview-actions">
+                  <button class="button primary" id="replace-project-asset" type="button" disabled>
+                    <i data-lucide="replace"></i><span>Replace selected</span>
+                  </button>
+                  <button class="button secondary" id="undo-project-asset" type="button" disabled>
+                    <i data-lucide="undo-2"></i><span>Undo</span>
+                  </button>
+                  <input id="project-asset-file" type="file" accept="image/png,image/jpeg,image/bmp,.png,.jpg,.jpeg,.bmp" hidden>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="project-pane" data-project-pane="sounds" hidden>
+            <div class="sound-list" id="project-sound-list"></div>
+            <p class="field-note">Browser-supported audio files are converted to 22,050 Hz mono signed 8-bit audio. Interface sounds are capped at 0.35 seconds; Boot is capped at 1.70 seconds.</p>
+            <input id="project-sound-file" type="file" accept="audio/*,.wav,.mp3,.ogg,.m4a" hidden>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-styles" data-view="styles" hidden>
+        <div class="view-heading">
+          <div>
+            <p class="eyebrow">Alternative kernels</p>
+            <h1>Styles</h1>
+            <p>Manage the .bin files shown by Settings &gt; Interface &gt; Load style.</p>
+          </div>
+          <button class="button primary" id="add-style" type="button" disabled>
+            <i data-lucide="file-plus-2"></i><span>Add style</span>
+          </button>
+          <input id="style-file-input" type="file" accept=".bin,application/octet-stream" hidden multiple>
+        </div>
+
+        <div class="empty-state" id="styles-empty">
+          <i data-lucide="layers-3"></i>
+          <h2>Connect an SD card</h2>
+          <p>Your installed styles will appear here.</p>
+        </div>
+        <div class="style-list" id="style-list" hidden></div>
+      </section>
+
+      <section class="view" id="view-build" data-view="build" hidden>
+        <div class="view-heading">
+          <div>
+            <p class="eyebrow">Kernel compiler</p>
+            <h1>Build</h1>
+            <p>Send the open project to a compatible DS Style build service and receive the correct kernel file.</p>
+          </div>
+        </div>
+
+        <div class="build-layout">
+          <div class="build-main">
+            <div class="build-project-summary">
+              <div class="action-symbol"><i data-lucide="folder-cog"></i></div>
+              <div>
+                <span>Current project</span>
+                <strong id="build-project-name">No project open</strong>
+                <small id="build-project-model">Open a Customiser project first.</small>
+              </div>
+            </div>
+
+            <label class="field">
+              <span>Build service address</span>
+              <input id="build-service-url" type="url" placeholder="https://build.example.com">
+              <small>The address is saved only in this browser. The public manager does not include a shared compiler by default.</small>
+            </label>
+
+            <div class="build-controls">
+              <button class="button secondary" id="check-build-service" type="button">
+                <i data-lucide="activity"></i><span>Check service</span>
+              </button>
+              <button class="button primary" id="start-web-build" type="button" disabled>
+                <i data-lucide="hammer"></i><span>Build kernel</span>
+              </button>
+            </div>
+
+            <div class="build-progress" id="build-progress" hidden>
+              <div class="progress-track"><span id="build-progress-bar"></span></div>
+              <div>
+                <strong id="build-progress-title">Preparing project</strong>
+                <span id="build-progress-copy">Collecting editable project files...</span>
+              </div>
+            </div>
+
+            <div class="build-result" id="build-result" hidden></div>
+          </div>
+
+          <aside class="build-note">
+            <i data-lucide="server-cog"></i>
+            <h2>Why a build service?</h2>
+            <p>The kernel still uses the official devkitPro toolchain. Artwork and SD-card work stays entirely on your device; only a project build is sent to the compiler you choose.</p>
+            <a href="https://github.com/FrankieT19/ds-style-customiser" target="_blank" rel="noopener noreferrer">Use the desktop Customiser instead <i data-lucide="external-link"></i></a>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <dialog class="confirm-dialog" id="confirm-dialog">
+    <form method="dialog">
+      <div class="dialog-icon"><i data-lucide="triangle-alert"></i></div>
+      <h2 id="confirm-title">Confirm action</h2>
+      <p id="confirm-copy"></p>
+      <div class="dialog-actions">
+        <button class="button secondary" value="cancel">Cancel</button>
+        <button class="button danger" id="confirm-action" value="confirm">Continue</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
