@@ -1,6 +1,8 @@
 @;--------------------------------------------------------------------
-	.section   	.iwram,"ax",%progbits
-
+	/* This is a byte-for-byte template copied into the game ROM; the kernel never
+	 * executes it in place, so keeping the source template in ROM preserves IWRAM. */
+	.section   	.rodata,"a",%progbits
+		
 	.global  RTS_ReplaceIRQ_start
 	.global  RTS_ReplaceIRQ_end
 	.global  RTS_Return_address_L
@@ -12,7 +14,7 @@
 	.global	 CHEAT
 	.global  no_CHEAT_end
 	@;.global  ASCII
-
+	
 REG_BASE		= 0x4000000
 REG_DISPCNT		= 0x00
 REG_DISPSTAT	= 0x04
@@ -81,7 +83,7 @@ REG_P1			= 0x130
 REG_P1CNT		= 0x132
 REG_WAITCNT		= 0x204
 
-@;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
 	.arm
 RTS_ReplaceIRQ_start:
 	MOV             R0, #0x4000000
@@ -95,6 +97,13 @@ RTS_Return_address_L:
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 spend_0x80:
 	.word 0x0203FE00   @; default
+
+@ Keep the hotkey words near the IRQ entry so ARM-state ADR remains
+@ encodable with the devkitARM r54 assembler after the E4 runtime grew.
+RTS_Sleep_key:
+	.word 0xFB @;L+R+select
+RTS_Reset_key:
+	.word 0xF7 @;L+R+Start
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 RTS_irq:
 	LDR			R1, [R0,#0x200]
@@ -105,50 +114,385 @@ RTS_irq:
 	ldr 		r2,[r0,#REG_P1]
 	bic 		r2,r2,#0xFF000000
 	bic 		r2,r2,#0x00FF0000
-
+	
 	@;check ingamemenu
-	adr 		r3,RTS_Reset_key
+	adr 		r3,RTS_Reset_key 
 	ldr 		r3,[r3]
-	cmp 		r2,r3
-	bne			check_sleep
+	cmp 		r2,r3		
+	bne			check_sleep	
 	@;----------------------
 	adrl		r12, spend_0x80
 	ldr			r12,[r12]
 	stmia		r12!,{r4-r11,sp,lr} @;0x0
 	mrs	 		r2,SPSR
 	stmia		r12!,{r2}       @;0x4
-
-	stmfd   SP!, {LR}  			@;0x4000000,
-	bl 			ingamemenu_now
+	
+	stmfd   SP!, {LR}  			@;0x4000000,	
+	bl 			ingamemenu_now	
 	ldmfd   SP!, {LR}
 	@;----------------------
 	@;check sleep
 check_sleep:
-	adr 		r3,RTS_Sleep_key
+	adr 		r3,RTS_Sleep_key 
 	ldr 		r3,[r3]
-	cmp 		r2,r3
+	cmp 		r2,r3 			
 	beq 		sleep_now
-
+	
 	@;check cheat
 	adrl 		r2,CheatONOFF
 	ldr 		r2,[r2]
 	ldr 		r2,[r2] @
 	cmp 		r2,#1
 	bne 		nocheat
-	stmfd   SP!, {r4-r6}
+	stmfd   SP!, {r4-r11,lr}
+	mov			r1,sp			@ saved-register frame base for malformed-table recovery
+	adrl		r0,cheat_condition_stack	@ fixed 16-level condition stack
 	adrl 		r5,CHEAT
-	adrl		r6,Cheat_count
-	ldr			r2,[r6]
+	adrl		r7,Cheat_count
+	ldr			r2,[r7]
+	mov			r6,#1			@ current branch state: 1 = operations enabled
 cheat_loop:
 	cmp			r2,#0
 	beq			cheat_loop_end
 	ldmia   r5!,{r3-r4}
-	strb		r4,[r3]
 	sub 		r2,#0x01
+
+	@ Enhanced runtime opcode dispatch. Normal records are direct W8 writes.
+	and			r7,r3,#0xFF000000
+	cmp			r7,#0xF1000000
+	beq			cheat_if
+	cmp			r7,#0xF2000000
+	beq			cheat_if
+	cmp			r7,#0xF3000000
+	beq			cheat_if
+	cmp			r7,#0xF4000000
+	beq			cheat_if
+	cmp			r7,#0xF5000000
+	beq			cheat_if
+	cmp			r7,#0xF6000000
+	beq			cheat_if
+	cmp			r7,#0xF7000000
+	beq			cheat_else
+	cmp			r7,#0xF8000000
+	beq			cheat_endif
+	cmp			r7,#0xF9000000
+	beq			cheat_add_sub
+	cmp			r7,#0xFA000000
+	beq			cheat_add_sub
+	cmp			r7,#0xFB000000
+	beq			cheat_ptr
+	cmp			r7,#0xFC000000
+	beq			cheat_loop		@ orphan data marker: ignore safely
+	cmp			r7,#0xFD000000
+	beq			cheat_write16
+	cmp			r7,#0xFE000000
+	beq			cheat_write32
+	cmp			r7,#0xFF000000
+	beq			cheat_compact
+
+	cmp			r6,#0
+	beq			cheat_loop
+	strb			r4,[r3]
 	b				cheat_loop
+
+@;------------------------------------------------------------------
+@; Compact direct W16/W32. The lower 20 bits hold the compact address.
+cheat_write16:
+	cmp			r6,#0
+	beq			cheat_loop
+	mov			r11,#1
+	bl			cheat_decode_compact
+	bl			cheat_store_width
+	b				cheat_loop
+cheat_write32:
+	cmp			r6,#0
+	beq			cheat_loop
+	mov			r11,#2
+	bl			cheat_decode_compact
+	bl			cheat_store_width
+	b				cheat_loop
+
+@;------------------------------------------------------------------
+@; IF/IFNE/IFLT/IFGT/IFLE/IFGE. Masked IF*M forms consume a following
+@; CHT_OP_DATA record and compare (memory & mask) against the stored value.
+cheat_if:
+	mov			r9,r7			@ preserve comparison opcode
+	tst			r3,#0x00800000
+	beq			cheat_if_mask_ready
+	cmp			r2,#1
+	blo			cheat_abort
+	ldmia   r5!,{r10,r12}
+	sub			r2,#0x01
+	and			r10,r10,#0xFF000000
+	cmp			r10,#0xFC000000
+	bne			cheat_abort
+	mov			r10,r12		@ preserve comparison mask
+cheat_if_mask_ready:
+	cmp			r6,#0
+	beq			cheat_if_false
+	mov			r11,r3,lsr #20
+	and			r11,r11,#3
+	bl			cheat_decode_compact
+	bl			cheat_load_width
+	tst			r3,#0x00800000
+	andne		r8,r8,r10
+	cmp			r9,#0xF1000000
+	beq			cheat_if_eq
+	cmp			r9,#0xF2000000
+	beq			cheat_if_ne
+	cmp			r9,#0xF3000000
+	beq			cheat_if_lt
+	cmp			r9,#0xF4000000
+	beq			cheat_if_gt
+	cmp			r9,#0xF5000000
+	beq			cheat_if_le
+	@ IFGE
+	cmp			r8,r4
+	mov			r10,#0
+	movhs		r10,#1
+	b				cheat_if_push
+cheat_if_eq:
+	cmp			r8,r4
+	mov			r10,#0
+	moveq		r10,#1
+	b				cheat_if_push
+cheat_if_ne:
+	cmp			r8,r4
+	mov			r10,#1
+	moveq		r10,#0
+	b				cheat_if_push
+cheat_if_lt:
+	cmp			r8,r4
+	mov			r10,#0
+	movlo		r10,#1
+	b				cheat_if_push
+cheat_if_gt:
+	cmp			r8,r4
+	mov			r10,#0
+	movhi		r10,#1
+	b				cheat_if_push
+cheat_if_le:
+	cmp			r8,r4
+	mov			r10,#0
+	movls		r10,#1
+	b				cheat_if_push
+cheat_if_false:
+	mov			r10,#0
+cheat_if_push:
+	adrl		r12,cheat_condition_stack_end
+	cmp			r0,r12
+	bhs			cheat_abort
+	stmia		r0!,{r6,r10}
+	and			r6,r6,r10
+	b				cheat_loop
+
+cheat_else:
+	adrl		r12,cheat_condition_stack
+	cmp			r0,r12
+	bls			cheat_abort
+	ldr			r7,[r0,#-8]
+	ldr			r8,[r0,#-4]
+	eor			r8,r8,#1
+	and			r6,r7,r8
+	b				cheat_loop
+
+cheat_endif:
+	adrl		r12,cheat_condition_stack
+	cmp			r0,r12
+	bls			cheat_abort
+	ldmdb		r0!,{r6,r10}
+	b				cheat_loop
+
+@;------------------------------------------------------------------
+@; Width-aware ADD/SUB. One record contains operation, width, address and value.
+cheat_add_sub:
+	mov			r9,r7			@ F9=ADD, FA=SUB
+	cmp			r6,#0
+	beq			cheat_loop
+	mov			r11,r3,lsr #20
+	and			r11,r11,#3
+	bl			cheat_decode_compact
+	bl			cheat_load_width
+	cmp			r9,#0xF9000000
+	addeq		r4,r8,r4
+	subne		r4,r8,r4
+	bl			cheat_store_width
+	b				cheat_loop
+
+@;------------------------------------------------------------------
+@; PTR:Wn,pointer-address,offset,value. One following data slot holds value.
+cheat_ptr:
+	cmp			r2,#1
+	blo			cheat_abort
+	mov			r10,r4			@ signed/two's-complement offset
+	mov			r11,r3,lsr #20
+	and			r11,r11,#3
+	bl			cheat_decode_compact
+	ldmia   r5!,{r8-r9}
+	sub			r2,r2,#1
+	and			r12,r8,#0xFF000000
+	cmp			r12,#0xFC000000
+	bne			cheat_abort
+	cmp			r6,#0
+	beq			cheat_loop
+	ldr			r7,[r7]
+	add			r7,r7,r10
+	mov			r12,#1
+	mov			r12,r12,lsl r11
+	sub			r8,r12,#1
+	tst			r7,r8
+	bne			cheat_loop
+	add			r10,r7,r12
+	cmp			r10,r7
+	blo			cheat_loop
+	ldr			r12,=0x02000000
+	cmp			r7,r12
+	blo			cheat_ptr_iwram
+	ldr			r12,=0x02040000
+	cmp			r10,r12
+	bls			cheat_ptr_store
+cheat_ptr_iwram:
+	ldr			r12,=0x03000000
+	cmp			r7,r12
+	blo			cheat_loop
+	ldr			r12,=0x03008000
+	cmp			r10,r12
+	bhi			cheat_loop
+cheat_ptr_store:
+	mov			r4,r9
+	bl			cheat_store_width
+	b				cheat_loop
+
+@;------------------------------------------------------------------
+@; FILL uses two records; SLIDE uses four, regardless of repetition count.
+cheat_compact:
+	tst			r3,#0x00800000
+	bne			cheat_slide
+	cmp			r2,#1
+	blo			cheat_abort
+	mov			r10,r4			@ repeat count
+	mov			r11,r3,lsr #20
+	and			r11,r11,#3
+	bl			cheat_decode_compact
+	ldmia   r5!,{r3-r4}
+	sub			r2,r2,#1
+	and			r12,r3,#0xFF000000
+	cmp			r12,#0xFC000000
+	bne			cheat_abort
+	cmp			r6,#0
+	beq			cheat_loop
+cheat_fill_loop:
+	cmp			r10,#0
+	beq			cheat_loop
+	bl			cheat_store_width
+	mov			r12,#1
+	mov			r12,r12,lsl r11
+	add			r7,r7,r12
+	sub			r10,r10,#1
+	b				cheat_fill_loop
+
+cheat_slide:
+	cmp			r2,#3
+	blo			cheat_abort
+	mov			r10,r4			@ repeat count
+	mov			r11,r3,lsr #20
+	and			r11,r11,#3
+	bl			cheat_decode_compact
+	ldmia   r5!,{r3,r8}		@ address step in r8
+	sub			r2,r2,#1
+	and			r12,r3,#0xFF000000
+	cmp			r12,#0xFC000000
+	bne			cheat_abort
+	ldmia   r5!,{r3,r9}		@ value step in r9
+	sub			r2,r2,#1
+	and			r12,r3,#0xFF000000
+	cmp			r12,#0xFC000000
+	bne			cheat_abort
+	ldmia   r5!,{r3-r4}		@ initial value in r4
+	sub			r2,r2,#1
+	and			r12,r3,#0xFF000000
+	cmp			r12,#0xFC000000
+	bne			cheat_abort
+	cmp			r6,#0
+	beq			cheat_loop
+cheat_slide_loop:
+	cmp			r10,#0
+	beq			cheat_loop
+	bl			cheat_store_width
+	add			r7,r7,r8
+	add			r4,r4,r9
+	cmp			r11,#0
+	andeq		r4,r4,#0xFF
+	cmp			r11,#1
+	moveq		r12,r4,lsl #16
+	moveq		r4,r12,lsr #16
+	sub			r10,r10,#1
+	b				cheat_slide_loop
+
+@;------------------------------------------------------------------
+@; Decode lower-20-bit compact address in r3 to full GBA address in r7.
+cheat_decode_compact:
+	ldr			r12,=0x000FFFFF
+	and			r7,r3,r12
+	ldr			r12,=0x00040000
+	cmp			r7,r12
+	blo			cheat_decode_ewram
+	ldr			r12,=0x00080000
+	cmp			r7,r12
+	bhs			cheat_decode_io
+	ldr			r12,=0x02FC0000
+	add			r7,r7,r12
+	bx			lr
+cheat_decode_ewram:
+	ldr			r12,=0x02000000
+	add			r7,r7,r12
+	bx			lr
+cheat_decode_io:
+	ldr			r12,=0x03F80000
+	add			r7,r7,r12
+	bx			lr
+
+@; r7=address, r11=0/1/2 width code, result r8.
+@ Use explicit branches instead of conditional byte/halfword mnemonics so
+@ this assembles correctly with devkitARM r54's ARM/Thumb syntax mode.
+cheat_load_width:
+	cmp			r11,#0
+	beq			cheat_load_width_byte
+	cmp			r11,#1
+	beq			cheat_load_width_half
+	ldr			r8,[r7]
+	bx			lr
+cheat_load_width_byte:
+	ldrb		r8,[r7]
+	bx			lr
+cheat_load_width_half:
+	ldrh		r8,[r7]
+	bx			lr
+
+@; r7=address, r11=0/1/2 width code, r4=value.
+cheat_store_width:
+	cmp			r11,#0
+	beq			cheat_store_width_byte
+	cmp			r11,#1
+	beq			cheat_store_width_half
+	str			r4,[r7]
+	bx			lr
+cheat_store_width_byte:
+	strb		r4,[r7]
+	bx			lr
+cheat_store_width_half:
+	strh		r4,[r7]
+	bx			lr
+
+cheat_abort:
+	mov			sp,r1
+	mov			r2,#0
+	b				cheat_loop_end
+
 cheat_loop_end:
-	ldmfd   SP!, {r4-r6}
+	ldmfd   SP!, {r4-r11,lr}
 nocheat:
+	mov			r0,#0x4000000
 	ldr 		pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -165,12 +509,7 @@ copy_loop:
 	add r0,r0,#1
 	bx r0
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-RTS_Sleep_key:
-	.word 0xFB @;L+R+select
-RTS_Reset_key:
-	.word 0xF7 @;L+R+Start
-@;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	.align
+	.align	
 	.thumb
 reset_code:
 	mov r0,#0x20
@@ -209,7 +548,7 @@ reset_code:
 	str r0,[r1]   @;#0x3FFFFFA (mirror of #0x3007FFA
 	swi 0x01
 	swi 0x00
-	.align
+	.align	
 reset_end:
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	.arm
@@ -329,9 +668,9 @@ clearLCD:
 	str		r0,[r2],#+4
 	cmp		r2,r3
 	blt		clearLCD
-
+	
 	ldmfd	sp!,{r0-r3}
-	bx		lr
+	bx		lr		
 @;------------------------------------------------------
 SetRampage:
 	ldr 	r1,=0xD200
@@ -376,7 +715,7 @@ wSram_loop:
 	LSR     R3, R3, #0x8
 	STRB    R3, [R0],#1
 	LSR     R3, R3, #0x8
-	STRB    R3, [R0],#1
+	STRB    R3, [R0],#1	
 	B       wSram_loop1
 @;------------------------------------------------------
 ReadSram: @;(u32 address, u8 *data, u32 size)
@@ -405,18 +744,18 @@ rSram_loop:
 backup_LCD:
 	stmfd	sp!,{r0-r7,lr}
 	mov 	r0,#0x20
-	bl 		SetRampage
+	bl 		SetRampage	
 	mov 	r0,#0x0E000000
 	mov 	r1,#0x6000000
 	mov 	r2,#0x10000		@;0x12C00
 	bl 		WriteSram   	@;(u32 address, u8 *data, u32 size)
 	mov 	r0,#0x30
-	bl 		SetRampage
+	bl 		SetRampage	
 	mov 	r0,#0x0E000000
 	ldr 	r1,=0x6010000
 	ldr 	r2,=0x2C00
 	bl 		WriteSram   	@;(u32 address, u8 *data, u32 size)
-
+	
 	ldmfd	sp!,{r0-r7,PC}
 
 @;------------------------------------------------------
@@ -427,9 +766,9 @@ restore_LCD:
 	mov r0,#0x0E000000
 	mov r1,#0x6000000
 	mov r2,#0x10000		@;0x12C00
-	bl  ReadSram    	@;(u32 address, u8 *data, u32 size)
+	bl  ReadSram    	@;(u32 address, u8 *data, u32 size)  
 	mov 	r0,#0x30
-	bl 		SetRampage
+	bl 		SetRampage	
 	mov r0,#0x0E000000
 	ldr r1,=0x6010000
 	ldr r2,=0x2C00
@@ -451,7 +790,7 @@ restore2_IO:        @; IOaddress, offset
 @;	LSL 		R4,R3,#0
 @;	LDRB    R3, [R1,#1]
 @;	LSL 		R5,R3,#8
-@;	ORR			R4,R5
+@;	ORR			R4,R5	
 @;	LDRB    R3, [R1,#2]
 @;	LSL 		R5,R3,#16
 @;	ORR			R4,R5
@@ -464,79 +803,79 @@ restore2_IO:        @; IOaddress, offset
 @;------------------------------------------------------
 ingamemenu_now:
 	stmfd	sp!,{r0-r12,lr}
-
+	
 	mov 	r7,#0x4000000
 	add 	r1,r7,#REG_SOUND1CNT_L
 	adrl	r11, spend_0x80
-	ldr		r11,[r11]
+	ldr		r11,[r11]  		
 	add		r11,#0x40     @;0x3007EC0
-
+  
 	add   r3,r11,#0x32 	@; IO 0x60-0x90 offset 0x100-130
 loopbak:
 	ldrh  r2,[r1],#2
 	strh  r2,[r11],#2
 	cmp   r11,r3
-	bne   loopbak
-
-	ldrh r2,[r7,#0xBA]@;DMA0CNT_H
+	bne   loopbak	
+	
+	ldrh r2,[r7,#0xBA]@;DMA0CNT_H	
 	strh  r2,[r11],#2 @;offset 0x72
-	ldrh r2,[r7,#0xC6]@;DMA1CNT_H
-	strh  r2,[r11],#2 @;offset 0x74
-	ldrh r2,[r7,#0xD2]@;DMA2CNT_H
+	ldrh r2,[r7,#0xC6]@;DMA1CNT_H	
+	strh  r2,[r11],#2 @;offset 0x74	
+	ldrh r2,[r7,#0xD2]@;DMA2CNT_H	
 	strh  r2,[r11],#2 @;offset 0x76
-	ldrh r2,[r7,#0xDE]@;DMA3CNT_H
-	strh  r2,[r11],#2 @;offset 0x78
-
+	ldrh r2,[r7,#0xDE]@;DMA3CNT_H	
+	strh  r2,[r11],#2 @;offset 0x78	
+		
 	mov		r7,#0x4000000
 	ldrh 	r3,[r7,#REG_SOUNDCNT_L]  @;san guo
-	stmfd	sp!,{r3}
+	stmfd	sp!,{r3}		
 	ldrh 	r3,[r7,#REG_SOUNDCNT_X]  @;bak
-	stmfd	sp!,{r3}
-
+	stmfd	sp!,{r3}		
+	
 	ldrh  r6,[r7]     @;Displaly Control
 	stmfd	sp!,{r6}
-
+	
 	mov 	r3,#0x0100
 	strh 	r3,[r7,#0x20]	@;Rotation/Scaling BG2P
-	strh 	r3,[r7,#0x26]
-	mov 	r3,#0x0
-	strh 	r3,[r7,#0x22]
-	strh 	r3,[r7,#0x24]
+	strh 	r3,[r7,#0x26]			
+	mov 	r3,#0x0	
+	strh 	r3,[r7,#0x22]	
+	strh 	r3,[r7,#0x24]		
 	str 	r3,[r7,#0x28]	@;BG2X/Y
-	str 	r3,[r7,#0x2c]
-
+	str 	r3,[r7,#0x2c]	
+	
 	strh 	r3,[r7,#0x54]	@;Bldy Brightness
 
 	strh 	r3,[r7,#0xBA]	@;DMA0CNT_H	0086game
-	strh 	r3,[r7,#0xC6]	@;DMA1CNT_H
-	strh 	r3,[r7,#0xD2]	@;DMA2CNT_H
-	strh 	r3,[r7,#0xDE]	@;DMA3CNT_H
+	strh 	r3,[r7,#0xC6]	@;DMA1CNT_H		
+	strh 	r3,[r7,#0xD2]	@;DMA2CNT_H	
+	strh 	r3,[r7,#0xDE]	@;DMA3CNT_H	
 	ldr  	r6,=0x403 		@;MODE_3 | BG2_ENABLE
-	strh 	r6,[r7]
-	@;mov 	r2,#0
+	strh 	r6,[r7]	
+	@;mov 	r2,#0	
 	strh 	r3,[r7,#208]  @;IME =0 Disable
 
 	strh 	r3,[r7,#REG_SOUNDCNT_X] @;sound off
-
+			
 	bl 		backup_LCD
 	bl 		clean_screen
 
 @; start
-	mov		r11,#0
+	mov		r11,#0	
 begin_show:
 	mov		r12,#0
 	@;cmp		r11,#0
 	@;movlt	r11,#0
-
+	
 	adrl  r8,ingameMENU
 	mov		r9,#40		 @;Y
-	mov		r10,#86    @;X
-
-showAll:
+	mov		r10,#86    @;X	
+	
+showAll:	
 	adrl  r7,Cheat_count
 	ldr		r7,[r7]
 	cmp 	r7,#0x0
-	beq   no_cheat
+	beq   no_cheat  
 	cmp		r11,#0
 	movlt	r11,#4
 	cmp		r11,#5
@@ -544,7 +883,7 @@ showAll:
 	moveq	r11,#0
 	ldrb	r0,[r8],#+1
 	cmp		r0,#0xA5
-	beq		waitSeletc
+	beq		waitSeletc	
 	b  		showMENU
 no_cheat:
 	cmp		r11,#0
@@ -555,7 +894,7 @@ no_cheat:
 	ldrb	r0,[r8],#+1
 	cmp		r0,#0x43 @;'C'
 	beq		waitSeletc
-
+		
 showMENU:
 	cmp		r0,#0
 	addeq	r9,#16
@@ -566,8 +905,8 @@ showMENU:
 	add		r2,r9,#0
 	cmp		r12,r11
 	ldreq		r3,=0x6A80 @;select
-	ldrne		r3,=0x7FFF
-	bl		printchar    @; r0 ch， r1, X  ， r2, Y , r3 color
+	ldrne		r3,=0x7FFF 
+	bl		printchar    @; r0 ch?? r1, X  ?? r2, Y , r3 color
 
 	add		r10,#8
 	b			showAll
@@ -577,13 +916,13 @@ waitSeletc:
 	ldr		r8,=0x4000130
 	ldrh	r9,[r8]
 	cmp		r9,r0
-	beq		waitSeletc
+	beq		waitSeletc	
 pressdown:
 	mov		r12,r9
 	ldrh	r9,[r8]
 	cmp		r9,r0
 	bne		pressdown
-
+	
 	ldr		r0,=0x3BF		;@up
 	cmp		r12,r0
 	subeq	r11,#1
@@ -595,15 +934,15 @@ pressdown:
 	ldr		r0,=0x3FE		;@A
 	cmp		r12,r0
 	beq		A_pressed
-	ldr		r0,=0x3FD		;@B
+	ldr		r0,=0x3FD		;@B 
 	cmp		r12,r0
 	moveq	r11,#5
 	beq		b_pressed_quit
 	b		waitSeletc
-A_pressed:
-	cmp			r11,#0
-	beq			reset_now
-	cmp			r11,#1
+A_pressed:	
+	cmp			r11,#0 
+	beq			reset_now	
+	cmp			r11,#1	
 	beq			call_Save
 	cmp			r11,#2
 	beq			call_Load
@@ -613,27 +952,27 @@ A_pressed:
 	beq			call_CheatOFF
 	@;-------------------------------------
 @;ingamemenu_exit:
-b_pressed_quit:
+b_pressed_quit:	
 	ldmfd	sp!,{r6}
 	mov		r7,#0x4000000
 	strh 	r6,[r7] @;re Displaly Control
-	bl 		restore_LCD
+	bl 		restore_LCD	
 save_exit:
-
+		
 	mov		r7,#0x4000000
 	mov 	r2,#1
 	strh 	r2,[r7,#208]
-
+	
 	ldmfd	sp!,{r3}
 	strh 	r3,[r7,#REG_SOUNDCNT_X]
-
-	ldmfd	sp!,{r3}
+	
+	ldmfd	sp!,{r3}	
 	strh 	r3,[r7,#REG_SOUNDCNT_L]  @;san guo
-
+	
 	adrl	r11, spend_0x80
-	ldr		r11,[r11]
+	ldr		r11,[r11]  
 	add		r0,r11,#0x40 @;0x3007EC0
-
+	
 	ldrh  r3,[r0],#2
 	strh 	r3,[r7,#0x60]	@;SOUND1CNT_L
 	ldrh  r3,[r0],#6
@@ -644,79 +983,79 @@ save_exit:
 	strh 	r3,[r7,#0x70]	@;SOUND3CNT_L
 	ldrh  r3,[r0],#8
 	strh 	r3,[r7,#0x78]	@;SOUND3CNT_L
-
+	
 	add		r11,#0x70   @;0x3007EC0+0x30
 	add 	r11,#2
 	ldrh  r3,[r11],#2
 	strh 	r3,[r7,#0xBA]	@;DMA0CNT_H
 	ldrh  r3,[r11],#2
-	strh 	r3,[r7,#0xC6]	@;DMA1CNT_H
+	strh 	r3,[r7,#0xC6]	@;DMA1CNT_H	
+	ldrh  r3,[r11],#2	
+	strh 	r3,[r7,#0xD2]	@;DMA2CNT_H	
 	ldrh  r3,[r11],#2
-	strh 	r3,[r7,#0xD2]	@;DMA2CNT_H
-	ldrh  r3,[r11],#2
-	strh 	r3,[r7,#0xDE]	@;DMA3CNT_H
-
+	strh 	r3,[r7,#0xDE]	@;DMA3CNT_H	
+		
 	mov 	r0,#0x00
-	bl 		SetRampage
-
+	bl 		SetRampage		
+	
 	ldmfd	sp!,{r0-r12,PC}
-	.ltorg
-	@;===================================================
-call_Save:
+	.ltorg		
+	@;===================================================	
+call_Save:	
 	adrl	r7,RTS_switch
 	ldr		r7,[r7]
 	cmp 	r7,#1
 	bne 	errorRTS
-
+	
 	@;02000000-0203FFFF   WRAM - On-board Work RAM  (256 KBytes)
 	mov		r8,#0x40   @; 0x40 0x50 0x60 0x70
 	mov   r9,#0x2000000
 wram_2000000:
 	mov 	r0,r8
-	bl 		SetRampage
+	bl 		SetRampage	
 	mov 	r0,#0x0E000000
 	mov 	r1,r9
 	mov		r2,#0x10000
 	bl 		WriteSram
 	add 	r8,#0x10
 	add 	r9,#0x10000
-	cmp 	r8,#0x80
+	cmp 	r8,#0x80	
 	bne 	wram_2000000
-
+	
 	@;03000000-03007FFF   WRAM - On-chip Work RAM   (32 KBytes)
 	mov 	r0,#0x80
-	bl 		SetRampage
+	bl 		SetRampage	
 	mov r0,#0x0E000000
 	mov r1,#0x3000000
 	mov r2,#0x8000
 	bl 	WriteSram
-
+	
 	@;05000000-050003FF   BG/OBJ Palette RAM        (1 Kbyte)
 	ldr r0,=0x0E008000
 	mov r1,#0x5000000
 	mov r2,#0x400
 	bl 	WriteSram
-
+	
 	@;06000000-06017FFF   VRAM - Video RAM          (96 KBytes)
 	ldmfd	sp!,{r6}
 	ldr		r7,=0x4000000
 	strh 	r6,[r7] @;re
-	bl 		restore_LCD
-
+	bl 		restore_LCD		
+		
 	mov 	r0,#0x90
-	bl 		SetRampage
+	bl 		SetRampage	
 	mov r0,#0x0E000000
 	mov r1,#0x6000000
 	mov r2,#0x10000
 	bl 	WriteSram
-
+	
 	mov 	r0,#0xA0
-	bl 		SetRampage
+	bl 		SetRampage	
 	mov r0,#0x0E000000
 	ldr r1,=0x6010000
 	mov r2,#0x8000
 	bl 	WriteSram
-
+	
 	@;07000000-070003FF   OAM - OBJ Attributes      (1 Kbyte)
 	ldr r0,=0x0E008000
 	mov r1,#0x7000000
@@ -728,70 +1067,70 @@ wram_2000000:
 	adrl	r7, spend_0x80
 	ldr		r7,[r7]
 	add		r7,#0x30  @;{r4-r11,sp,lr} SPSR  0x28+4
-
+		
 	mov		r1, #0xDF		@; Switch to systme Mode
 	msr		cpsr_cf, r1
 	NOP
 	mov		r6,sp
-	stmia r7!,{r6,lr}
-
-	msr 	cpsr_cf,r0	;@return IRQ mode
+	stmia r7!,{r6,lr}	
+	
+	msr 	cpsr_cf,r0	;@return IRQ mode	
 	NOP
-
+	
 	ldr 	r0,=0x0E008400
 	adrl 	r1, spend_0x80
 	ldr		r1,[r1]
 	mov 	r2,#0x80
-	bl 		WriteSram
-
+	bl 		WriteSram	
+	
 	@;04000000-040003FE   I/O Registers
 	ldr r0,=0x0E009000
 	mov r1,#0x4000000
 	mov r2,#0x60					@;0x0-0x60
 	bl 	WriteSram
-
+	
 	ldr 	r0,=0x0E009060
 	adrl 	r1, spend_0x80
-	ldr		r1,[r1]
-	add 	r1,#0x40
+	ldr		r1,[r1] 
+	add 	r1,#0x40	
 	@;ldr 	r1,=0x2010000
 	mov 	r2,#0x30   				@;0x60-0x90
-	bl 		WriteSram
-
+	bl 		WriteSram		
+	
 	ldr r0,=0x0E009090
 	mov r1,#0x4000000
 	add r1,#0x90          @;0x90-0x3FE
 	mov r2,#0x370
 	bl 	WriteSram
-
-	@;FLAG
+	
+	@;FLAG	
 	ldr r0,=0x0E00FFF0
 	adrl r1,S_RTS_FLAG
 	mov r2,#0x10
-	bl 	WriteSram
-
+	bl 	WriteSram	
+		
 	mov r7,#0x50000
 delay_loop:
 	cmp			r7,#0
-	beq			save_exit
+	beq			save_exit	
 	nop
 	sub 		r7,#0x01
 	b				delay_loop
-
-	b save_exit
-	@;===================================================
-	@;===================================================
+	
+	b save_exit	
+	@;===================================================		
+	@;===================================================	
 call_Load:
-	@;check 	;FLAG
+	@;check 	;FLAG	
 	mov 	r0,#0xA0
 	bl 		SetRampage
 	ldr 	r0,=0x0E00FFF0
 	adrl 	r1, spend_0x80  @;temp buff
 	ldr 	r1,[r1]
 	mov 	r2,#0x10
-	bl 		ReadSram
-
-	adrl 	r1,S_RTS_FLAG
+	bl 		ReadSram	
+	
+	adrl 	r1,S_RTS_FLAG	
 	adrl 	r2, spend_0x80 @;temp buff
 	ldr 	r2,[r2]
 	mov 	r3,#0
@@ -803,30 +1142,30 @@ loop_check:
 	add 	r3,#1
 	cmp 	r3,#4
 	bne 	loop_check
-
+	
 	@;02000000-0203FFFF   WRAM - On-board Work RAM  (256 KBytes)
 	mov		r8,#0x40   @; 0x40 0x50 0x60 0x70
 	mov   r9,#0x2000000
 wram_2000000_Load:
 	mov 	r0,r8
-	bl 		SetRampage
+	bl 		SetRampage	
 	mov 	r0,#0x0E000000
 	mov 	r1,r9
 	mov		r2,#0x10000
 	bl 		ReadSram
 	add 	r8,#0x10
 	add 	r9,#0x10000
-	cmp 	r8,#0x80
+	cmp 	r8,#0x80	
 	bne 	wram_2000000_Load
 
 	@;03000000-03007FFF   WRAM - On-chip Work RAM   (32 KBytes)
 	mov 	r0,#0x80
-	bl 		SetRampage
+	bl 		SetRampage	
 	mov r0,#0x0E000000
 	mov r1,#0x3000000
 	mov r2,#0x8000
 	bl 	ReadSram
-
+	
 	@;05000000-050003FF   BG/OBJ Palette RAM        (1 Kbyte)
 	ldr r0,=0x0E008000
 	mov r1,#0x5000000
@@ -835,28 +1174,28 @@ wram_2000000_Load:
 
 	@;06000000-06017FFF   VRAM - Video RAM          (96 KBytes)
 	mov 	r0,#0x90
-	bl 		SetRampage
+	bl 		SetRampage	
 	mov r0,#0x0E000000
 	mov r1,#0x6000000
 	mov r2,#0x10000
 	bl 	ReadSram
 	mov 	r0,#0xA0
-	bl 		SetRampage
+	bl 		SetRampage	
 	mov r0,#0x0E000000
 	ldr r1,=0x6010000
 	mov r2,#0x8000
 	bl 	ReadSram
-
+	
 	@;07000000-070003FF   OAM - OBJ Attributes      (1 Kbyte)
 	ldr r0,=0x0E008000
 	mov r1,#0x7000000
 	mov r2,#0x400
 	bl 	ReadSram
-
+	
 	@;-------------------------------------
 	mov r10,#0x4000000
 	LDR r11,=0x0E009000
-
+	
 	adr r9,register_list
 register_list_loop:
 	ldrh r2,[r9],#2
@@ -870,42 +1209,42 @@ register_list_loop:
 register_list_end:
 
 	@;mov r10,#0x4000000
-	LDR r11,=0x0E008500
+	LDR r11,=0x0E008500		
 @;	add r0,r10,#0xBA  @;0x40000BA  DMA
 @;	add r1,r11,#0x32
-@;	bl  restore2_IO
+@;	bl  restore2_IO	
 	add r0,r10,#0xC6  @;0x40000C6
 	add r1,r11,#0x34
-	bl  restore2_IO
+	bl  restore2_IO	
 @;	add r0,r10,#0xD2  @;0x40000D2
 @;	add r1,r11,#0x36
-@;	bl  restore2_IO
+@;	bl  restore2_IO	
 @;	add r0,r10,#0xDE  @;0x40000DE
 @;	add r1,r11,#0x38
-@;	bl  restore2_IO
-
+@;	bl  restore2_IO	
+	
 	@;mov   r4,#0x8F
 	@;mov   r7,#0x4000000
 	@;strh 	r4,[r7,#REG_SOUNDCNT_X]
-
+	
 	ldr r0,=0x4000202   @;0x4000202
 	mov r1,#0
 	strh r1,[r0]
-
+	
 
 	ldr 	r0,=0x0E008400
 	adrl 	r1, spend_0x80 @;temp buff
-	ldr		r1,[r1]
+	ldr		r1,[r1] 
 	mov 	r2,#0x80
-	bl 		ReadSram
-
+	bl 		ReadSram	
+	
 	mrs	  r0,CPSR
 	adrl	r7, spend_0x80
-	ldr		r7,[r7]
+	ldr		r7,[r7] 
 	add		r7,#0x28      @;SPSR offset
-
+	
 	ldmia	r7!,{r2}			@;r7=0x2C
-	msr		SPSR_cxsf,r2	@;restore SPSR_irq
+	msr		SPSR_cxsf,r2	@;restore SPSR_irq  
 
 	mov		r1, #0xDF		  @;Switch to systme Mode
 	msr		cpsr_cf, r1
@@ -913,62 +1252,62 @@ register_list_end:
 	add		r7,#0x4					@;offset 0x30
 	ldmia r7!,{r13-r14}
 
-	msr 	cpsr_cf,r0	  @;restore IRQ
+	msr 	cpsr_cf,r0	  @;restore IRQ	
 	NOP
 
 	mov 	r0,#0x0
 	bl 		SetRampage
-
+	
 	@;spin until VCOUNT==160, triggers next vblank
-	mov 	r0,#0x4000000
+	mov 	r0,#0x4000000 
 spin3_load:
 	ldrh 	r1,[r0,#REG_VCOUNT]
 	cmp 	r1,#160
-	bne 	spin3_load
-
+	bne 	spin3_load  
+	
 	adrl	r12, spend_0x80
-	ldr		r12,[r12]
+	ldr		r12,[r12] 
 	ldmia r12!,{r4-r11,sp,lr}
+	
+	ldr 	pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine		
 
-	ldr 	pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine
-
-	@;===================================================
+	@;===================================================	
 errorRTS:
 	adrl  r8,s_badRTS
 	mov		r9,#145	   @;Y
 	mov		r10,#64    @;X
-showerror:
+showerror:	
 	ldrb	r0,[r8],#+1
 	cmp		r0,#0x00
 	beq		enderror
 	mov		r1,r10
 	add		r2,r9,#0
 	mov	  r3,#0x1F  @;red
-	bl		printchar    @; r0 char， r1, X  ， r2, Y , r3 color
+	bl		printchar    @; r0 char?? r1, X  ?? r2, Y , r3 color
 	add		r10,#8
 	b			showerror
-enderror:
+enderror:	
 waitB:
 	ldr		r0,=0x3FF		@;No key press
 	ldr		r8,=0x4000130
 	ldrh	r9,[r8]
 	cmp		r9,r0
-	beq		waitB
+	beq		waitB	
 pressB:
 	mov		r12,r9
 	ldrh	r9,[r8]
 	cmp		r9,r0
 	bne		pressB
-
-	ldr		r0,=0x3FD		;@B
+	
+	ldr		r0,=0x3FD		;@B 
 	cmp		r12,r0
 	moveq	r11,#5
 	beq		b_pressed_quit
 	b		waitB
 
-
-
-	@;===================================================
+	
+	
+	@;===================================================		
 call_CheatON:
 	mov r3,#1
 set_Cheat:
@@ -976,17 +1315,17 @@ set_Cheat:
 	ldr	r2,[r2]
 	str r3,[r2]
 	b b_pressed_quit
-	@;===================================================
+	@;===================================================		
 call_CheatOFF:
 	mov r3,#0
 	b   set_Cheat
 
-
-	.ltorg
+	
+	.ltorg	
 	@;--------------
-CheatONOFF:
+CheatONOFF:	
 	.word	 0x03007FE0
-	@;===================================================
+	@;===================================================	
 draw_plot:
 	MOV     R11, #0xF0
 	MLA     R3, R1, R11, R0
@@ -994,8 +1333,8 @@ draw_plot:
 	ADD     R3, R3, #0x6000000
 	STRH    R2, [R3]
 	BX			LR
-		@;===================================================
-printchar:	@; r0 打印的字符， r1, X  ， r2, Y , r3 颜色
+		@;===================================================	
+printchar:	@; r0 ???????????? r1, X  ?? r2, Y , r3 ????
 	STMFD   SP!, {R8-R11,LR}
 	MOV     R8, R1
 	MOV     R6, R2
@@ -1006,7 +1345,7 @@ printchar:	@; r0 打印的字符， r1, X  ， r2, Y , r3 颜色
 	ADD     R4, R4, R0,LSL#4
 	ADD     R7, R4, #0x10
 
-loc_A0DD7C:
+loc_A0DD7C:                             
 	MOV     R5, #0
 loc_A0DD80:
 	LDRB    R3, [R4]
@@ -1032,13 +1371,13 @@ register_list:
 	.hword 0x0060,0x0062,0x0068,0x0070,0x0072,0x0078
 	.hword 0x0080,0x0082,0x0088                 @;0x008C,0x008E,
 	.hword 0x0090,0x0092,0x0094,0x0096,0x0098,0x009A,0x009C,0x009E
-
+	
 	.hword 0x00B8,0x00C4,0x00D0,0x00DC  @;DMA
 	.hword 0x0120,0x0122,0x0124,0x0126,0x0128,0x012A,0x012C,0x0132,0x0134
 	.hword 0x0140,0x0150,0x0154,0x0200,0x0204,0x0208,0xFF00
 	.align
-@;------------------------------------------------
-ASCII:
+@;------------------------------------------------	
+ASCII:	
 	.byte		0x00,0x00,0x10,0x38,0x6C,0xC6,0xC6,0xFE  @;// -A-
 	.byte		0xC6,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00
 
@@ -1104,10 +1443,10 @@ ASCII:
 
 	.byte		0x00,0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6 @;// -V-
 	.byte		0xC6,0x6C,0x38,0x10,0x00,0x00,0x00,0x00
-
+	
 	.byte		0x00,0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xD6 @;// -W-
 	.byte		0xD6,0xFE,0x6C,0x6C,0x00,0x00,0x00,0x00
-
+	
 	.byte		0x00,0x00,0xC6,0xC6,0x6C,0x6C,0x38,0x38  @;// -X-
 	.byte		0x6C,0x6C,0xC6,0xC6,0x00,0x00,0x00,0x00
 
@@ -1116,7 +1455,7 @@ ASCII:
 
 	.byte		0x00,0x00,0xFE,0xC6,0x86,0x0C,0x18,0x30  @;// -Z- 0x5A
 	.byte		0x60,0xC2,0xC6,0xFE,0x00,0x00,0x00,0x00
-
+	
 	.align
 ingameMENU:
 s_reset:
@@ -1130,17 +1469,21 @@ s_cheatON:
 s_cheatOFF:
  	.byte  'C','H','E','A','T','O','F','F',0x0
 	.byte  0xA5  @;end
-	.align
+	.align	
 S_RTS_FLAG:
  	.byte  'E','Z','-','O','m','e','g','a','R','T','C','F','I','L','E','.'
-	.align
+	.align	
 s_badRTS:
  	.byte  'R','T','S','F','I','L','E','D','A','M','A','G','E','D',0x00
-	.align
-RTS_switch:
+	.align	
+RTS_switch: 
 	.word 0x00000000
 Cheat_count:
-	.word 0x00000000
+	.word 0x00000000	
+	.align
+cheat_condition_stack:
+	.space 0x80		@ 16 levels x parent/result pair
+cheat_condition_stack_end:
 no_CHEAT_end:
 CHEAT:
 	.space 0x400
