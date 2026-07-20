@@ -903,6 +903,44 @@ void Show_KEY_val(u32 total_entries, u32 visible_total, u32 Select, u32 showoffs
 	for(line=0; line<need_show; line++)
 		Show_KEY_line(line, Select, showoffset, total_entries);
 }
+
+static u16 CheatVisibleSelectionMask(u32 total_entries, u32 visible_total,
+	u32 showoffset)
+{
+	u16 mask = 0;
+	u32 line;
+	u32 visible = (visible_total > showoffset) ? visible_total - showoffset : 0;
+
+	if (visible > 10)
+		visible = 10;
+	for (line = 0; line < visible; line++)
+	{
+		u32 entry_index = GetVisibleCheatMenuEntryIndex(total_entries,
+			showoffset + line);
+		if (entry_index < total_entries)
+		{
+			FM_CHT_LINE *entry = &((FM_CHT_LINE*)pCHTbuffer)[entry_index];
+			if (entry->is_section != 1 && entry->select)
+				mask |= (u16)(1u << line);
+		}
+	}
+	return mask;
+}
+
+static void RedrawChangedCheatSelections(u16 changed, u32 total_entries,
+	u32 visible_total, u32 Select, u32 showoffset)
+{
+	u32 line;
+	u32 visible = (visible_total > showoffset) ? visible_total - showoffset : 0;
+
+	if (visible > 10)
+		visible = 10;
+	for (line = 0; line < visible; line++)
+	{
+		if (changed & (u16)(1u << line))
+			Show_KEY_line(line, Select, showoffset, total_entries);
+	}
+}
 static u32 IsHexDigitCHT(char c)
 {
 	return ((c >= '0' && c <= '9') ||
@@ -2403,6 +2441,7 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 		u32 old_showoffset = 0;
 		u32 cheat_scroll_delay = 0;
 		u32 visible_count;
+		u16 selection_redraw_mask = 0;
 
 		CheatSelectionRestore(all_count);
 
@@ -2422,7 +2461,13 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 				VBlankIntrWait();
 				VBlankIntrWait();
 				UIAudio_UpdateExport();
-				if(re_show)
+				if(selection_redraw_mask)
+				{
+					RedrawChangedCheatSelections(selection_redraw_mask, all_count,
+						visible_count, Select, showoffset);
+					selection_redraw_mask = 0;
+				}
+				else if(re_show)
 				{
 					if(re_show>1)
 					{
@@ -2567,8 +2612,12 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 					}
 					else if (entry_index < all_count)
 					{
+						u16 old_selection_mask = CheatVisibleSelectionMask(all_count,
+							visible_count, showoffset);
 						ToggleCheatMenuEntry(entry_index, all_count);
-						re_show = 1;
+						selection_redraw_mask = old_selection_mask ^
+							CheatVisibleSelectionMask(all_count, visible_count,
+							showoffset);
 					}
 					UIAudio_PlayAcceptExport();
 				}
