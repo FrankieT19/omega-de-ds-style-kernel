@@ -739,6 +739,37 @@ void Show_KEY_val(u32 total,u32 Select,u32 showoffset)
 	for(line=0;line<need_show;line++)
 		Show_KEY_line(line, Select, showoffset);
 }
+
+static u16 CheatVisibleSelectionMask(u32 total,u32 showoffset)
+{
+	u16 mask = 0;
+	u32 line;
+	u32 visible = (total > showoffset) ? total - showoffset : 0;
+
+	if(visible > 10)
+		visible = 10;
+	for(line=0;line<visible;line++)
+	{
+		FM_CHT_LINE *entry = &((FM_CHT_LINE*)pCHTbuffer)[showoffset+line];
+		if(entry->is_section != 1 && entry->select)
+			mask |= (u16)(1u << line);
+	}
+	return mask;
+}
+
+static void RedrawChangedCheatSelections(u16 changed,u32 total,u32 Select,u32 showoffset)
+{
+	u32 line;
+	u32 visible = (total > showoffset) ? total - showoffset : 0;
+
+	if(visible > 10)
+		visible = 10;
+	for(line=0;line<visible;line++)
+	{
+		if(changed & (u16)(1u << line))
+			Show_KEY_line(line, Select, showoffset);
+	}
+}
 //------------------------------------------------------------------
 unsigned long str2hex( char*str)
 {
@@ -1121,6 +1152,7 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 		u32 old_select = 1;
 		u32 old_showoffset = 0;
 		u32 cheat_scroll_delay = 0;
+		u16 selection_redraw_mask = 0;
 
 		CheatSelectionRestore(all_count);
 
@@ -1133,7 +1165,12 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 				VBlankIntrWait();
 				VBlankIntrWait();
 				UIAudio_UpdateExport();
-				if(re_show)
+				if(selection_redraw_mask)
+				{
+					RedrawChangedCheatSelections(selection_redraw_mask, all_count, Select, showoffset);
+					selection_redraw_mask = 0;
+				}
+				else if(re_show)
 				{
 					if(re_show>1)
 					{
@@ -1301,6 +1338,7 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 				{
 					if(((FM_CHT_LINE*)pCHTbuffer)[showoffset+Select].is_section != 1)
 					{
+						u16 old_selection_mask = CheatVisibleSelectionMask(all_count, showoffset);
 						u32 current_select = showoffset+Select-1;
 						while(((FM_CHT_LINE*)pCHTbuffer)[current_select].is_section != 1)
 						{
@@ -1314,8 +1352,8 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 
 						u8 select	= ((FM_CHT_LINE*)pCHTbuffer)[showoffset+Select].select;
 						((FM_CHT_LINE*)pCHTbuffer)[showoffset+Select].select = !select;
+						selection_redraw_mask = old_selection_mask ^ CheatVisibleSelectionMask(all_count, showoffset);
 						UIAudio_PlayAcceptExport();
-						re_show=1;
 					}
 				}
 				else if(keysup & KEY_B)
