@@ -402,8 +402,7 @@ export class LauncherPreview {
       }
       this.drawKernelText(truncateCharacters(label, Math.floor(maxWidth / 6)), 17, y, textColour);
       if (preferences.cleanList !== "On") {
-        const metaX = row.type === "folder" ? 221 : 208;
-        this.drawKernelText(row.meta, metaX, y, textColour);
+        this.drawKernelText(row.meta, 221, y, textColour);
       }
     });
 
