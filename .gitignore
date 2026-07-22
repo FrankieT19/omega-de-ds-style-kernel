@@ -10,3 +10,7 @@ build/
 *.tmp
 Thumbs.db
 desktop.ini
+
+# Browser installer payloads are release data, not compiler output.
+!docs/manager/packages/current/**/*.gba
+!docs/manager/packages/current/**/*.bin
