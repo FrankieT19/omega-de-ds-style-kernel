@@ -649,8 +649,8 @@ h3 {
 
 .personalisation-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.78fr);
-  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) 520px;
+  gap: 24px;
   align-items: start;
   padding-top: 20px;
 }
@@ -709,7 +709,7 @@ h3 {
   position: sticky;
   top: calc(var(--header-height) + 24px);
   min-width: 0;
-  padding: 18px;
+  padding: 12px;
   border: 1px solid var(--line);
   border-radius: 7px;
   background: var(--bg-deep);
@@ -752,86 +752,32 @@ h3 {
   color: var(--text);
 }
 
-.handheld-preview {
-  position: relative;
-  width: min(100%, 420px);
-  margin: 20px auto 14px;
-  padding: 24px 26px 70px;
-  border: 1px solid #555b6d;
-  border-radius: 18px 18px 32px 18px;
-  background: #c7cad3;
-  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.35), inset 0 1px rgba(255, 255, 255, 0.7);
+.screen-preview-stage {
+  min-height: 382px;
+  display: grid;
+  place-items: center;
+  padding: 28px 0 24px;
 }
 
-.handheld-screen {
-  padding: 9px;
-  border: 1px solid #3f4350;
-  border-radius: 7px;
-  background: #20232b;
-  box-shadow: inset 0 0 0 3px #0d0f14;
+.gba-screen-frame {
+  width: min(100%, 494px);
+  padding: 6px;
+  border: 1px solid #3c3a48;
+  border-radius: 6px;
+  background: #08090c;
+  box-shadow:
+    0 28px 62px rgba(0, 0, 0, 0.5),
+    0 0 54px rgba(139, 79, 225, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
 }
 
-.handheld-screen canvas {
+.gba-screen-frame canvas {
   width: 100%;
   aspect-ratio: 3 / 2;
   display: block;
   background: #fff;
   image-rendering: pixelated;
-}
-
-.handheld-speaker {
-  position: absolute;
-  top: 9px;
-  left: 50%;
-  width: 42px;
-  height: 3px;
-  border-radius: 3px;
-  background: rgba(53, 57, 68, 0.48);
-  transform: translateX(-50%);
-}
-
-.handheld-controls i {
-  position: absolute;
-  bottom: 22px;
-  left: 34px;
-  width: 42px;
-  height: 14px;
-  background: #4d5260;
-  box-shadow: 14px -14px #4d5260, 14px 14px #4d5260;
-}
-
-.handheld-controls i::after {
-  content: "";
-  position: absolute;
-  inset: -14px 14px;
-  background: #4d5260;
-}
-
-.handheld-controls b {
-  position: absolute;
-  right: 42px;
-  bottom: 31px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #7d699f;
-  box-shadow: inset 0 -2px rgba(0, 0, 0, 0.24);
-}
-
-.handheld-controls b:last-child {
-  right: 76px;
-  bottom: 21px;
-}
-
-.handheld-controls span {
-  position: absolute;
-  bottom: 19px;
-  left: 50%;
-  width: 30px;
-  height: 5px;
-  border-radius: 3px;
-  background: #6b6f7a;
-  transform: translateX(-50%);
+  image-rendering: crisp-edges;
 }
 
 .launcher-preview-panel > p {
@@ -1746,6 +1692,17 @@ input[type="range"] {
   gap: 10px;
 }
 
+@media (max-width: 1240px) {
+  .personalisation-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .launcher-preview-panel {
+    position: static;
+    grid-row: 1;
+  }
+}
+
 @media (max-width: 1080px) {
   :root {
     --nav-width: 82px;
@@ -1968,8 +1925,9 @@ input[type="range"] {
     flex: 1;
   }
 
-  .handheld-preview {
-    padding-inline: 18px;
+  .screen-preview-stage {
+    min-height: 0;
+    padding-block: 22px 18px;
   }
 
   .style-card-grid {

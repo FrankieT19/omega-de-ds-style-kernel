@@ -1,0 +1,68 @@
+{
+  "English (UK)": {
+    "DSTEXT_LANGUAGE_NAME": "English (UK)",
+    "DSTEXT_SD_CARD": "SD Card",
+    "DSTEXT_NOR_FLASH": "NOR Flash",
+    "DSTEXT_START_SETTINGS": "Settings"
+  },
+  "English (US)": {
+    "DSTEXT_LANGUAGE_NAME": "English (US)",
+    "DSTEXT_SD_CARD": "SD Card",
+    "DSTEXT_NOR_FLASH": "NOR Flash",
+    "DSTEXT_START_SETTINGS": "Settings"
+  },
+  "Espa\u00f1ol": {
+    "DSTEXT_LANGUAGE_NAME": "Espa\u00f1ol",
+    "DSTEXT_SD_CARD": "Tarjeta SD",
+    "DSTEXT_NOR_FLASH": "Flash NOR",
+    "DSTEXT_START_SETTINGS": "Ajustes"
+  },
+  "Fran\u00e7ais": {
+    "DSTEXT_LANGUAGE_NAME": "Fran\u00e7ais",
+    "DSTEXT_SD_CARD": "Carte SD",
+    "DSTEXT_NOR_FLASH": "Flash NOR",
+    "DSTEXT_START_SETTINGS": "R\u00e9glages"
+  },
+  "Portugu\u00eas": {
+    "DSTEXT_LANGUAGE_NAME": "Portugu\u00eas",
+    "DSTEXT_SD_CARD": "Cart\u00e3o SD",
+    "DSTEXT_NOR_FLASH": "Flash NOR",
+    "DSTEXT_START_SETTINGS": "Defini\u00e7\u00f5es"
+  },
+  "Deutsch": {
+    "DSTEXT_LANGUAGE_NAME": "Deutsch",
+    "DSTEXT_SD_CARD": "SD-Karte",
+    "DSTEXT_NOR_FLASH": "NOR-Flash",
+    "DSTEXT_START_SETTINGS": "Einstellungen"
+  },
+  "T\u00fcrk\u00e7e": {
+    "DSTEXT_LANGUAGE_NAME": "T\u00fcrk\u00e7e",
+    "DSTEXT_SD_CARD": "SD kart",
+    "DSTEXT_NOR_FLASH": "NOR Flash",
+    "DSTEXT_START_SETTINGS": "Ayarlar"
+  },
+  "Italiano": {
+    "DSTEXT_LANGUAGE_NAME": "Italiano",
+    "DSTEXT_SD_CARD": "Scheda SD",
+    "DSTEXT_NOR_FLASH": "Flash NOR",
+    "DSTEXT_START_SETTINGS": "Impostazioni"
+  },
+  "Nederlands": {
+    "DSTEXT_LANGUAGE_NAME": "Nederlands",
+    "DSTEXT_SD_CARD": "SD-kaart",
+    "DSTEXT_NOR_FLASH": "NOR-flash",
+    "DSTEXT_START_SETTINGS": "Instellingen"
+  },
+  "Svenska": {
+    "DSTEXT_LANGUAGE_NAME": "Svenska",
+    "DSTEXT_SD_CARD": "SD-kort",
+    "DSTEXT_NOR_FLASH": "NOR-flash",
+    "DSTEXT_START_SETTINGS": "Inst\u00e4llningar"
+  },
+  "Suomi": {
+    "DSTEXT_LANGUAGE_NAME": "Suomi",
+    "DSTEXT_SD_CARD": "SD-kortti",
+    "DSTEXT_NOR_FLASH": "NOR-flash",
+    "DSTEXT_START_SETTINGS": "Asetukset"
+  }
+}

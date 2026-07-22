@@ -139,18 +139,19 @@ function renderPersonalisation() {
   refreshPersonalisationUi();
 }
 
-function markPersonalisationDirty() {
+function markPersonalisationDirty(preference = null) {
   state.setupDirty = true;
   setSetupState(state.sdRoot ? "Unsaved changes" : "Applied during install");
   $("#save-settings").disabled = !state.sdRoot;
-  refreshPersonalisationUi();
+  refreshPersonalisationUi(preference);
 }
 
-function refreshPersonalisationUi() {
+function refreshPersonalisationUi(preference = null) {
   const preferences = state.personalisation;
   $("#setup-start-source").disabled = preferences.startScreen === "Off";
   $("#setup-list-art-field").hidden = preferences.viewMode !== "List + art";
-  launcherPreview?.render();
+  if (preference) launcherPreview?.showPreference(preference);
+  else launcherPreview?.render();
 }
 
 async function loadCardPersonalisation() {
@@ -553,13 +554,13 @@ document.querySelectorAll("[data-setup-control] [data-value]").forEach((button) 
     const control = button.closest("[data-setup-control]").dataset.setupControl;
     state.personalisation[control === "clock" ? "clock" : "theme"] = button.dataset.value;
     setSegmentedValue(control, button.dataset.value);
-    markPersonalisationDirty();
+    markPersonalisationDirty(control === "clock" ? "clock" : "theme");
   });
 });
 $("#setup-name").addEventListener("input", (event) => {
   state.personalisation.name = [...event.target.value.replace(/[\0\r\n]/g, "")].slice(0, 11).join("");
   if (event.target.value !== state.personalisation.name) event.target.value = state.personalisation.name;
-  markPersonalisationDirty();
+  markPersonalisationDirty("name");
 });
 const setupSelectBindings = {
   "#setup-colour": "colour",
@@ -582,7 +583,7 @@ for (const [selector, preference] of Object.entries(setupSelectBindings)) {
     if (preference === "colour") {
       $("#setup-colour-swatch").style.background = COLOUR_SWATCHES[event.target.value] || COLOUR_SWATCHES["Pale Blue"];
     }
-    markPersonalisationDirty();
+    markPersonalisationDirty(preference);
   });
 }
 const setupToggleBindings = {
@@ -595,7 +596,7 @@ const setupToggleBindings = {
 for (const [selector, preference] of Object.entries(setupToggleBindings)) {
   $(selector).addEventListener("change", (event) => {
     state.personalisation[preference] = event.target.checked ? "On" : "Off";
-    markPersonalisationDirty();
+    markPersonalisationDirty(preference);
   });
 }
 document.querySelectorAll("[data-preview-scene]").forEach((button) => {
@@ -618,7 +619,11 @@ document.querySelectorAll(".bundled-style").forEach((button) => {
   button.addEventListener("click", () => addBundledStyle(button.dataset.bundledStyle, button));
 });
 
-const launcherPreview = new LauncherPreview($("#launcher-preview"), () => state.personalisation);
+const launcherPreview = new LauncherPreview(
+  $("#launcher-preview"),
+  () => state.personalisation,
+  (copy) => { $("#launcher-preview-copy").textContent = copy; },
+);
 
 const artwork = new ArtworkController({
   getSdRoot: () => state.sdRoot,
