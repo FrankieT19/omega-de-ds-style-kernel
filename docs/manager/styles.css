@@ -1244,6 +1244,36 @@ h3 {
   font-size: 12px;
 }
 
+.checkbox-field {
+  margin: 16px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.checkbox-field input {
+  margin: 3px 0 0;
+  accent-color: var(--purple);
+}
+
+.checkbox-field span {
+  display: grid;
+  gap: 3px;
+}
+
+.checkbox-field small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.scan-status {
+  margin-top: 10px;
+}
+
 input[type="text"],
 input[type="search"],
 input[type="url"],

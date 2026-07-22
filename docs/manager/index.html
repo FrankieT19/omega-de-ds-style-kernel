@@ -279,7 +279,7 @@
           <div>
             <p class="eyebrow">Thumbnail maker</p>
             <h1>Artwork</h1>
-            <p>Create wide and square DS Style thumbnails from your own images or Libretro.</p>
+            <p>Create wide and square DS Style thumbnails from your own images or supported Libretro systems.</p>
           </div>
         </div>
 
@@ -310,6 +310,29 @@
 
             <div class="control-panel" id="libretro-art-panel" hidden>
               <div class="field-row split">
+                <label class="field grow">
+                  <span>System / console</span>
+                  <select id="libretro-system">
+                    <option>Game Boy Advance</option>
+                    <option>Game Boy</option>
+                    <option>Game Boy Color</option>
+                    <option>Nintendo Entertainment System</option>
+                    <option>Master System</option>
+                    <option>Game Gear</option>
+                    <option>SG-1000</option>
+                    <option>PC Engine</option>
+                    <option>Neo Geo Pocket</option>
+                    <option>Neo Geo Pocket Color</option>
+                    <option>WonderSwan</option>
+                    <option>WonderSwan Color</option>
+                    <option>MSX</option>
+                    <option>Watara Supervision</option>
+                    <option>ZX Spectrum</option>
+                    <option>ColecoVision</option>
+                    <option>Arcadia 2001</option>
+                    <option>Super Cassette Vision</option>
+                  </select>
+                </label>
                 <label class="field">
                   <span>Artwork type</span>
                   <select id="libretro-source">
@@ -318,18 +341,49 @@
                     <option value="Named_Snaps">Gameplay screenshot</option>
                   </select>
                 </label>
-                <label class="field grow">
-                  <span>Search</span>
-                  <span class="input-with-button">
-                    <input id="libretro-query" type="search" autocomplete="off" placeholder="Game name">
-                    <button class="icon-button compact" id="libretro-search" type="button" title="Search Libretro">
-                      <i data-lucide="search"></i><span class="sr-only">Search</span>
-                    </button>
-                  </span>
-                </label>
               </div>
+              <label class="field">
+                <span>Search</span>
+                <span class="input-with-button">
+                  <input id="libretro-query" type="search" autocomplete="off" placeholder="Game name">
+                  <button class="icon-button compact" id="libretro-search" type="button" title="Search Libretro">
+                    <i data-lucide="search"></i><span class="sr-only">Search</span>
+                  </button>
+                </span>
+              </label>
               <p class="field-note" id="libretro-status">Search the public Game Boy Advance artwork library.</p>
               <div class="search-results" id="libretro-results" aria-live="polite"></div>
+            </div>
+
+            <div class="form-section sd-library-scan">
+              <h2>Scan SD library</h2>
+              <p class="field-note">Find matching Libretro artwork for supported games already on the connected card. Results are saved as CUSTOM artwork without changing any game files.</p>
+              <div class="field-row split">
+                <label class="field grow">
+                  <span>Artwork type</span>
+                  <select id="scan-art-source">
+                    <option value="Named_Boxarts">Box art</option>
+                    <option value="Named_Titles">Title screen</option>
+                    <option value="Named_Snaps">Gameplay screenshot</option>
+                  </select>
+                </label>
+                <label class="field grow">
+                  <span>Sizes</span>
+                  <select id="scan-art-size-mode">
+                    <option value="both">Wide and square</option>
+                    <option value="wide">Wide, 120 x 80</option>
+                    <option value="square">Square, 80 x 80</option>
+                  </select>
+                </label>
+              </div>
+              <label class="checkbox-field">
+                <input id="scan-include-gba" type="checkbox">
+                <span><strong>Include Game Boy Advance files</strong><small>GBA artwork is normally supplied by a standard thumbnail pack.</small></span>
+              </label>
+              <button class="button primary" id="scan-sd-artwork" type="button" disabled>
+                <i data-lucide="scan-search"></i><span>Scan connected SD card</span>
+              </button>
+              <p class="field-note scan-status" id="sd-artwork-scan-status" aria-live="polite">Connect an SD card to scan its installed games.</p>
             </div>
 
             <div class="form-section">

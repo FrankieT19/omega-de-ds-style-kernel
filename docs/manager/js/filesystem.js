@@ -135,8 +135,10 @@ export async function listFilesRecursive(root, options = {}) {
     maxFiles = 2000,
     includeHidden = false,
     basePath = "",
+    excludeDirectories = [],
   } = options;
   const wanted = extensions.map((value) => value.toLocaleLowerCase());
+  const excluded = new Set(excludeDirectories.map((value) => value.toLocaleLowerCase()));
   const files = [];
 
   async function visit(directory, relativePath, depth) {
@@ -146,6 +148,7 @@ export async function listFilesRecursive(root, options = {}) {
       if (!includeHidden && name.startsWith(".")) continue;
       const path = relativePath ? `${relativePath}/${name}` : name;
       if (handle.kind === "directory") {
+        if (excluded.has(name.toLocaleLowerCase())) continue;
         await visit(handle, path, depth + 1);
       } else if (!wanted.length || wanted.some((ext) => name.toLocaleLowerCase().endsWith(ext))) {
         files.push({ name, path, handle });
