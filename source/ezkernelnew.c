@@ -6414,11 +6414,28 @@ static int Launcher_NotFoundHeight(void)
 	return 80;
 }
 
-static void Launcher_RestoreHorizontalThumbBox(int x, int y, int w, int h, u16 outline, u16 fill)
+static void Launcher_RestoreHorizontalOuterBorder(int x, int y, int w, int h)
 {
-	(void)outline;
-	(void)fill;
-	Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), x - 1, y - 1, w + 2, h + 2);
+	const u16 *bg = (const u16*)Launcher_GetBGImage();
+	Launcher_RestoreBGClip(bg, x - 1, y - 1, w + 2, 1);
+	Launcher_RestoreBGClip(bg, x - 1, y + h, w + 2, 1);
+	Launcher_RestoreBGClip(bg, x - 1, y, 1, h);
+	Launcher_RestoreBGClip(bg, x + w, y, 1, h);
+}
+
+static void Launcher_DrawPreparedHorizontalArtwork(const u16 *src, int stride,
+		int x, int y, int w, int h, u32 selected)
+{
+	if(launcher_popup_restore_redraw)
+		Launcher_RestoreThumbCornerMask(x, y, w, h);
+
+	/* Keep the horizontal border resident while artwork changes. Drawing it
+	before a masked copy also preserves the rounded-corner border pixels. */
+	Launcher_DrawThumbBorderEx(x, y, w, h, selected);
+	if(Launcher_RoundedCornersForCarousel())
+		Launcher_DrawPreparedThumbMasked(src, stride, x, y, w, h);
+	else
+		Launcher_DrawPicClipStride(src, stride, x, y, w, h);
 }
 
 static void Launcher_ScaleThumb120x80_To60x40(const u16 *src, u16 *dst)
@@ -6638,6 +6655,8 @@ static void Launcher_DrawPreparedHorizontalSidePreview(u16 *src, int x, int y, i
 	int draw_w = w;
 	int draw_h = h;
 	int stride = w;
+	(void)outline;
+	(void)fill;
 
 	if(launcher_thumbnail_style == LAUNCHER_THUMB_STYLE_BOX)
 	{
@@ -6647,9 +6666,7 @@ static void Launcher_DrawPreparedHorizontalSidePreview(u16 *src, int x, int y, i
 		stride = 40;
 	}
 
-	if(!launcher_popup_restore_redraw)
-		Launcher_RestoreHorizontalThumbBox(x, y, w, h, outline, fill);
-	Launcher_DrawPreparedCarouselSideArtwork(src, stride, draw_x, draw_y, draw_w, draw_h);
+	Launcher_DrawPreparedHorizontalArtwork(src, stride, draw_x, draw_y, draw_w, draw_h, 0);
 }
 
 static void Launcher_DrawHorizontalSelectedPreview(const u16 *src, int src_w, int src_h, int x, int y, int w, int h, u16 outline, u16 fill)
@@ -6664,25 +6681,33 @@ static void Launcher_DrawHorizontalSelectedPreview(const u16 *src, int src_w, in
 	if(!src)
 		return;
 
-	Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), x - 1, y - 1, w + 2, 1);
-	Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), x - 1, y + h, w + 2, 1);
-	Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), x - 1, y - 1, 1, h + 2);
-	Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), x + w, y - 1, 1, h + 2);
+	if(launcher_popup_restore_redraw)
+	{
+		Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), x - 1, y - 1, w + 2, 1);
+		Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), x - 1, y + h, w + 2, 1);
+		Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), x - 1, y - 1, 1, h + 2);
+		Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), x + w, y - 1, 1, h + 2);
+	}
 
 	if(launcher_thumbnail_style == LAUNCHER_THUMB_STYLE_BOX)
 	{
 		draw_x = x + ((w - 80) / 2);
 		draw_w = 80;
 		draw_h = 80;
-		Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), x, y, draw_x - x, h);
-		Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), draw_x + draw_w, y, (x + w) - (draw_x + draw_w), h);
+		if(launcher_popup_restore_redraw)
+		{
+			Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), x, y, draw_x - x, h);
+			Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), draw_x + draw_w, y, (x + w) - (draw_x + draw_w), h);
+		}
 	}
 
 	if((src_w == draw_w) && (src_h == draw_h))
-		Launcher_DrawPicClipStride(src, src_w, draw_x, draw_y, draw_w, draw_h);
+		Launcher_DrawPreparedHorizontalArtwork(src, src_w, draw_x, draw_y, draw_w, draw_h, 1);
 	else
+	{
 		Launcher_DrawScaledThumbClip(src, src_w, src_h, draw_x, draw_y, draw_w, draw_h);
-	Launcher_FinishCarouselArtwork(draw_x, draw_y, draw_w, draw_h);
+		Launcher_FinishCarouselArtwork(draw_x, draw_y, draw_w, draw_h);
+	}
 }
 
 static void __attribute__((unused)) Launcher_DrawIconCenteredClip(const u16 *icon, int box_x, int box_y, int box_w, int box_h)
@@ -8076,6 +8101,7 @@ static void __attribute__((unused)) Draw_ModernLauncher_SD_State(u32 show_offset
 		else if(prev_icon)
 		{
 			Launcher_PrepareSideIconPanel60x40(prev_icon, launcher_side_preview_left, (u16*)Launcher_GetBGImage(), left_x, left_y);
+			Launcher_RestoreHorizontalOuterBorder(left_x, left_y, side_w, side_h);
 			Launcher_DrawPicClipStride(launcher_side_preview_left, 60, left_x, left_y, side_w, side_h);
 		}
 	}
@@ -8089,6 +8115,7 @@ static void __attribute__((unused)) Draw_ModernLauncher_SD_State(u32 show_offset
 		else if(next_icon)
 		{
 			Launcher_PrepareSideIconPanel60x40(next_icon, launcher_side_preview_right, (u16*)Launcher_GetBGImage(), right_x, right_y);
+			Launcher_RestoreHorizontalOuterBorder(right_x, right_y, side_w, side_h);
 			Launcher_DrawPicClipStride(launcher_side_preview_right, 60, right_x, right_y, side_w, side_h);
 		}
 	}
@@ -8105,6 +8132,7 @@ static void __attribute__((unused)) Draw_ModernLauncher_SD_State(u32 show_offset
 	}
 	else if(selected_icon)
 	{
+		Launcher_RestoreBGClip((u16*)Launcher_GetBGImage(), thumb_x - 1, thumb_y - 1, thumb_w + 2, thumb_h + 2);
 		Launcher_DrawIconCenteredClip2x(selected_icon, thumb_x, thumb_y, thumb_w, thumb_h);
 	}
 
@@ -8217,6 +8245,7 @@ static void Draw_ModernLauncher_SD(u32 show_offset, u32 file_select, u32 haveThu
 		else if(prev_icon)
 		{
 			Launcher_PrepareSideIconPanel60x40(prev_icon, launcher_side_preview_left, (u16*)Launcher_GetBGImage(), left_x, left_y);
+			Launcher_RestoreHorizontalOuterBorder(left_x, left_y, side_w, side_h);
 			Launcher_DrawPicClipStride(launcher_side_preview_left, 60, left_x, left_y, side_w, side_h);
 		}
 	}
@@ -8234,6 +8263,7 @@ static void Draw_ModernLauncher_SD(u32 show_offset, u32 file_select, u32 haveThu
 		else if(next_icon)
 		{
 			Launcher_PrepareSideIconPanel60x40(next_icon, launcher_side_preview_right, (u16*)Launcher_GetBGImage(), right_x, right_y);
+			Launcher_RestoreHorizontalOuterBorder(right_x, right_y, side_w, side_h);
 			Launcher_DrawPicClipStride(launcher_side_preview_right, 60, right_x, right_y, side_w, side_h);
 		}
 	}
