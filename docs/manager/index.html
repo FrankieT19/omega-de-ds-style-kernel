@@ -112,76 +112,126 @@
             <div>
               <span class="section-kicker">Optional</span>
               <h2 id="setup-title">Make it yours</h2>
-              <p>Choose a few starting preferences. Existing settings not shown here are left untouched.</p>
+              <p>Choose your starting setup here. You can change every option later from Settings on the GBA.</p>
             </div>
-            <span class="setup-state" id="setup-state">Applied during install</span>
+            <div class="setup-actions">
+              <span class="setup-state" id="setup-state">Applied during install</span>
+              <button class="button secondary" id="save-settings" type="button" disabled>
+                <i data-lucide="save"></i><span>Save settings</span>
+              </button>
+            </div>
           </div>
 
-          <div class="setup-grid">
-            <label class="setup-field">
-              <span>Name</span>
-              <input id="setup-name" type="text" maxlength="11" autocomplete="off" placeholder="Your name">
-              <small>Shown in the top bar, up to 11 characters.</small>
-            </label>
+          <div class="personalisation-layout">
+            <div class="settings-groups">
+              <details class="settings-group" open>
+                <summary><span><i data-lucide="sparkles"></i> Essentials</span><i data-lucide="chevron-down"></i></summary>
+                <div class="setup-grid">
+                  <label class="setup-field">
+                    <span>Name</span>
+                    <input id="setup-name" type="text" maxlength="11" autocomplete="off" placeholder="Your name">
+                    <small>Shown in the top bar, up to 11 characters.</small>
+                  </label>
+                  <label class="setup-field">
+                    <span>Language</span>
+                    <select id="setup-language">
+                      <option>English (UK)</option><option>English (US)</option><option>Español</option><option>Français</option>
+                      <option>Português</option><option>Deutsch</option><option>Türkçe</option><option>Italiano</option>
+                      <option>Nederlands</option><option>Svenska</option><option>Suomi</option><option value="Chinese">中文</option><option value="ภาษาไทย">ภาษาไทย</option>
+                    </select>
+                  </label>
+                  <fieldset class="setup-field">
+                    <legend>Appearance</legend>
+                    <div class="setup-segmented" data-setup-control="theme">
+                      <button class="is-active" type="button" data-value="Light" aria-pressed="true"><i data-lucide="sun"></i> Light</button>
+                      <button type="button" data-value="Dark" aria-pressed="false"><i data-lucide="moon"></i> Dark</button>
+                    </div>
+                  </fieldset>
+                  <label class="setup-field">
+                    <span>Accent colour</span>
+                    <span class="colour-select">
+                      <i id="setup-colour-swatch" aria-hidden="true"></i>
+                      <select id="setup-colour">
+                        <option>Pale Blue</option><option>Light Blue</option><option>Blue</option><option>Dark Blue</option>
+                        <option>Green</option><option>Pale Green</option><option>Bright Green</option><option>Lime</option>
+                        <option>Yellow</option><option>Red</option><option>Orange</option><option>Brown</option>
+                        <option>Pink</option><option>Pale Pink</option><option>Magenta</option><option>Purple</option>
+                      </select>
+                    </span>
+                  </label>
+                  <label class="setup-field">
+                    <span>Boot to</span>
+                    <select id="setup-boot">
+                      <option value="Start">Start screen</option><option value="SD">SD Card</option><option value="NOR">NOR Flash</option>
+                      <option value="Last game">Last game</option><option value="Recents">Recently played</option><option value="Favourites">Favourites</option>
+                    </select>
+                  </label>
+                </div>
+              </details>
 
-            <fieldset class="setup-field">
-              <legend>Appearance</legend>
-              <div class="setup-segmented" data-setup-control="theme">
-                <button class="is-active" type="button" data-value="Light" aria-pressed="true"><i data-lucide="sun"></i> Light</button>
-                <button type="button" data-value="Dark" aria-pressed="false"><i data-lucide="moon"></i> Dark</button>
+              <details class="settings-group">
+                <summary><span><i data-lucide="layout-grid"></i> Start and browsing</span><i data-lucide="chevron-down"></i></summary>
+                <div class="setup-grid">
+                  <label class="setup-field setup-toggle">
+                    <span class="toggle-copy"><strong>Start screen</strong><small>Show the launcher home screen.</small></span>
+                    <input id="setup-start-screen" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span>
+                  </label>
+                  <label class="setup-field"><span>Start screen game</span><select id="setup-start-source"><option>Last played</option><option>Favourites</option></select></label>
+                  <label class="setup-field"><span>View mode</span><select id="setup-view-mode"><option>List</option><option>List + art</option><option>Horizontal</option><option>Vertical</option></select></label>
+                  <label class="setup-field"><span>Artwork shape</span><select id="setup-thumbnails"><option value="Title">Wide</option><option value="Box">Square</option></select></label>
+                  <label class="setup-field" id="setup-list-art-field"><span>List artwork position</span><select id="setup-list-art"><option>Top</option><option>Center</option><option>Bottom</option></select></label>
+                  <label class="setup-field setup-toggle">
+                    <span class="toggle-copy"><strong>List folders</strong><small>Use list view for folders without games.</small></span>
+                    <input id="setup-list-folders" type="checkbox"><span class="toggle-track" aria-hidden="true"><i></i></span>
+                  </label>
+                  <label class="setup-field setup-toggle">
+                    <span class="toggle-copy"><strong>Clean list</strong><small>Hide extensions and right-side file details.</small></span>
+                    <input id="setup-clean-list" type="checkbox"><span class="toggle-track" aria-hidden="true"><i></i></span>
+                  </label>
+                  <label class="setup-field setup-toggle">
+                    <span class="toggle-copy"><strong>Hide system files</strong><small>Keep support files out of the root browser.</small></span>
+                    <input id="setup-hide-system" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span>
+                  </label>
+                </div>
+              </details>
+
+              <details class="settings-group">
+                <summary><span><i data-lucide="image"></i> Artwork presentation</span><i data-lucide="chevron-down"></i></summary>
+                <div class="setup-grid">
+                  <label class="setup-field"><span>Artwork border</span><select id="setup-art-border"><option>Off</option><option>Accent</option><option>Black</option><option>Grey</option><option>White</option></select></label>
+                  <label class="setup-field"><span>Rounded corners</span><select id="setup-rounded"><option value="Full">All artwork</option><option value="No Start">Except Start screen</option><option value="Off">Off</option></select></label>
+                  <label class="setup-field"><span>Vertical side artwork</span><select id="setup-vertical-side"><option>Center</option><option>Left</option><option>Right</option></select></label>
+                  <label class="setup-field"><span>Horizontal side artwork</span><select id="setup-horizontal-side"><option>Center</option><option>Top</option><option>Bottom</option></select></label>
+                </div>
+              </details>
+
+              <details class="settings-group">
+                <summary><span><i data-lucide="settings-2"></i> Behaviour</span><i data-lucide="chevron-down"></i></summary>
+                <div class="setup-grid">
+                  <fieldset class="setup-field"><legend>Clock</legend><div class="setup-segmented" data-setup-control="clock"><button class="is-active" type="button" data-value="24 hour" aria-pressed="true">24 hour</button><button type="button" data-value="12 hour" aria-pressed="false">12 hour</button></div></fieldset>
+                  <label class="setup-field setup-toggle"><span class="toggle-copy"><strong>Menu sounds</strong><small>Play sounds while navigating DS Style.</small></span><input id="setup-sounds" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span></label>
+                  <label class="setup-field"><span>Quick start button</span><select id="setup-quick-start"><option>Start</option><option>Select</option><option>L</option><option>A</option><option>B</option></select></label>
+                  <label class="setup-field"><span>Default game launch</span><select id="setup-launch-mode"><option value="Clean">Clean boot</option><option value="Addon">Addon menu</option></select></label>
+                </div>
+              </details>
+            </div>
+
+            <aside class="launcher-preview-panel" aria-labelledby="launcher-preview-title">
+              <div class="preview-toolbar">
+                <div><span class="section-kicker">Live preview</span><strong id="launcher-preview-title">Your DS Style setup</strong></div>
+                <div class="preview-scenes" role="group" aria-label="Preview screen">
+                  <button class="is-active" type="button" data-preview-scene="auto">Auto</button>
+                  <button type="button" data-preview-scene="start">Start</button>
+                  <button type="button" data-preview-scene="browse">Browse</button>
+                </div>
               </div>
-            </fieldset>
-
-            <label class="setup-field">
-              <span>Accent colour</span>
-              <span class="colour-select">
-                <i id="setup-colour-swatch" aria-hidden="true"></i>
-                <select id="setup-colour">
-                  <option>Pale Blue</option>
-                  <option>Light Blue</option>
-                  <option>Blue</option>
-                  <option>Dark Blue</option>
-                  <option>Green</option>
-                  <option>Pale Green</option>
-                  <option>Bright Green</option>
-                  <option>Lime</option>
-                  <option>Yellow</option>
-                  <option>Red</option>
-                  <option>Orange</option>
-                  <option>Brown</option>
-                  <option>Pink</option>
-                  <option>Pale Pink</option>
-                  <option>Magenta</option>
-                  <option>Purple</option>
-                </select>
-              </span>
-            </label>
-
-            <label class="setup-field">
-              <span>Start on</span>
-              <select id="setup-boot">
-                <option value="Start">Start screen</option>
-                <option value="SD">SD Card</option>
-                <option value="NOR">NOR Flash</option>
-                <option value="Last game">Last game</option>
-                <option value="Recents">Recently played</option>
-                <option value="Favourites">Favourites</option>
-              </select>
-            </label>
-
-            <fieldset class="setup-field">
-              <legend>Clock</legend>
-              <div class="setup-segmented" data-setup-control="clock">
-                <button class="is-active" type="button" data-value="24 hour" aria-pressed="true">24 hour</button>
-                <button type="button" data-value="12 hour" aria-pressed="false">12 hour</button>
+              <div class="handheld-preview" aria-hidden="true">
+                <div class="handheld-speaker"></div>
+                <div class="handheld-screen"><canvas id="launcher-preview" width="240" height="160"></canvas></div>
+                <div class="handheld-controls"><i></i><span></span><b></b><b></b></div>
               </div>
-            </fieldset>
-
-            <label class="setup-field setup-toggle">
-              <span class="toggle-copy"><strong>Menu sounds</strong><small>Play sounds while navigating DS Style.</small></span>
-              <input id="setup-sounds" type="checkbox" checked>
-              <span class="toggle-track" aria-hidden="true"><i></i></span>
-            </label>
+              <p id="launcher-preview-copy">Previewing the screen selected by your boot and view settings.</p>
+            </aside>
           </div>
         </section>
 
@@ -226,7 +276,7 @@
           <div>
             <p class="eyebrow">Thumbnail maker</p>
             <h1>Artwork</h1>
-            <p>Create wide and square DS Style thumbnails from your own images or the Libretro library.</p>
+            <p>Create wide and square DS Style thumbnails from your own images, Libretro or a web search.</p>
           </div>
           <div class="view-actions">
             <button class="button secondary" id="choose-art-image" type="button">
@@ -241,6 +291,7 @@
             <div class="segmented" role="group" aria-label="Artwork source">
               <button class="is-active" type="button" data-art-source="local">My image</button>
               <button type="button" data-art-source="libretro">Libretro</button>
+              <button type="button" data-art-source="web">Web search</button>
             </div>
 
             <div class="control-panel" id="local-art-panel">
@@ -275,13 +326,25 @@
               <div class="search-results" id="libretro-results" aria-live="polite"></div>
             </div>
 
+            <div class="control-panel" id="web-art-panel" hidden>
+              <label class="field">
+                <span>Find an image online</span>
+                <span class="input-with-button">
+                  <input id="web-art-query" type="search" autocomplete="off" placeholder="Game, file or folder">
+                  <button class="button inline" id="web-art-search" type="button"><i data-lucide="search"></i><span>Search images</span></button>
+                </span>
+                <small>Opens an image search in a new tab. Download an image, then choose or drop it here.</small>
+              </label>
+              <button class="button secondary" id="choose-web-image" type="button"><i data-lucide="image-plus"></i><span>Choose downloaded image</span></button>
+            </div>
+
             <div class="form-section">
               <h2>Output</h2>
               <div class="field-row split">
                 <label class="field grow">
                   <span>Match artwork by</span>
                   <select id="art-match-mode">
-                    <option value="custom">Exact file or folder name</option>
+                    <option value="custom">File or folder name</option>
                     <option value="gba">GBA header code</option>
                   </select>
                 </label>
@@ -349,7 +412,7 @@
                 <span class="section-kicker">Preview</span>
                 <strong id="art-preview-name">No image selected</strong>
               </div>
-              <span class="format-label">GBA BGR555</span>
+              <span class="format-label">GBA-ready BMP</span>
             </div>
 
             <div class="preview-stage">
@@ -373,7 +436,7 @@
                 <i data-lucide="download"></i><span>Download</span>
               </button>
             </div>
-            <p class="field-note">Each CUSTOM folder supports up to 256 images. Existing names are replaced safely.</p>
+            <p class="field-note">Save to SD card writes the finished image directly to the correct DS Style folder. Each CUSTOM folder supports up to 256 images.</p>
           </div>
         </div>
       </section>
@@ -383,13 +446,36 @@
           <div>
             <p class="eyebrow">Alternative kernels</p>
             <h1>Styles</h1>
-            <p>Manage the .bin files shown by Settings &gt; Interface &gt; Load style.</p>
+            <p>Add a ready-made style or manage the .bin files shown by Settings &gt; Interface &gt; Load style.</p>
           </div>
           <button class="button primary" id="add-style" type="button" disabled>
             <i data-lucide="file-plus-2"></i><span>Add style</span>
           </button>
           <input id="style-file-input" type="file" accept=".bin,application/octet-stream" hidden multiple>
         </div>
+
+        <section class="style-library" aria-labelledby="style-library-title">
+          <div class="section-title"><h2 id="style-library-title">Style library</h2><p>Styles are added to the connected card. Choose Load style on the GBA when you are ready to switch.</p></div>
+          <div class="style-card-grid">
+            <article class="style-card">
+              <img src="../project/assets/GreyBlueShowcase.JPG" alt="Standard DS Style on a Game Boy Advance SP">
+              <div><span class="section-kicker">Standard</span><h3>DS Style</h3><p>The default Nintendo DS-inspired look.</p></div>
+              <button class="button secondary bundled-style" type="button" data-bundled-style="standard" disabled><i data-lucide="plus"></i><span>Add to card</span></button>
+            </article>
+            <article class="style-card">
+              <img src="../project/assets/themes/analogue-1.jpg" alt="Analogue Style on an Analogue Pocket">
+              <div><span class="section-kicker">Alternative</span><h3>Analogue Style</h3><p>A monochrome style inspired by the minimal Analogue Pocket interface.</p></div>
+              <button class="button secondary bundled-style" type="button" data-bundled-style="analogue" disabled><i data-lucide="plus"></i><span>Add to card</span></button>
+            </article>
+            <article class="style-card">
+              <img src="../project/assets/themes/simple-4.jpg" alt="Simple Style on a Game Boy Advance SP">
+              <div><span class="section-kicker">Alternative</span><h3>Simple Style</h3><p>A homage to Sterophonick's Simple theme.</p></div>
+              <button class="button secondary bundled-style" type="button" data-bundled-style="simple" disabled><i data-lucide="plus"></i><span>Add to card</span></button>
+            </article>
+          </div>
+        </section>
+
+        <div class="installed-styles-heading"><div><span class="section-kicker">Connected card</span><h2>Installed styles</h2></div><p>Custom `.bin` files can still be added with the button above.</p></div>
 
         <div class="empty-state" id="styles-empty">
           <i data-lucide="layers-3"></i>

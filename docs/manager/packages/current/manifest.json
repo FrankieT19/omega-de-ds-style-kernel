@@ -1,4 +1,4 @@
-﻿{
+{
     "schema":  1,
     "version":  "7.2",
     "directories":  [
@@ -16,8 +16,8 @@
                   {
                       "source":  "common/SYSTEM/NAME.TXT",
                       "target":  "SYSTEM/NAME.TXT",
-                      "size":  65,
-                      "sha256":  "2b5d2d1c5a470689e5809e21871220aec517059ff29b232574976d8aef4d54f6",
+                      "size":  63,
+                      "sha256":  "0bb445820a2882531d8be29bb678ffcb84a7002bb0654fb6d3c6921cd0c945ed",
                       "policy":  "preserve"
                   },
                   {
@@ -277,16 +277,58 @@
                     "omega_de":  {
                                      "source":  "kernels/ezkernelnew.bin",
                                      "target":  "ezkernelnew.bin",
-                                     "size":  2089304,
-                                     "sha256":  "fd30611d0fdc3e7be192dd2cc3d2affc535d427f4e551303398a4a987074ce90",
+                                     "size":  2089592,
+                                     "sha256":  "db4006635ef6936f452059e42a8dc54bb308fcc4823e9b561d46b30e4b1a1d0c",
                                      "policy":  "replace"
                                  },
                     "original":  {
                                      "source":  "kernels/ezkernel.bin",
                                      "target":  "ezkernel.bin",
-                                     "size":  2089216,
-                                     "sha256":  "c082ee20d41b6adc4e99f9c78f9baebe38eb6d9da7e9b0f93c2939155c708263",
+                                     "size":  2089504,
+                                     "sha256":  "46976895f6e31ae26699940ec61be0a80c8d1ce797fa8b41fe4fb2e43eb7b434",
                                      "policy":  "replace"
                                  }
-                }
+                },
+    "styles":  {
+                   "analogue":  {
+                                    "label":  "Analogue Style",
+                                    "description":  "A monochrome style inspired by the minimal Analogue Pocket interface.",
+                                    "models":  {
+                                                   "omega_de":  {
+                                                                    "source":  "styles/omega_de/Analogue Style v7.2.bin",
+                                                                    "target":  "SYSTEM/KERNELS/Analogue Style v7.2.bin",
+                                                                    "size":  2098152,
+                                                                    "sha256":  "a868259a4e3b0372cf1d4c03ea51ab0c77edf457c27bb11d8be6eb0851952bb4",
+                                                                    "policy":  "replace"
+                                                                },
+                                                   "original":  {
+                                                                    "source":  "styles/original/Analogue Style v7.2.bin",
+                                                                    "target":  "SYSTEM/KERNELS/Analogue Style v7.2.bin",
+                                                                    "size":  2087904,
+                                                                    "sha256":  "fa610e54568d938f913fb8e7794976d8c290a64e951e2400c7bd23045316550e",
+                                                                    "policy":  "replace"
+                                                                }
+                                               }
+                                },
+                   "simple":  {
+                                  "label":  "Simple Style",
+                                  "description":  "A homage to Sterophonick\u0027s Simple theme.",
+                                  "models":  {
+                                                 "omega_de":  {
+                                                                  "source":  "styles/omega_de/Simple Style v7.2.bin",
+                                                                  "target":  "SYSTEM/KERNELS/Simple Style v7.2.bin",
+                                                                  "size":  2596168,
+                                                                  "sha256":  "7bde963d3c12c83d61adab43ef2bbd4ae70646f743b72a183d87762778eeefb3",
+                                                                  "policy":  "replace"
+                                                              },
+                                                 "original":  {
+                                                                  "source":  "styles/original/Simple Style v7.2.bin",
+                                                                  "target":  "SYSTEM/KERNELS/Simple Style v7.2.bin",
+                                                                  "size":  2087920,
+                                                                  "sha256":  "9de8fffeb2919cd4ec64cd5e20373a634605f813173238d5d1e03fdef2e2002f",
+                                                                  "policy":  "replace"
+                                                              }
+                                             }
+                              }
+               }
 }

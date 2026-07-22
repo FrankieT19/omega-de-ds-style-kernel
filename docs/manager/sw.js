@@ -1,4 +1,4 @@
-const CACHE_NAME = "ds-style-manager-v3";
+const CACHE_NAME = "ds-style-manager-v4";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -8,7 +8,7 @@ const CORE_ASSETS = [
   "./js/filesystem.js",
   "./js/images.js",
   "./js/installer.js",
-  "./packages/current/manifest.json",
+  "./js/preview.js",
   "./manifest.webmanifest",
   "../project/assets/Logo.png",
   "../project/assets/favicon.png"
@@ -28,7 +28,12 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET" || new URL(event.request.url).origin !== self.location.origin) return;
+  const url = new URL(event.request.url);
+  if (event.request.method !== "GET" || url.origin !== self.location.origin) return;
+  if (url.pathname.includes("/manager/packages/")) {
+    event.respondWith(fetch(event.request, { cache: "no-store" }));
+    return;
+  }
   event.respondWith(
     fetch(event.request)
       .then((response) => {

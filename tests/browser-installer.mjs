@@ -9,7 +9,10 @@ globalThis.fetch = async (input, options) => {
   const url = input instanceof URL ? input : new URL(input);
   if (url.protocol !== "file:") return nativeFetch(input, options);
   try {
-    return new Response(await readFile(fileURLToPath(url)), { status: 200 });
+    const fileUrl = new URL(url);
+    fileUrl.search = "";
+    fileUrl.hash = "";
+    return new Response(await readFile(fileURLToPath(fileUrl)), { status: 200 });
   } catch {
     return new Response("Not found", { status: 404 });
   }
@@ -123,7 +126,7 @@ async function textAt(root, path) {
 }
 
 const moduleUrl = new URL("../docs/manager/js/installer.js", import.meta.url);
-const { installDsStyle, loadPersonalisation } = await import(moduleUrl.href);
+const { installBundledStyle, installDsStyle, loadPersonalisation, savePersonalisation } = await import(moduleUrl.href);
 
 {
   const root = new MemoryDirectoryHandle("blank-de");
@@ -131,9 +134,24 @@ const { installDsStyle, loadPersonalisation } = await import(moduleUrl.href);
     name: "FrankieT19",
     theme: "Dark",
     colour: "Purple",
+    language: "Español",
+    startScreen: "On",
+    startSource: "Favourites",
     boot: "SD",
+    viewMode: "List + art",
+    listArt: "Top",
+    thumbnails: "Box",
+    artBorder: "Accent",
+    roundedCorners: "Full",
+    verticalSide: "Left",
+    horizontalSide: "Bottom",
+    hideSystemFiles: "On",
+    listFolders: "On",
+    cleanList: "On",
     clock: "12 hour",
     sounds: "Off",
+    quickStart: "L",
+    launchMode: "Addon",
   });
   assert.equal(result.version, "7.2");
   assert.equal(result.personalised, true);
@@ -146,9 +164,29 @@ const { installDsStyle, loadPersonalisation } = await import(moduleUrl.href);
   const settings = await textAt(root, "SYSTEM/SETTINGS.TXT");
   assert.match(settings, /^Theme = Dark$/m);
   assert.match(settings, /^Colour = Purple$/m);
+  assert.match(settings, /^Language = Español$/m);
+  assert.match(settings, /^Start screen source = Favourites$/m);
   assert.match(settings, /^Boot to = SD$/m);
+  assert.match(settings, /^View mode = List \+ art$/m);
+  assert.match(settings, /^List art = Top$/m);
+  assert.match(settings, /^Thumbnails = Box$/m);
+  assert.match(settings, /^Art border = Accent$/m);
+  assert.match(settings, /^Rounded corners = Full$/m);
+  assert.match(settings, /^Vertical side = Left$/m);
+  assert.match(settings, /^Horizontal side = Bottom$/m);
+  assert.match(settings, /^List folders = On$/m);
+  assert.match(settings, /^Clean list = On$/m);
   assert.match(settings, /^Clock format = 12 hour$/m);
   assert.match(settings, /^Sounds = Off$/m);
+  assert.match(settings, /^Quick start hotkey = L$/m);
+  assert.match(settings, /^Last launch mode = Addon$/m);
+
+  const style = await installBundledStyle(root, "omega_de", "analogue");
+  assert.equal(style.label, "Analogue Style");
+  assert.equal(await exists(root, "SYSTEM/KERNELS/Analogue Style v7.2.bin"), true);
+  const simpleStyle = await installBundledStyle(root, "omega_de", "simple");
+  assert.equal(simpleStyle.label, "Simple Style");
+  assert.equal(await exists(root, "SYSTEM/KERNELS/Simple Style v7.2.bin"), true);
 }
 
 {
@@ -165,6 +203,10 @@ const { installDsStyle, loadPersonalisation } = await import(moduleUrl.href);
   assert.equal(await exists(root, "RTS"), false);
   assert.equal(await exists(root, "ezkernel.bin"), true);
   assert.equal(result.preserved, 1);
+  await installBundledStyle(root, "original", "analogue");
+  await installBundledStyle(root, "original", "simple");
+  assert.equal(await exists(root, "SYSTEM/KERNELS/Analogue Style v7.2.bin"), true);
+  assert.equal(await exists(root, "SYSTEM/KERNELS/Simple Style v7.2.bin"), true);
 }
 
 {
@@ -215,8 +257,11 @@ const { installDsStyle, loadPersonalisation } = await import(moduleUrl.href);
   assert.equal(loaded.name, "Old name");
   assert.equal(loaded.theme, "Light");
   assert.equal(loaded.colour, "Red");
+  assert.equal(loaded.language, "Français");
+  assert.equal(loaded.viewMode, "Vertical");
   assert.equal(loaded.boot, "Start");
   await installDsStyle(root, "omega_de", {
+    ...loaded,
     name: "New name",
     theme: "Light",
     colour: "Green",
@@ -226,7 +271,7 @@ const { installDsStyle, loadPersonalisation } = await import(moduleUrl.href);
   });
   const settings = await textAt(root, "SYSTEM/SETTINGS.TXT");
   assert.match(settings, /Language = Fran\u00e7ais/);
-  assert.match(settings, /View mode = Vertical/);
+  assert.match(settings, /^View mode = Vertical$/m);
   assert.equal((settings.match(/^Theme = /gm) || []).length, 1);
   assert.match(settings, /^Theme = Light$/m);
   assert.match(settings, /^Colour = Green$/m);
@@ -235,6 +280,20 @@ const { installDsStyle, loadPersonalisation } = await import(moduleUrl.href);
   const name = await textAt(root, "SYSTEM/NAME.TXT");
   assert.match(name, /^New name\r\n/);
   assert.match(name, /# Keep this note/);
+}
+
+{
+  const root = new MemoryDirectoryHandle("save-settings-only");
+  await savePersonalisation(root, {
+    name: "Manager",
+    language: "ภาษาไทย",
+    viewMode: "Horizontal",
+    roundedCorners: "No Start",
+  });
+  assert.match(await textAt(root, "SYSTEM/NAME.TXT"), /^Manager\n/);
+  const settings = await textAt(root, "SYSTEM/SETTINGS.TXT");
+  assert.match(settings, /^Language = ภาษาไทย$/m);
+  assert.match(settings, /^Rounded corners = No Start$/m);
 }
 
 console.log("Browser installer scenarios passed.");

@@ -9,7 +9,14 @@ import {
   supportsFileSystemAccess,
 } from "./filesystem.js";
 import { ArtworkController } from "./artwork.js";
-import { installDsStyle, loadInstallManifest, loadPersonalisation } from "./installer.js";
+import {
+  installBundledStyle,
+  installDsStyle,
+  loadInstallManifest,
+  loadPersonalisation,
+  savePersonalisation,
+} from "./installer.js";
+import { LauncherPreview } from "./preview.js";
 
 const state = {
   sdRoot: null,
@@ -24,9 +31,24 @@ const state = {
     name: "",
     theme: "Light",
     colour: "Pale Blue",
+    language: "English (UK)",
+    startScreen: "On",
+    startSource: "Last played",
     boot: "Start",
+    viewMode: "Horizontal",
+    listArt: "Bottom",
+    thumbnails: "Title",
+    artBorder: "Off",
+    roundedCorners: "Off",
+    verticalSide: "Center",
+    horizontalSide: "Center",
+    hideSystemFiles: "On",
+    listFolders: "Off",
+    cleanList: "Off",
     clock: "24 hour",
     sounds: "On",
+    quickStart: "Start",
+    launchMode: "Clean",
   },
 };
 
@@ -94,16 +116,41 @@ function renderPersonalisation() {
   const preferences = state.personalisation;
   $("#setup-name").value = preferences.name;
   $("#setup-colour").value = preferences.colour;
+  $("#setup-language").value = preferences.language;
+  $("#setup-start-screen").checked = preferences.startScreen === "On";
+  $("#setup-start-source").value = preferences.startSource;
   $("#setup-boot").value = preferences.boot;
+  $("#setup-view-mode").value = preferences.viewMode;
+  $("#setup-list-art").value = preferences.listArt;
+  $("#setup-thumbnails").value = preferences.thumbnails;
+  $("#setup-art-border").value = preferences.artBorder;
+  $("#setup-rounded").value = preferences.roundedCorners;
+  $("#setup-vertical-side").value = preferences.verticalSide;
+  $("#setup-horizontal-side").value = preferences.horizontalSide;
+  $("#setup-hide-system").checked = preferences.hideSystemFiles === "On";
+  $("#setup-list-folders").checked = preferences.listFolders === "On";
+  $("#setup-clean-list").checked = preferences.cleanList === "On";
   $("#setup-sounds").checked = preferences.sounds === "On";
+  $("#setup-quick-start").value = preferences.quickStart;
+  $("#setup-launch-mode").value = preferences.launchMode;
   $("#setup-colour-swatch").style.background = COLOUR_SWATCHES[preferences.colour] || COLOUR_SWATCHES["Pale Blue"];
   setSegmentedValue("theme", preferences.theme);
   setSegmentedValue("clock", preferences.clock);
+  refreshPersonalisationUi();
 }
 
 function markPersonalisationDirty() {
   state.setupDirty = true;
-  setSetupState("Ready to apply");
+  setSetupState(state.sdRoot ? "Unsaved changes" : "Applied during install");
+  $("#save-settings").disabled = !state.sdRoot;
+  refreshPersonalisationUi();
+}
+
+function refreshPersonalisationUi() {
+  const preferences = state.personalisation;
+  $("#setup-start-source").disabled = preferences.startScreen === "Off";
+  $("#setup-list-art-field").hidden = preferences.viewMode !== "List + art";
+  launcherPreview?.render();
 }
 
 async function loadCardPersonalisation() {
@@ -113,14 +160,27 @@ async function loadCardPersonalisation() {
   state.setupDirty = false;
   renderPersonalisation();
   setSetupState("Current settings loaded");
+  $("#save-settings").disabled = true;
 }
 
 function collectPersonalisation() {
   state.personalisation.name = [...$("#setup-name").value.replace(/[\0\r\n]/g, "").trim()].slice(0, 11).join("");
-  state.personalisation.colour = $("#setup-colour").value;
-  state.personalisation.boot = $("#setup-boot").value;
-  state.personalisation.sounds = $("#setup-sounds").checked ? "On" : "Off";
   return { ...state.personalisation };
+}
+
+async function saveCurrentSettings() {
+  if (!state.sdRoot) return;
+  const button = $("#save-settings");
+  button.disabled = true;
+  try {
+    await savePersonalisation(state.sdRoot, collectPersonalisation());
+    state.setupDirty = false;
+    setSetupState("Saved to SD card");
+    toast("Settings saved to the SD card.", "success");
+  } catch (error) {
+    button.disabled = false;
+    toast(error.message, "error");
+  }
 }
 
 function requestConfirmation(title, copy, actionLabel = "Continue", options = {}) {
@@ -253,6 +313,10 @@ function renderSdSummary() {
   $("#quick-install").disabled = false;
   $("#refresh-sd").disabled = false;
   $("#add-style").disabled = false;
+  $("#save-settings").disabled = !state.setupDirty;
+  document.querySelectorAll(".bundled-style").forEach((button) => {
+    button.disabled = !info;
+  });
 }
 
 async function chooseCartridge() {
@@ -444,6 +508,34 @@ async function addStyles(files) {
   await scanSd();
 }
 
+async function addBundledStyle(styleId, button) {
+  if (!state.sdRoot) return;
+  let model = state.sdModel;
+  if (!MODEL_INFO[model]) model = await chooseCartridge();
+  if (!MODEL_INFO[model]) return;
+  const label = styleId === "standard" ? "DS Style" : styleId === "analogue" ? "Analogue Style" : "Simple Style";
+  const confirmed = await requestConfirmation(
+    `Add ${label}?`,
+    `${label} will be added to SYSTEM/KERNELS for the ${MODEL_INFO[model].label}. If it is already there, the copy on the card will be refreshed.`,
+    "Add to card",
+  );
+  if (!confirmed) return;
+  const copy = button.querySelector("span");
+  const originalCopy = copy.textContent;
+  button.disabled = true;
+  copy.textContent = "Adding...";
+  try {
+    const result = await installBundledStyle(state.sdRoot, model, styleId);
+    toast(`${result.label} added to the card.`, "success");
+    await scanSd();
+  } catch (error) {
+    toast(error.message, "error", 7000);
+  } finally {
+    copy.textContent = originalCopy;
+    button.disabled = !state.sdRoot || !MODEL_INFO[state.sdModel];
+  }
+}
+
 async function loadInstallerInfo() {
   try {
     state.installManifest = await loadInstallManifest();
@@ -469,28 +561,64 @@ $("#setup-name").addEventListener("input", (event) => {
   if (event.target.value !== state.personalisation.name) event.target.value = state.personalisation.name;
   markPersonalisationDirty();
 });
-$("#setup-colour").addEventListener("change", (event) => {
-  state.personalisation.colour = event.target.value;
-  $("#setup-colour-swatch").style.background = COLOUR_SWATCHES[event.target.value] || COLOUR_SWATCHES["Pale Blue"];
-  markPersonalisationDirty();
-});
-$("#setup-boot").addEventListener("change", (event) => {
-  state.personalisation.boot = event.target.value;
-  markPersonalisationDirty();
-});
-$("#setup-sounds").addEventListener("change", (event) => {
-  state.personalisation.sounds = event.target.checked ? "On" : "Off";
-  markPersonalisationDirty();
+const setupSelectBindings = {
+  "#setup-colour": "colour",
+  "#setup-language": "language",
+  "#setup-start-source": "startSource",
+  "#setup-boot": "boot",
+  "#setup-view-mode": "viewMode",
+  "#setup-list-art": "listArt",
+  "#setup-thumbnails": "thumbnails",
+  "#setup-art-border": "artBorder",
+  "#setup-rounded": "roundedCorners",
+  "#setup-vertical-side": "verticalSide",
+  "#setup-horizontal-side": "horizontalSide",
+  "#setup-quick-start": "quickStart",
+  "#setup-launch-mode": "launchMode",
+};
+for (const [selector, preference] of Object.entries(setupSelectBindings)) {
+  $(selector).addEventListener("change", (event) => {
+    state.personalisation[preference] = event.target.value;
+    if (preference === "colour") {
+      $("#setup-colour-swatch").style.background = COLOUR_SWATCHES[event.target.value] || COLOUR_SWATCHES["Pale Blue"];
+    }
+    markPersonalisationDirty();
+  });
+}
+const setupToggleBindings = {
+  "#setup-start-screen": "startScreen",
+  "#setup-hide-system": "hideSystemFiles",
+  "#setup-list-folders": "listFolders",
+  "#setup-clean-list": "cleanList",
+  "#setup-sounds": "sounds",
+};
+for (const [selector, preference] of Object.entries(setupToggleBindings)) {
+  $(selector).addEventListener("change", (event) => {
+    state.personalisation[preference] = event.target.checked ? "On" : "Off";
+    markPersonalisationDirty();
+  });
+}
+document.querySelectorAll("[data-preview-scene]").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("[data-preview-scene]").forEach((candidate) => candidate.classList.toggle("is-active", candidate === button));
+    launcherPreview.setScene(button.dataset.previewScene);
+  });
 });
 for (const selector of ["#connect-sd-header", "#connect-sd-main"]) $(selector).addEventListener("click", connectSd);
 $("#choose-cartridge").addEventListener("click", chooseCartridge);
 $("#quick-install").addEventListener("click", startQuickInstall);
+$("#save-settings").addEventListener("click", saveCurrentSettings);
 $("#refresh-sd").addEventListener("click", () => scanSd().catch((error) => toast(error.message, "error")));
 $("#add-style").addEventListener("click", () => $("#style-file-input").click());
 $("#style-file-input").addEventListener("change", (event) => {
   addStyles([...event.target.files]).catch((error) => toast(error.message, "error"));
   event.target.value = "";
 });
+document.querySelectorAll(".bundled-style").forEach((button) => {
+  button.addEventListener("click", () => addBundledStyle(button.dataset.bundledStyle, button));
+});
+
+const launcherPreview = new LauncherPreview($("#launcher-preview"), () => state.personalisation);
 
 const artwork = new ArtworkController({
   getSdRoot: () => state.sdRoot,

@@ -28,24 +28,69 @@ const NAME_NOTE = "# The name shown on the top bar displays up to 11 characters.
 const PERSONAL_SETTING_OPTIONS = {
   "Theme": ["Light", "Dark"],
   "Colour": ["Pale Blue", "Light Blue", "Blue", "Dark Blue", "Green", "Pale Green", "Bright Green", "Lime", "Yellow", "Red", "Orange", "Brown", "Pink", "Pale Pink", "Magenta", "Purple"],
+  "Language": ["English (UK)", "English (US)", "Español", "Français", "Português", "Deutsch", "Türkçe", "Italiano", "Nederlands", "Svenska", "Suomi", "Chinese", "ภาษาไทย"],
+  "Start screen": ["On", "Off"],
+  "Start screen source": ["Last played", "Favourites"],
   "Boot to": ["Start", "SD", "NOR", "Last game", "Recents", "Favourites"],
+  "View mode": ["List", "List + art", "Horizontal", "Vertical"],
+  "List art": ["Top", "Center", "Bottom"],
+  "Thumbnails": ["Title", "Box"],
+  "Art border": ["Off", "Accent", "Black", "Grey", "White"],
+  "Rounded corners": ["Full", "No Start", "Off"],
+  "Vertical side": ["Center", "Left", "Right"],
+  "Horizontal side": ["Center", "Top", "Bottom"],
+  "Hide system files": ["On", "Off"],
+  "List folders": ["On", "Off"],
+  "Clean list": ["On", "Off"],
   "Clock format": ["24 hour", "12 hour"],
   "Sounds": ["On", "Off"],
+  "Quick start hotkey": ["Start", "Select", "L", "A", "B"],
+  "Last launch mode": ["Clean", "Addon"],
 };
 const PERSONAL_DEFAULTS = Object.freeze({
   name: "",
   theme: "Light",
   colour: "Pale Blue",
+  language: "English (UK)",
+  startScreen: "On",
+  startSource: "Last played",
   boot: "Start",
+  viewMode: "Horizontal",
+  listArt: "Bottom",
+  thumbnails: "Title",
+  artBorder: "Off",
+  roundedCorners: "Off",
+  verticalSide: "Center",
+  horizontalSide: "Center",
+  hideSystemFiles: "On",
+  listFolders: "Off",
+  cleanList: "Off",
   clock: "24 hour",
   sounds: "On",
+  quickStart: "Start",
+  launchMode: "Clean",
 });
 const PREFERENCE_KEYS = {
   theme: "Theme",
   colour: "Colour",
+  language: "Language",
+  startScreen: "Start screen",
+  startSource: "Start screen source",
   boot: "Boot to",
+  viewMode: "View mode",
+  listArt: "List art",
+  thumbnails: "Thumbnails",
+  artBorder: "Art border",
+  roundedCorners: "Rounded corners",
+  verticalSide: "Vertical side",
+  horizontalSide: "Horizontal side",
+  hideSystemFiles: "Hide system files",
+  listFolders: "List folders",
+  cleanList: "Clean list",
   clock: "Clock format",
   sounds: "Sounds",
+  quickStart: "Quick start hotkey",
+  launchMode: "Last launch mode",
 };
 
 let manifestPromise = null;
@@ -176,6 +221,10 @@ async function applyPersonalisation(root, input, onProgress) {
   return preferences;
 }
 
+export async function savePersonalisation(root, input) {
+  return applyPersonalisation(root, input);
+}
+
 function report(onProgress, detail) {
   onProgress?.(detail);
 }
@@ -196,17 +245,30 @@ async function verifyBytes(bytes, entry) {
   }
 }
 
-async function fetchPackageEntry(entry) {
-  const response = await fetch(new URL(entry.source, PACKAGE_ROOT), { cache: "no-cache" });
+async function fetchPackageEntryOnce(entry, retry = false) {
+  const url = new URL(entry.source, PACKAGE_ROOT);
+  url.searchParams.set("sha256", entry.sha256 || String(entry.size || "current"));
+  if (retry) url.searchParams.set("retry", String(Date.now()));
+  const response = await fetch(url, { cache: "no-store" });
   if (!response.ok) throw new Error(`Could not download ${entry.target} (${response.status}).`);
   const bytes = await response.arrayBuffer();
   await verifyBytes(bytes, entry);
   return { entry, bytes };
 }
 
+async function fetchPackageEntry(entry) {
+  try {
+    return await fetchPackageEntryOnce(entry, false);
+  } catch {
+    return fetchPackageEntryOnce(entry, true);
+  }
+}
+
 export function loadInstallManifest(force = false) {
   if (force || !manifestPromise) {
-    manifestPromise = fetch(MANIFEST_URL, { cache: "no-cache" })
+    const url = new URL(MANIFEST_URL);
+    if (force) url.searchParams.set("refresh", String(Date.now()));
+    manifestPromise = fetch(url, { cache: "no-store" })
       .then((response) => {
         if (!response.ok) throw new Error(`The installer package is unavailable (${response.status}).`);
         return response.json();
@@ -223,6 +285,28 @@ export function loadInstallManifest(force = false) {
       });
   }
   return manifestPromise;
+}
+
+export async function installBundledStyle(root, model, styleId) {
+  if (!KERNEL_FILES[model]) throw new Error("Choose a supported cartridge before adding a style.");
+  const manifest = await loadInstallManifest();
+  let entry;
+  let label;
+  if (styleId === "standard") {
+    label = "DS Style";
+    entry = {
+      ...manifest.kernels[model],
+      target: `SYSTEM/KERNELS/DS Style v${manifest.version}.bin`,
+    };
+  } else {
+    const style = manifest.styles?.[styleId];
+    entry = style?.models?.[model];
+    label = style?.label;
+  }
+  if (!entry || !label) throw new Error("That style is not available for the selected cartridge.");
+  const payload = await fetchPackageEntry(entry);
+  await writeFile(root, entry.target, payload.bytes);
+  return { label, target: entry.target, version: manifest.version };
 }
 
 async function preparePayload(model, onProgress) {
