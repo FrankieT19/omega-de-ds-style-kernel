@@ -297,15 +297,15 @@
                                                    "omega_de":  {
                                                                     "source":  "styles/omega_de/Analogue Style v7.2.bin",
                                                                     "target":  "SYSTEM/KERNELS/Analogue Style v7.2.bin",
-                                                                    "size":  2098152,
-                                                                    "sha256":  "a868259a4e3b0372cf1d4c03ea51ab0c77edf457c27bb11d8be6eb0851952bb4",
+                                                                    "size":  2098328,
+                                                                    "sha256":  "f5ea34db5cb34db9c40774f518cb00706a4d1594527eddcf52f6366f1322bf75",
                                                                     "policy":  "replace"
                                                                 },
                                                    "original":  {
                                                                     "source":  "styles/original/Analogue Style v7.2.bin",
                                                                     "target":  "SYSTEM/KERNELS/Analogue Style v7.2.bin",
-                                                                    "size":  2087904,
-                                                                    "sha256":  "fa610e54568d938f913fb8e7794976d8c290a64e951e2400c7bd23045316550e",
+                                                                    "size":  2088112,
+                                                                    "sha256":  "2a410fbb066f44aa9015ca6ca143eed76bf70b59acce7d6c8a3ca3ce348f2bf6",
                                                                     "policy":  "replace"
                                                                 }
                                                }
@@ -317,15 +317,15 @@
                                                  "omega_de":  {
                                                                   "source":  "styles/omega_de/Simple Style v7.2.bin",
                                                                   "target":  "SYSTEM/KERNELS/Simple Style v7.2.bin",
-                                                                  "size":  2596168,
-                                                                  "sha256":  "7bde963d3c12c83d61adab43ef2bbd4ae70646f743b72a183d87762778eeefb3",
+                                                                  "size":  2596416,
+                                                                  "sha256":  "e056fba0fca84b90d438c764b416fcab4ca9a09cde56084880c4b879aceb9060",
                                                                   "policy":  "replace"
                                                               },
                                                  "original":  {
                                                                   "source":  "styles/original/Simple Style v7.2.bin",
                                                                   "target":  "SYSTEM/KERNELS/Simple Style v7.2.bin",
-                                                                  "size":  2087920,
-                                                                  "sha256":  "9de8fffeb2919cd4ec64cd5e20373a634605f813173238d5d1e03fdef2e2002f",
+                                                                  "size":  2088088,
+                                                                  "sha256":  "5e1e0208a86348a4484f8a6f6ae9c499e6f08c8b3944e83241262bfe6ae1b401",
                                                                   "policy":  "replace"
                                                               }
                                              }
