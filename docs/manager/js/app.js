@@ -15,6 +15,7 @@ import {
   loadInstallManifest,
   loadPersonalisation,
   savePersonalisation,
+  updateDsStyle,
 } from "./installer.js";
 import { LauncherPreview } from "./preview.js";
 
@@ -25,6 +26,7 @@ const state = {
   manualSdModel: null,
   sdSummary: null,
   installManifest: null,
+  installBusy: false,
   setupRoot: null,
   setupDirty: false,
   personalisation: {
@@ -255,6 +257,15 @@ async function countStyles(root) {
   }
 }
 
+async function hasExistingDsStyle(root) {
+  try {
+    const system = await getDirectory(root, "SYSTEM", false);
+    return Boolean(await findEntryCaseInsensitive(system, "SETTINGS.TXT", "file"));
+  } catch {
+    return false;
+  }
+}
+
 async function scanSd() {
   if (!state.sdRoot) return;
   const root = state.sdRoot;
@@ -267,10 +278,11 @@ async function scanSd() {
     state.sdModel = MODEL_INFO[state.manualSdModel] ? state.manualSdModel : null;
   }
 
-  const [wideCount, squareCount, styleCount] = await Promise.all([
+  const [wideCount, squareCount, styleCount, hasDsStyle] = await Promise.all([
     countFiles(root, "SYSTEM/IMGS", { extensions: [".bmp"], maxDepth: 4, maxFiles: 50000, includeHidden: false }),
     countFiles(root, "SYSTEM/IMGS2", { extensions: [".bmp"], maxDepth: 4, maxFiles: 50000, includeHidden: false }),
     countStyles(root),
+    hasExistingDsStyle(root),
   ]);
 
   let kernelText = "Not found";
@@ -281,7 +293,7 @@ async function scanSd() {
     kernelText = "Two kernel files found";
   }
 
-  state.sdSummary = { detection, wideCount, squareCount, styleCount, kernelText };
+  state.sdSummary = { detection, wideCount, squareCount, styleCount, kernelText, hasDsStyle };
   await loadCardPersonalisation();
   renderSdSummary();
   await refreshStyles();
@@ -303,7 +315,9 @@ function renderSdSummary() {
   $("#sd-style-count").textContent = summary.styleCount.toLocaleString();
   $("#sd-connection-title").textContent = state.sdRoot.name;
   $("#sd-connection-copy").textContent = info
-    ? "Ready to install DS Style and manage artwork or styles."
+    ? summary.hasDsStyle
+      ? "Existing DS Style install found. Ready to update the kernel or manage artwork and styles."
+      : "Ready to install DS Style and manage artwork or styles."
     : "Choose the cartridge that will use this SD card to continue.";
   $("#sd-model-pill").textContent = info ? modelLabel : "Choose cartridge";
   $("#sd-connection-banner").dataset.state = info ? "connected" : "choice";
@@ -311,13 +325,27 @@ function renderSdSummary() {
   cartridgeButton.disabled = !canChoose;
   cartridgeButton.classList.toggle("is-selectable", canChoose);
   cartridgeButton.title = canChoose ? "Choose cartridge" : "Detected from the kernel file at the SD-card root";
-  $("#quick-install").disabled = false;
+  refreshInstallerActions();
   $("#refresh-sd").disabled = false;
   $("#add-style").disabled = false;
   $("#save-settings").disabled = !state.setupDirty;
   document.querySelectorAll(".bundled-style").forEach((button) => {
     button.disabled = !info;
   });
+}
+
+function refreshInstallerActions() {
+  const connected = Boolean(state.sdRoot);
+  const modelKnown = Boolean(MODEL_INFO[state.sdModel]);
+  const hasDsStyle = Boolean(state.sdSummary?.hasDsStyle);
+  $("#quick-install").disabled = state.installBusy || !connected;
+  $("#quick-update").disabled = state.installBusy || !connected || !hasDsStyle;
+
+  const availability = $("#update-availability");
+  if (!connected) availability.textContent = "Connect an existing DS Style SD card to update only its kernel.";
+  else if (!hasDsStyle) availability.textContent = "No existing DS Style install was found. Use Install DS Style for a new setup.";
+  else if (!modelKnown) availability.textContent = "Choose your cartridge when you update. Settings and personal files stay unchanged.";
+  else availability.textContent = "Updates only the kernel. Settings and personal files stay unchanged.";
 }
 
 async function chooseCartridge() {
@@ -347,6 +375,7 @@ async function connectSd() {
     state.setupRoot = null;
     state.setupDirty = false;
     $("#quick-install").disabled = true;
+    $("#quick-update").disabled = true;
     $("#sd-connection-title").textContent = "Reading card...";
     $("#sd-connection-copy").textContent = "Checking the kernel, artwork and style folders.";
     await scanSd();
@@ -398,8 +427,8 @@ async function startQuickInstall() {
   );
   if (!confirmed) return;
 
-  const button = $("#quick-install");
-  button.disabled = true;
+  state.installBusy = true;
+  refreshInstallerActions();
   $("#install-result").hidden = true;
   try {
     const result = await installDsStyle(state.sdRoot, model, collectPersonalisation(), showInstallProgress);
@@ -419,7 +448,52 @@ async function startQuickInstall() {
     showInstallResult("error", "Installation stopped", `${error.message} It is safe to reconnect the card and try again.`);
     toast(error.message, "error", 7000);
   } finally {
-    button.disabled = false;
+    state.installBusy = false;
+    refreshInstallerActions();
+  }
+}
+
+async function startQuickUpdate() {
+  if (!state.sdRoot || !state.sdSummary?.hasDsStyle) return;
+  let model = state.sdModel;
+  if (!MODEL_INFO[model]) model = await chooseCartridge();
+  if (!MODEL_INFO[model]) return;
+
+  let manifest = state.installManifest;
+  try {
+    manifest ||= await loadInstallManifest();
+    state.installManifest = manifest;
+  } catch (error) {
+    toast(error.message, "error", 6500);
+    return;
+  }
+
+  const info = MODEL_INFO[model];
+  const confirmed = await requestConfirmation(
+    `Update DS Style to v${manifest.version}?`,
+    `Only the kernel update file for the ${info.label} will be replaced. Your settings, saves, artwork, cheats and installed styles will not be changed.`,
+    "Update",
+  );
+  if (!confirmed) return;
+
+  state.installBusy = true;
+  refreshInstallerActions();
+  $("#install-result").hidden = true;
+  try {
+    const result = await updateDsStyle(state.sdRoot, model, showInstallProgress);
+    showInstallResult(
+      "success",
+      `DS Style v${result.version} is ready`,
+      "Safely eject the SD card, insert it into the cartridge, then hold R while the cartridge boots. Keep the console powered on until the update finishes.",
+    );
+    toast("DS Style was updated on the SD card.", "success", 6500);
+    await scanSd();
+  } catch (error) {
+    showInstallResult("error", "Update stopped", `${error.message} It is safe to reconnect the card and try again.`);
+    toast(error.message, "error", 7000);
+  } finally {
+    state.installBusy = false;
+    refreshInstallerActions();
   }
 }
 
@@ -608,6 +682,7 @@ document.querySelectorAll("[data-preview-scene]").forEach((button) => {
 for (const selector of ["#connect-sd-header", "#connect-sd-main"]) $(selector).addEventListener("click", connectSd);
 $("#choose-cartridge").addEventListener("click", chooseCartridge);
 $("#quick-install").addEventListener("click", startQuickInstall);
+$("#quick-update").addEventListener("click", startQuickUpdate);
 $("#save-settings").addEventListener("click", saveCurrentSettings);
 $("#refresh-sd").addEventListener("click", () => scanSd().catch((error) => toast(error.message, "error")));
 $("#add-style").addEventListener("click", () => $("#style-file-input").click());

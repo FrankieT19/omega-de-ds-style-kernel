@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Install DS Style, choose starting preferences, and manage artwork and styles directly on an SD card.">
+  <meta name="description" content="Install or update DS Style, choose starting preferences, and manage artwork and styles directly on an SD card.">
   <meta name="theme-color" content="#0b0d16">
   <link rel="icon" type="image/png" href="../project/assets/favicon.png">
   <link rel="apple-touch-icon" href="../project/assets/favicon.png">
@@ -61,8 +61,8 @@
         <div class="view-heading">
           <div>
             <p class="eyebrow">Guided setup</p>
-            <h1>Install DS Style</h1>
-            <p>Prepare a blank, stock or Simple SD card in one guided step. Existing games, saves and artwork are preserved.</p>
+            <h1>Install or update DS Style</h1>
+            <p>Prepare a blank, stock or Simple SD card, or update an existing DS Style install without changing personal files.</p>
           </div>
           <button class="button primary" id="connect-sd-main" type="button">
             <i data-lucide="folder-open"></i><span>Connect SD card</span>
@@ -240,14 +240,20 @@
             <div class="installer-symbol"><i data-lucide="package-check"></i></div>
             <div>
               <span class="recommend-tag">Recommended</span>
-              <h2>Quick install</h2>
-              <p>Installs the correct kernel and support files, creates the DS Style folders, and moves recognised EZ-Flash folders into <strong>SYSTEM</strong>.</p>
+              <h2>Install or update</h2>
+              <p>Install prepares a new setup with the required support files. Update replaces only the kernel on an existing DS Style SD card.</p>
             </div>
             <div class="installer-action">
               <span id="installer-version">Checking current release...</span>
-              <button class="button primary" id="quick-install" type="button" disabled>
-                <i data-lucide="sparkles"></i><span>Install DS Style</span>
-              </button>
+              <div class="installer-action-buttons">
+                <button class="button secondary" id="quick-update" type="button" disabled>
+                  <i data-lucide="refresh-cw"></i><span>Update DS Style</span>
+                </button>
+                <button class="button primary" id="quick-install" type="button" disabled>
+                  <i data-lucide="sparkles"></i><span>Install DS Style</span>
+                </button>
+              </div>
+              <small id="update-availability">Connect an existing DS Style SD card to update only its kernel.</small>
             </div>
           </div>
 
@@ -268,7 +274,7 @@
           </div>
         </div>
 
-        <p class="installer-note"><i data-lucide="shield-check"></i> Files stay on this device. Existing files that need replacing during migration are backed up first.</p>
+        <p class="installer-note"><i data-lucide="shield-check"></i> Files stay on this device. Updating leaves personal files untouched; a full install safely preserves existing content.</p>
       </section>
 
       <section class="view" id="view-artwork" data-view="artwork" hidden>

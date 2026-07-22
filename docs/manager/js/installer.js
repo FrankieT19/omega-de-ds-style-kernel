@@ -309,6 +309,41 @@ export async function installBundledStyle(root, model, styleId) {
   return { label, target: entry.target, version: manifest.version };
 }
 
+export async function updateDsStyle(root, model, onProgress = null) {
+  if (!KERNEL_FILES[model]) throw new Error("Choose a supported cartridge before updating DS Style.");
+
+  report(onProgress, {
+    percent: 8,
+    title: "Preparing update",
+    copy: "Checking the latest DS Style kernel...",
+  });
+  const manifest = await loadInstallManifest();
+  const manifestKernel = manifest.kernels[model];
+  if (!manifestKernel) throw new Error("The selected cartridge is not supported by this updater.");
+  const kernel = { ...manifestKernel, target: KERNEL_FILES[model] };
+
+  report(onProgress, {
+    percent: 24,
+    title: `Downloading DS Style v${manifest.version}`,
+    copy: "Verifying the kernel update file...",
+  });
+  const payload = await fetchPackageEntry(kernel);
+
+  report(onProgress, {
+    percent: 78,
+    title: "Updating DS Style",
+    copy: `Writing ${kernel.target} to the SD-card root...`,
+  });
+  await writeFile(root, kernel.target, payload.bytes);
+
+  report(onProgress, {
+    percent: 100,
+    title: "DS Style is ready",
+    copy: "Your existing settings and personal files were left unchanged.",
+  });
+  return { version: manifest.version, kernel: kernel.target };
+}
+
 async function preparePayload(model, onProgress) {
   report(onProgress, { percent: 2, title: "Preparing installer", copy: "Checking the latest DS Style package..." });
   const manifest = await loadInstallManifest();

@@ -1007,6 +1007,20 @@ h3 {
   font-size: 12px;
 }
 
+.installer-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.installer-action > small {
+  max-width: 360px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: right;
+}
+
 .install-progress {
   align-items: flex-start;
   flex-wrap: wrap;
@@ -1980,6 +1994,20 @@ input[type="range"] {
 
   .installer-action > span {
     text-align: right;
+  }
+
+  .installer-action-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .installer-action-buttons .button {
+    width: 100%;
+  }
+
+  .installer-action > small {
+    max-width: none;
+    text-align: left;
   }
 
   .installer-note {
