@@ -54,6 +54,10 @@ const state = {
   },
 };
 
+let personalisationRevision = 0;
+let personalisationSaveTimer = null;
+let personalisationSaveQueue = Promise.resolve();
+
 const MODEL_INFO = {
   omega_de: { label: "Omega Definitive Edition", kernel: "ezkernelnew.bin" },
   original: { label: "Original Omega", kernel: "ezkernel.bin" },
@@ -143,8 +147,13 @@ function renderPersonalisation() {
 
 function markPersonalisationDirty(preference = null) {
   state.setupDirty = true;
-  setSetupState(state.sdRoot ? "Unsaved changes" : "Applied during install");
-  $("#save-settings").disabled = !state.sdRoot;
+  personalisationRevision += 1;
+  if (state.sdRoot && state.sdSummary?.hasDsStyle) {
+    setSetupState("Saving automatically...");
+    schedulePersonalisationSave(personalisationRevision);
+  } else {
+    setSetupState("Applied during install");
+  }
   refreshPersonalisationUi(preference);
 }
 
@@ -162,8 +171,7 @@ async function loadCardPersonalisation() {
   state.setupRoot = state.sdRoot;
   state.setupDirty = false;
   renderPersonalisation();
-  setSetupState("Current settings loaded");
-  $("#save-settings").disabled = true;
+  setSetupState(state.sdSummary?.hasDsStyle ? "Changes save automatically" : "Applied during install");
 }
 
 function collectPersonalisation() {
@@ -171,19 +179,47 @@ function collectPersonalisation() {
   return { ...state.personalisation };
 }
 
-async function saveCurrentSettings() {
-  if (!state.sdRoot) return;
-  const button = $("#save-settings");
-  button.disabled = true;
+function schedulePersonalisationSave(revision) {
+  window.clearTimeout(personalisationSaveTimer);
+  const root = state.sdRoot;
+  personalisationSaveTimer = window.setTimeout(() => {
+    const preferences = collectPersonalisation();
+    personalisationSaveQueue = personalisationSaveQueue.then(
+      () => saveCurrentSettingsAutomatically(root, revision, preferences),
+      () => saveCurrentSettingsAutomatically(root, revision, preferences),
+    );
+  }, 300);
+}
+
+async function saveCurrentSettingsAutomatically(root, revision, preferences) {
+  if (!root || root !== state.sdRoot || !state.sdSummary?.hasDsStyle) return;
   try {
-    await savePersonalisation(state.sdRoot, collectPersonalisation());
-    state.setupDirty = false;
-    setSetupState("Saved to SD card");
-    toast("Settings saved to the SD card.", "success");
+    await savePersonalisation(root, preferences);
+    if (root === state.sdRoot && revision === personalisationRevision) {
+      state.setupDirty = false;
+      setSetupState("Saved automatically");
+    }
   } catch (error) {
-    button.disabled = false;
-    toast(error.message, "error");
+    if (root === state.sdRoot && revision === personalisationRevision) {
+      setSetupState("Could not save changes");
+      toast(error.message, "error");
+    }
   }
+}
+
+async function flushAutomaticSettingsSave() {
+  window.clearTimeout(personalisationSaveTimer);
+  personalisationSaveTimer = null;
+  if (state.sdRoot && state.sdSummary?.hasDsStyle && state.setupDirty) {
+    const root = state.sdRoot;
+    const revision = personalisationRevision;
+    const preferences = collectPersonalisation();
+    personalisationSaveQueue = personalisationSaveQueue.then(
+      () => saveCurrentSettingsAutomatically(root, revision, preferences),
+      () => saveCurrentSettingsAutomatically(root, revision, preferences),
+    );
+  }
+  await personalisationSaveQueue;
 }
 
 function requestConfirmation(title, copy, actionLabel = "Continue", options = {}) {
@@ -328,7 +364,6 @@ function renderSdSummary() {
   refreshInstallerActions();
   $("#refresh-sd").disabled = false;
   $("#add-style").disabled = false;
-  $("#save-settings").disabled = !state.setupDirty;
   document.querySelectorAll(".bundled-style").forEach((button) => {
     button.disabled = !info;
   });
@@ -374,6 +409,8 @@ async function connectSd() {
     state.sdSummary = null;
     state.setupRoot = null;
     state.setupDirty = false;
+    personalisationRevision += 1;
+    window.clearTimeout(personalisationSaveTimer);
     $("#quick-install").disabled = true;
     $("#quick-update").disabled = true;
     $("#sd-connection-title").textContent = "Reading card...";
@@ -427,6 +464,8 @@ async function startQuickInstall() {
   );
   if (!confirmed) return;
 
+  await flushAutomaticSettingsSave();
+
   state.installBusy = true;
   refreshInstallerActions();
   $("#install-result").hidden = true;
@@ -442,7 +481,7 @@ async function startQuickInstall() {
     );
     toast("DS Style was installed on the SD card.", "success", 6500);
     state.setupDirty = false;
-    setSetupState("Saved to SD card");
+    setSetupState("Saved automatically");
     await scanSd();
   } catch (error) {
     showInstallResult("error", "Installation stopped", `${error.message} It is safe to reconnect the card and try again.`);
@@ -475,6 +514,8 @@ async function startQuickUpdate() {
     "Update",
   );
   if (!confirmed) return;
+
+  await flushAutomaticSettingsSave();
 
   state.installBusy = true;
   refreshInstallerActions();
@@ -683,7 +724,6 @@ for (const selector of ["#connect-sd-header", "#connect-sd-main"]) $(selector).a
 $("#choose-cartridge").addEventListener("click", chooseCartridge);
 $("#quick-install").addEventListener("click", startQuickInstall);
 $("#quick-update").addEventListener("click", startQuickUpdate);
-$("#save-settings").addEventListener("click", saveCurrentSettings);
 $("#refresh-sd").addEventListener("click", () => scanSd().catch((error) => toast(error.message, "error")));
 $("#add-style").addEventListener("click", () => $("#style-file-input").click());
 $("#style-file-input").addEventListener("change", (event) => {

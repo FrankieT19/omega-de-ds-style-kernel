@@ -643,10 +643,6 @@ h3 {
   gap: 12px;
 }
 
-.setup-actions .button {
-  min-height: 38px;
-}
-
 .personalisation-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 520px;
@@ -977,7 +973,7 @@ h3 {
 }
 
 .installer-lead h2 {
-  margin: 5px 0 4px;
+  margin: 0 0 4px;
   font-size: 19px;
 }
 
@@ -986,13 +982,6 @@ h3 {
   margin: 0;
   color: var(--text-soft);
   font-size: 13px;
-}
-
-.recommend-tag {
-  color: var(--purple-bright);
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
 }
 
 .installer-action {

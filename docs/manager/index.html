@@ -62,7 +62,7 @@
           <div>
             <p class="eyebrow">Guided setup</p>
             <h1>Install or update DS Style</h1>
-            <p>Prepare a blank, stock or Simple SD card, or update an existing DS Style install without changing personal files.</p>
+            <p>Prepare a blank, stock or Simple SD card, or update DS Style without changing personal files.</p>
           </div>
           <button class="button primary" id="connect-sd-main" type="button">
             <i data-lucide="folder-open"></i><span>Connect SD card</span>
@@ -116,9 +116,7 @@
             </div>
             <div class="setup-actions">
               <span class="setup-state" id="setup-state">Applied during install</span>
-              <button class="button secondary" id="save-settings" type="button" disabled>
-                <i data-lucide="save"></i><span>Save settings</span>
-              </button>
+              <button id="save-settings" type="button" hidden disabled aria-hidden="true"></button>
             </div>
           </div>
 
@@ -239,9 +237,8 @@
           <div class="installer-lead">
             <div class="installer-symbol"><i data-lucide="package-check"></i></div>
             <div>
-              <span class="recommend-tag">Recommended</span>
               <h2>Install or update</h2>
-              <p>Install prepares a new setup with the required support files. Update replaces only the kernel on an existing DS Style SD card.</p>
+              <p>Install adds the required files. Update replaces only the kernel on an existing DS Style SD card.</p>
             </div>
             <div class="installer-action">
               <span id="installer-version">Checking current release...</span>
@@ -282,13 +279,7 @@
           <div>
             <p class="eyebrow">Thumbnail maker</p>
             <h1>Artwork</h1>
-            <p>Create wide and square DS Style thumbnails from your own images, Libretro or a web search.</p>
-          </div>
-          <div class="view-actions">
-            <button class="button secondary" id="choose-art-image" type="button">
-              <i data-lucide="image-plus"></i><span>Choose image</span>
-            </button>
-            <input id="art-image-input" type="file" accept="image/png,image/jpeg,image/bmp,.png,.jpg,.jpeg,.bmp" hidden>
+            <p>Create wide and square DS Style thumbnails from your own images or Libretro.</p>
           </div>
         </div>
 
@@ -297,14 +288,23 @@
             <div class="segmented" role="group" aria-label="Artwork source">
               <button class="is-active" type="button" data-art-source="local">My image</button>
               <button type="button" data-art-source="libretro">Libretro</button>
-              <button type="button" data-art-source="web">Web search</button>
             </div>
 
             <div class="control-panel" id="local-art-panel">
               <div class="drop-zone" id="art-drop-zone" tabindex="0">
                 <i data-lucide="image-up"></i>
-                <strong>Drop an image here</strong>
+                <strong>Choose or drop an image</strong>
                 <span>PNG, JPG or BMP</span>
+              </div>
+              <input id="art-image-input" type="file" accept="image/png,image/jpeg,image/bmp,.png,.jpg,.jpeg,.bmp" hidden>
+              <!-- Kept hidden for one cache generation so the previous Manager script can upgrade cleanly. -->
+              <div hidden aria-hidden="true">
+                <button id="choose-art-image" type="button"></button>
+                <div id="web-art-panel" hidden>
+                  <input id="web-art-query" type="search">
+                  <button id="web-art-search" type="button"></button>
+                  <button id="choose-web-image" type="button"></button>
+                </div>
               </div>
             </div>
 
@@ -330,18 +330,6 @@
               </div>
               <p class="field-note" id="libretro-status">Search the public Game Boy Advance artwork library.</p>
               <div class="search-results" id="libretro-results" aria-live="polite"></div>
-            </div>
-
-            <div class="control-panel" id="web-art-panel" hidden>
-              <label class="field">
-                <span>Find an image online</span>
-                <span class="input-with-button">
-                  <input id="web-art-query" type="search" autocomplete="off" placeholder="Game, file or folder">
-                  <button class="button inline" id="web-art-search" type="button"><i data-lucide="search"></i><span>Search images</span></button>
-                </span>
-                <small>Opens an image search in a new tab. Download an image, then choose or drop it here.</small>
-              </label>
-              <button class="button secondary" id="choose-web-image" type="button"><i data-lucide="image-plus"></i><span>Choose downloaded image</span></button>
             </div>
 
             <div class="form-section">

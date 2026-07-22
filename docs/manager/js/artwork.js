@@ -135,14 +135,12 @@ export class ArtworkController {
     this.libretroSource = document.querySelector("#libretro-source");
     this.libretroResults = document.querySelector("#libretro-results");
     this.libretroStatus = document.querySelector("#libretro-status");
-    this.webQuery = document.querySelector("#web-art-query");
 
     this.bind();
     this.drawEmptyPreviews();
   }
 
   bind() {
-    document.querySelector("#choose-art-image").addEventListener("click", () => this.imageInput.click());
     this.imageInput.addEventListener("change", () => {
       const file = this.imageInput.files?.[0];
       if (file) this.loadSource(file, file.name);
@@ -206,14 +204,6 @@ export class ArtworkController {
     this.libretroSource.addEventListener("change", () => {
       if (this.libretroQuery.value.trim()) this.searchLibretro();
     });
-    document.querySelector("#web-art-search").addEventListener("click", () => this.searchWeb());
-    document.querySelector("#choose-web-image").addEventListener("click", () => this.imageInput.click());
-    this.webQuery.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        this.searchWeb();
-      }
-    });
     this.saveButton.addEventListener("click", () => this.saveToSd());
     this.downloadButton.addEventListener("click", () => this.download());
   }
@@ -224,7 +214,6 @@ export class ArtworkController {
     });
     document.querySelector("#local-art-panel").hidden = source !== "local";
     document.querySelector("#libretro-art-panel").hidden = source !== "libretro";
-    document.querySelector("#web-art-panel").hidden = source !== "web";
   }
 
   refreshRangeOutputs() {
@@ -314,19 +303,6 @@ export class ArtworkController {
     } catch (error) {
       if (error.name !== "AbortError") this.toast(error.message, "error");
     }
-  }
-
-  searchWeb() {
-    const query = this.webQuery.value.trim() || this.customName.value.trim() || this.libretroQuery.value.trim();
-    if (query.length < 2) {
-      this.toast("Enter a game, file or folder name first.", "error");
-      this.webQuery.focus();
-      return;
-    }
-    const url = new URL("https://www.google.com/search");
-    url.searchParams.set("tbm", "isch");
-    url.searchParams.set("q", `${query} Game Boy Advance artwork`);
-    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   async pickTargetFolder() {
