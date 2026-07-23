@@ -277,15 +277,15 @@
                     "omega_de":  {
                                      "source":  "kernels/ezkernelnew.bin",
                                      "target":  "ezkernelnew.bin",
-                                     "size":  2089800,
-                                     "sha256":  "9dc8b0c350ff7ed0d60726f0dcd53f49d147f71ccc7be3112fa2f9454581f612",
+                                     "size":  2090104,
+                                     "sha256":  "858e52f2d3aec678bd7badf0c8f6056a40d8ee66ff8fa45fcb0baf038b62de9a",
                                      "policy":  "replace"
                                  },
                     "original":  {
                                      "source":  "kernels/ezkernel.bin",
                                      "target":  "ezkernel.bin",
-                                     "size":  2089648,
-                                     "sha256":  "2a80748c6d8d85c4114eb939b3c96d577e7ca4044f0a788acb46ff098a4dc1f1",
+                                     "size":  2089960,
+                                     "sha256":  "510feb8a57c215e920c4072c2a0dc01549b74ca3444af90110cf2eccfe97b2be",
                                      "policy":  "replace"
                                  }
                 },

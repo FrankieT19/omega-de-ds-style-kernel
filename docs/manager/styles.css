@@ -1401,6 +1401,112 @@ h3 {
   margin-bottom: 0;
 }
 
+.region-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0 0 16px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.region-fieldset legend,
+.region-priority > div:first-child > strong {
+  padding: 0;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.region-fieldset > .field-note,
+.region-priority > div:first-child > .field-note {
+  margin: 5px 0 11px;
+  line-height: 1.45;
+}
+
+.region-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.region-checkbox {
+  min-width: 0;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.region-checkbox:has(input:checked) {
+  border-color: rgba(167, 128, 224, 0.58);
+  background: var(--purple-wash);
+}
+
+.region-checkbox input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--purple);
+}
+
+.region-priority {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.75fr) minmax(220px, 1.25fr);
+  gap: 18px;
+  align-items: start;
+  padding-top: 16px;
+}
+
+.region-priority-list {
+  display: grid;
+  gap: 6px;
+}
+
+.region-priority-row {
+  min-height: 36px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 30px 30px;
+  gap: 5px;
+  align-items: center;
+  padding: 3px 4px 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+}
+
+.region-priority-row > strong {
+  overflow: hidden;
+  color: var(--text-soft);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.region-rank {
+  color: var(--purple-bright);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.region-priority-row .icon-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+}
+
+.region-priority-row .icon-button svg {
+  width: 15px;
+  height: 15px;
+}
+
 .artwork-folder-picker {
   display: flex;
   align-items: center;
@@ -1619,6 +1725,12 @@ input[type="range"] {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.pack-preview-column .preview-heading strong {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .preview-stage {
@@ -2018,6 +2130,15 @@ input[type="range"] {
   :root {
     --header-height: 68px;
     --nav-width: 0px;
+  }
+
+  .region-checkbox-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .region-priority {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .app-header {

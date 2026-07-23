@@ -45,7 +45,7 @@ const PERSONAL_SETTING_OPTIONS = {
   "Clock format": ["24 hour", "12 hour"],
   "Sounds": ["On", "Off"],
   "Quick start hotkey": ["Start", "Select", "L", "A", "B"],
-  "Last launch mode": ["Clean", "Addon"],
+  "Boot mode": ["Clean", "Addon", "Menu"],
 };
 const PERSONAL_DEFAULTS = Object.freeze({
   name: "",
@@ -90,7 +90,7 @@ const PREFERENCE_KEYS = {
   clock: "Clock format",
   sounds: "Sounds",
   quickStart: "Quick start hotkey",
-  launchMode: "Last launch mode",
+  launchMode: "Boot mode",
 };
 
 let manifestPromise = null;

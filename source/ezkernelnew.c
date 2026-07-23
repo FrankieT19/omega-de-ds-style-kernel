@@ -9627,6 +9627,30 @@ static void Launcher_ReadThumbnailStyle(void)
     }
 }
 
+static const char *Launcher_BootModeSettingName(void)
+{
+    if(gl_boot_mode_pref == 0x1)
+        return "Clean";
+    if(gl_boot_mode_pref == 0x2)
+        return "Addon";
+    return "Menu";
+}
+
+static void Launcher_ReadBootModeSetting(void)
+{
+    char buf[16];
+
+    memset(buf, 0x00, sizeof(buf));
+    if(!Launcher_SettingsReadValue("Boot mode", buf, sizeof(buf)))
+        return;
+    if(!strcasecmp(buf, "Clean"))
+        gl_boot_mode_pref = 0x1;
+    else if(!strcasecmp(buf, "Addon"))
+        gl_boot_mode_pref = 0x2;
+    else if(!strcasecmp(buf, "Menu"))
+        gl_boot_mode_pref = 0x0;
+}
+
 static const char *Launcher_BootModeText(void)
 {
     if(gl_boot_mode_pref == 0x1)
@@ -10612,6 +10636,9 @@ static void Launcher_SaveUnifiedSettings(void)
         f_printf(&f, "Language = %s\n", Launcher_LanguageName());
         f_printf(&f, "\n# Options: Start, Select, L, A, B\n");
         f_printf(&f, "Quick start hotkey = %s\n", Launcher_KeyName((u8)gl_auto_start_key));
+        f_printf(&f, "\n# Options: Clean, Addon, Menu\n");
+        f_printf(&f, "# Boot mode chooses what happens when a GBA game is opened.\n");
+        f_printf(&f, "Boot mode = %s\n", Launcher_BootModeSettingName());
         f_printf(&f, "\n# Options: Clean, Addon\n");
         f_printf(&f, "Last launch mode = %s\n", (launcher_last_launch_mode == LAST_LAUNCH_MODE_ADDON) ? "Addon" : "Clean");
         f_printf(&f, "\n# Options: 0 or higher. 0 is the first favourite.\n");
@@ -13704,6 +13731,7 @@ int main(void) {
 	Launcher_ReadListFoldersSetting();
 	Launcher_ReadCleanListSetting();
 	Launcher_ReadClockFormatSetting();
+	Launcher_ReadBootModeSetting();
 	Launcher_ReadViewModeSetting();
 	Launcher_ReadListArtPositionSetting();
 	Launcher_ReadArtBorderSetting();
