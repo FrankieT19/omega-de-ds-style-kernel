@@ -50,7 +50,6 @@ const state = {
     clock: "24 hour",
     sounds: "On",
     quickStart: "Start",
-    launchMode: "Clean",
   },
 };
 
@@ -138,7 +137,6 @@ function renderPersonalisation() {
   $("#setup-clean-list").checked = preferences.cleanList === "On";
   $("#setup-sounds").checked = preferences.sounds === "On";
   $("#setup-quick-start").value = preferences.quickStart;
-  $("#setup-launch-mode").value = preferences.launchMode;
   $("#setup-colour-swatch").style.background = COLOUR_SWATCHES[preferences.colour] || COLOUR_SWATCHES["Pale Blue"];
   setSegmentedValue("theme", preferences.theme);
   setSegmentedValue("clock", preferences.clock);
@@ -690,7 +688,6 @@ const setupSelectBindings = {
   "#setup-vertical-side": "verticalSide",
   "#setup-horizontal-side": "horizontalSide",
   "#setup-quick-start": "quickStart",
-  "#setup-launch-mode": "launchMode",
 };
 for (const [selector, preference] of Object.entries(setupSelectBindings)) {
   $(selector).addEventListener("change", (event) => {
