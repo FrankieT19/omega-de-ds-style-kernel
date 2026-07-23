@@ -123,7 +123,7 @@
           <div class="personalisation-layout">
             <div class="settings-groups">
               <details class="settings-group" open>
-                <summary><span><i data-lucide="sparkles"></i> Essentials</span><i data-lucide="chevron-down"></i></summary>
+                <summary><span><i data-lucide="monitor-cog"></i> Interface</span><i data-lucide="chevron-down"></i></summary>
                 <div class="setup-grid">
                   <label class="setup-field">
                     <span>Name</span>
@@ -157,6 +157,14 @@
                       </select>
                     </span>
                   </label>
+                  <fieldset class="setup-field"><legend>Clock</legend><div class="setup-segmented" data-setup-control="clock"><button class="is-active" type="button" data-value="24 hour" aria-pressed="true">24 hour</button><button type="button" data-value="12 hour" aria-pressed="false">12 hour</button></div></fieldset>
+                  <label class="setup-field setup-toggle"><span class="toggle-copy"><strong>Menu sounds</strong><small>Play sounds while navigating DS Style.</small></span><input id="setup-sounds" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span></label>
+                </div>
+              </details>
+
+              <details class="settings-group">
+                <summary><span><i data-lucide="layout-grid"></i> Start and browsing</span><i data-lucide="chevron-down"></i></summary>
+                <div class="setup-grid">
                   <label class="setup-field">
                     <span>Boot to</span>
                     <select id="setup-boot">
@@ -164,20 +172,12 @@
                       <option value="Last game">Last game</option><option value="Recents">Recently played</option><option value="Favourites">Favourites</option>
                     </select>
                   </label>
-                </div>
-              </details>
-
-              <details class="settings-group">
-                <summary><span><i data-lucide="layout-grid"></i> Start and browsing</span><i data-lucide="chevron-down"></i></summary>
-                <div class="setup-grid">
                   <label class="setup-field setup-toggle">
                     <span class="toggle-copy"><strong>Start screen</strong><small>Show the launcher home screen.</small></span>
                     <input id="setup-start-screen" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span>
                   </label>
                   <label class="setup-field"><span>Start screen game</span><select id="setup-start-source"><option>Last played</option><option>Favourites</option></select></label>
                   <label class="setup-field"><span>View mode</span><select id="setup-view-mode"><option>List</option><option>List + art</option><option>Horizontal</option><option>Vertical</option></select></label>
-                  <label class="setup-field"><span>Artwork shape</span><select id="setup-thumbnails"><option value="Title">Wide</option><option value="Box">Square</option></select></label>
-                  <label class="setup-field" id="setup-list-art-field"><span>List artwork position</span><select id="setup-list-art"><option>Top</option><option>Center</option><option>Bottom</option></select></label>
                   <label class="setup-field setup-toggle">
                     <span class="toggle-copy"><strong>List folders</strong><small>Use list view for folders without games.</small></span>
                     <input id="setup-list-folders" type="checkbox"><span class="toggle-track" aria-hidden="true"><i></i></span>
@@ -194,8 +194,10 @@
               </details>
 
               <details class="settings-group">
-                <summary><span><i data-lucide="image"></i> Artwork presentation</span><i data-lucide="chevron-down"></i></summary>
+                <summary><span><i data-lucide="image"></i> Artwork</span><i data-lucide="chevron-down"></i></summary>
                 <div class="setup-grid">
+                  <label class="setup-field"><span>Artwork shape</span><select id="setup-thumbnails"><option value="Title">Wide</option><option value="Box">Square</option></select></label>
+                  <label class="setup-field" id="setup-list-art-field"><span>List artwork position</span><select id="setup-list-art"><option>Top</option><option>Center</option><option>Bottom</option></select></label>
                   <label class="setup-field"><span>Artwork border</span><select id="setup-art-border"><option>Off</option><option>Accent</option><option>Black</option><option>Grey</option><option>White</option></select></label>
                   <label class="setup-field"><span>Rounded corners</span><select id="setup-rounded"><option value="Full">All artwork</option><option value="No Start">Except Start screen</option><option value="Off">Off</option></select></label>
                   <label class="setup-field"><span>Vertical side artwork</span><select id="setup-vertical-side"><option>Center</option><option>Left</option><option>Right</option></select></label>
@@ -204,10 +206,8 @@
               </details>
 
               <details class="settings-group">
-                <summary><span><i data-lucide="settings-2"></i> Behaviour</span><i data-lucide="chevron-down"></i></summary>
+                <summary><span><i data-lucide="gamepad-2"></i> Game launching</span><i data-lucide="chevron-down"></i></summary>
                 <div class="setup-grid">
-                  <fieldset class="setup-field"><legend>Clock</legend><div class="setup-segmented" data-setup-control="clock"><button class="is-active" type="button" data-value="24 hour" aria-pressed="true">24 hour</button><button type="button" data-value="12 hour" aria-pressed="false">12 hour</button></div></fieldset>
-                  <label class="setup-field setup-toggle"><span class="toggle-copy"><strong>Menu sounds</strong><small>Play sounds while navigating DS Style.</small></span><input id="setup-sounds" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span></label>
                   <label class="setup-field"><span>Quick start button</span><select id="setup-quick-start"><option>Start</option><option>Select</option><option>L</option><option>A</option><option>B</option></select></label>
                   <label class="setup-field"><span>Default game launch</span><select id="setup-launch-mode"><option value="Clean">Clean boot</option><option value="Addon">Addon menu</option></select></label>
                 </div>
@@ -279,29 +279,27 @@
           <div>
             <p class="eyebrow">Thumbnail maker</p>
             <h1>Artwork</h1>
-            <p>Create wide and square DS Style thumbnails from your own images or supported Libretro systems.</p>
+            <p>Add one image, fill artwork for games on your SD card, or build a complete GBA pack.</p>
           </div>
         </div>
 
-        <div class="artwork-layout">
-          <div class="controls-column">
-            <div class="segmented" role="group" aria-label="Artwork source">
-              <button class="is-active" type="button" data-art-source="local">My image</button>
-              <button type="button" data-art-source="libretro">Libretro</button>
-            </div>
+        <div class="artwork-workflow-tabs tabs" role="tablist" aria-label="Artwork task">
+          <button class="is-active" type="button" role="tab" data-art-workflow="single" aria-selected="true">Single artwork</button>
+          <button type="button" role="tab" data-art-workflow="custom-pack" aria-selected="false">Custom pack</button>
+          <button type="button" role="tab" data-art-workflow="gba-pack" aria-selected="false">GBA pack</button>
+        </div>
 
-            <div class="control-panel" id="local-art-panel">
-              <div class="drop-zone" id="art-drop-zone" tabindex="0">
-                <i data-lucide="image-up"></i>
-                <strong>Choose or drop an image</strong>
-                <span>PNG, JPG or BMP</span>
-              </div>
-              <input id="art-image-input" type="file" accept="image/png,image/jpeg,image/bmp,.png,.jpg,.jpeg,.bmp" hidden>
-            </div>
+        <section class="artwork-workflow-panel" data-art-workflow-panel="single">
+          <div class="workflow-intro">
+            <span class="workflow-symbol"><i data-lucide="image-plus"></i></span>
+            <div><h2>Add one image</h2><p>Create artwork for one game, file or folder, then save it directly to the connected SD card.</p></div>
+          </div>
 
-            <div class="control-panel" id="libretro-art-panel" hidden>
-              <div class="field-row split">
-                <label class="field grow">
+          <div class="artwork-layout">
+            <div class="controls-column">
+              <div class="form-section workflow-first-section">
+                <h2>Choose artwork</h2>
+                <label class="field">
                   <span>System / console</span>
                   <select id="libretro-system">
                     <option>Game Boy Advance</option>
@@ -324,40 +322,165 @@
                     <option>Super Cassette Vision</option>
                   </select>
                 </label>
-                <label class="field">
-                  <span>Artwork type</span>
-                  <select id="libretro-source">
-                    <option value="Named_Boxarts">Box art</option>
-                    <option value="Named_Titles">Title screen</option>
-                    <option value="Named_Snaps">Gameplay screenshot</option>
-                  </select>
-                </label>
+
+                <div class="segmented" role="group" aria-label="Artwork source">
+                  <button class="is-active" type="button" data-art-source="local">Upload image</button>
+                  <button type="button" data-art-source="libretro">Search Libretro</button>
+                </div>
+
+                <div class="control-panel" id="local-art-panel">
+                  <div class="drop-zone" id="art-drop-zone" tabindex="0">
+                    <i data-lucide="image-up"></i>
+                    <strong>Choose or drop an image</strong>
+                    <span>PNG, JPG or BMP</span>
+                  </div>
+                  <input id="art-image-input" type="file" accept="image/png,image/jpeg,image/bmp,.png,.jpg,.jpeg,.bmp" hidden>
+                </div>
+
+                <div class="control-panel" id="libretro-art-panel" hidden>
+                  <label class="field">
+                    <span>Artwork type</span>
+                    <select id="libretro-source">
+                      <option value="Named_Boxarts">Box art</option>
+                      <option value="Named_Titles">Title screen</option>
+                      <option value="Named_Snaps">Gameplay screenshot</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>Search</span>
+                    <span class="input-with-button">
+                      <input id="libretro-query" type="search" autocomplete="off" placeholder="Game name">
+                      <button class="icon-button compact" id="libretro-search" type="button" title="Search Libretro">
+                        <i data-lucide="search"></i><span class="sr-only">Search</span>
+                      </button>
+                    </span>
+                  </label>
+                  <p class="field-note" id="libretro-status">Search the public Game Boy Advance artwork library.</p>
+                  <div class="search-results" id="libretro-results" aria-live="polite"></div>
+                </div>
               </div>
-              <label class="field">
-                <span>Search</span>
-                <span class="input-with-button">
-                  <input id="libretro-query" type="search" autocomplete="off" placeholder="Game name">
-                  <button class="icon-button compact" id="libretro-search" type="button" title="Search Libretro">
-                    <i data-lucide="search"></i><span class="sr-only">Search</span>
-                  </button>
-                </span>
-              </label>
-              <p class="field-note" id="libretro-status">Search the public Game Boy Advance artwork library.</p>
-              <div class="search-results" id="libretro-results" aria-live="polite"></div>
+
+              <div class="form-section">
+                <h2>Choose where it belongs</h2>
+                <div class="field-row split">
+                  <label class="field grow">
+                    <span>Identify by</span>
+                    <select id="art-match-mode">
+                      <option value="custom">File or folder name</option>
+                      <option value="gba">GBA header code</option>
+                    </select>
+                  </label>
+                  <label class="field grow">
+                    <span>Output size</span>
+                    <select id="art-size-mode">
+                      <option value="both">Wide and square</option>
+                      <option value="wide">Wide, 120 x 80</option>
+                      <option value="square">Square, 80 x 80</option>
+                    </select>
+                  </label>
+                </div>
+                <p class="field-note artwork-size-note">DS Style calls wide artwork <strong>Title</strong> and square artwork <strong>Box</strong> in Settings.</p>
+
+                <div id="custom-name-fields">
+                  <label class="field">
+                    <span>Exact name</span>
+                    <span class="input-with-button">
+                      <input id="custom-art-name" type="text" maxlength="96" placeholder="Pokemon Emerald Rogue">
+                      <button class="icon-button compact" id="pick-art-target-file" type="button" title="Use a file name">
+                        <i data-lucide="file"></i><span class="sr-only">Use a file name</span>
+                      </button>
+                      <button class="icon-button compact" id="pick-art-target-folder" type="button" title="Use a folder name">
+                        <i data-lucide="folder"></i><span class="sr-only">Use a folder name</span>
+                      </button>
+                    </span>
+                    <small>Use the name exactly as it appears on the SD card, without the extension.</small>
+                  </label>
+                </div>
+
+                <div id="gba-code-fields" hidden>
+                  <label class="field">
+                    <span>GBA header code</span>
+                    <span class="input-with-button">
+                      <input id="gba-art-code" type="text" maxlength="4" placeholder="BPEE">
+                      <button class="button inline" id="read-gba-code" type="button">
+                        <i data-lucide="gamepad-2"></i><span>Read ROM</span>
+                      </button>
+                    </span>
+                    <small id="gba-code-note">Four letters or numbers from the ROM header.</small>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h2>Position</h2>
+                <label class="range-field">
+                  <span><b>Zoom</b><output id="zoom-output">100%</output></span>
+                  <input id="art-zoom" type="range" min="100" max="240" value="100" step="1">
+                </label>
+                <label class="range-field">
+                  <span><b>Horizontal</b><output id="pan-x-output">0</output></span>
+                  <input id="art-pan-x" type="range" min="-100" max="100" value="0" step="1">
+                </label>
+                <label class="range-field">
+                  <span><b>Vertical</b><output id="pan-y-output">0</output></span>
+                  <input id="art-pan-y" type="range" min="-100" max="100" value="0" step="1">
+                </label>
+                <button class="text-button" id="reset-art-position" type="button"><i data-lucide="rotate-ccw"></i> Reset position</button>
+              </div>
             </div>
 
-            <div class="form-section sd-library-scan">
-              <div class="section-heading-row">
+            <div class="preview-column">
+              <div class="preview-heading">
                 <div>
-                  <h2>Artwork for installed games</h2>
-                  <p class="field-note">Choose one console at a time. Emulated games use exact-name CUSTOM artwork; recognised GBA releases use the standard artwork folders.</p>
+                  <span class="section-kicker">Preview</span>
+                  <strong id="art-preview-name">No image selected</strong>
                 </div>
-                <span class="beta-label">SD card</span>
+                <span class="format-label">GBA-ready BMP</span>
               </div>
-              <div class="field-row split">
-                <label class="field grow">
+
+              <div class="preview-stage">
+                <div class="preview-item">
+                  <span>Wide</span>
+                  <canvas id="wide-preview" width="120" height="80" aria-label="120 by 80 artwork preview"></canvas>
+                  <small>120 x 80</small>
+                </div>
+                <div class="preview-item">
+                  <span>Square</span>
+                  <canvas id="square-preview" width="80" height="80" aria-label="80 by 80 artwork preview"></canvas>
+                  <small>80 x 80</small>
+                </div>
+              </div>
+
+              <div class="preview-actions">
+                <button class="button primary" id="save-art-to-sd" type="button" disabled>
+                  <i data-lucide="save"></i><span>Save to SD card</span>
+                </button>
+                <button class="button secondary" id="download-art" type="button" disabled>
+                  <i data-lucide="download"></i><span>Download</span>
+                </button>
+              </div>
+              <p class="field-note">Save to SD card writes the finished image directly to the correct DS Style folder. Each CUSTOM folder supports up to 256 images.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="artwork-workflow-panel" data-art-workflow-panel="pack" hidden>
+          <div class="workflow-intro">
+            <span class="workflow-symbol"><i data-lucide="images"></i></span>
+            <div><h2 id="pack-workflow-title">Build a custom pack</h2><p id="pack-workflow-copy">Scan installed emulated games and add matching artwork to the connected SD card.</p></div>
+          </div>
+
+          <div class="artwork-layout artwork-pack-layout">
+            <div class="controls-column">
+              <div class="form-section workflow-first-section">
+                <div class="section-heading-row">
+                  <div><h2>Choose games</h2><p class="field-note" id="pack-games-note">Scan every supported emulated system, or tune one console at a time.</p></div>
+                  <span class="beta-label">SD card</span>
+                </div>
+                <label class="field" id="scan-system-field">
                   <span>System / console</span>
                   <select id="scan-art-system">
+                    <option value="__all_emulated__">All supported emulated systems</option>
                     <option>Game Boy Color</option>
                     <option>Game Boy</option>
                     <option>Nintendo Entertainment System</option>
@@ -375,105 +498,129 @@
                     <option>ColecoVision</option>
                     <option>Arcadia 2001</option>
                     <option>Super Cassette Vision</option>
-                    <option>Game Boy Advance</option>
                   </select>
                 </label>
+                <label class="checkbox-field" id="scan-include-gba-field">
+                  <input id="scan-include-gba" type="checkbox">
+                  <span><strong>Also add missing GBA artwork</strong><small>Recognised releases use the standard artwork folders; homebrew and unmatched games use CUSTOM.</small></span>
+                </label>
+              </div>
+
+              <div class="form-section">
+                <h2>Choose artwork</h2>
                 <label class="field">
-                  <span>Artwork source</span>
+                  <span>Source</span>
                   <select id="scan-art-provider">
                     <option value="libretro">Libretro</option>
                     <option value="folder">Artwork folder</option>
                   </select>
                 </label>
-              </div>
 
-              <div class="library-source-panel" id="scan-libretro-options">
-                <label class="field">
-                  <span>Artwork type</span>
-                  <select id="scan-art-source">
-                    <option value="Named_Boxarts">Box art</option>
-                    <option value="Named_Titles">Title screen</option>
-                    <option value="Named_Snaps">Gameplay screenshot</option>
-                  </select>
-                </label>
-              </div>
-
-              <div class="library-source-panel artwork-folder-picker" id="scan-folder-options" hidden>
-                <button class="button secondary" id="choose-artwork-folder" type="button">
-                  <i data-lucide="folder-open"></i><span>Choose artwork folder</span>
-                </button>
-                <p class="field-note" id="artwork-folder-name">No artwork folder selected.</p>
-              </div>
-
-              <div class="field-row split">
-                <label class="field">
-                  <span>Sizes</span>
-                  <select id="scan-art-size-mode">
-                    <option value="both">Both sizes</option>
-                    <option value="wide">Wide, 120 x 80</option>
-                    <option value="square">Square, 80 x 80</option>
-                  </select>
-                </label>
-                <label class="field grow">
-                  <span>Action</span>
-                  <select id="scan-art-action">
-                    <option value="missing">Add missing artwork</option>
-                    <option value="rebuild">Rebuild installed</option>
-                    <option value="complete_gba">Complete GBA pack</option>
-                  </select>
-                </label>
-              </div>
-
-              <div class="library-source-panel" id="gba-pack-options" hidden>
-                <div class="field-row split">
-                  <label class="field grow">
-                    <span>GBA pack regions</span>
-                    <select id="scan-gba-regions">
-                      <option value="all">All regions</option>
-                      <option value="usa_europe">USA and Europe</option>
-                      <option value="usa">USA</option>
-                      <option value="europe">Europe</option>
-                      <option value="japan">Japan</option>
-                    </select>
-                  </label>
+                <div class="library-source-panel" id="scan-libretro-options">
                   <label class="field">
-                    <span>Artwork priority</span>
-                    <select id="scan-gba-priority">
-                      <option value="usa">USA first</option>
-                      <option value="europe">Europe first</option>
-                      <option value="japan">Japan first</option>
+                    <span>Artwork type</span>
+                    <select id="scan-art-source">
+                      <option value="Named_Boxarts">Box art</option>
+                      <option value="Named_Titles">Title screen</option>
+                      <option value="Named_Snaps">Gameplay screenshot</option>
                     </select>
                   </label>
                 </div>
-                <p class="field-note">When releases share a header code, the preferred region supplies the artwork.</p>
+
+                <div class="library-source-panel artwork-folder-picker" id="scan-folder-options" hidden>
+                  <button class="button secondary" id="choose-artwork-folder" type="button">
+                    <i data-lucide="folder-open"></i><span>Choose artwork folder</span>
+                  </button>
+                  <p class="field-note" id="artwork-folder-name">No artwork folder selected.</p>
+                </div>
               </div>
 
-              <div class="library-position">
+              <div class="form-section">
+                <h2>Choose output</h2>
+                <div class="pack-output-fields">
+                  <label class="field">
+                    <span>Output size</span>
+                    <select id="scan-art-size-mode">
+                      <option value="both">Wide and square</option>
+                      <option value="wide">Wide, 120 x 80</option>
+                      <option value="square">Square, 80 x 80</option>
+                    </select>
+                  </label>
+                  <label class="field grow" id="scan-action-field">
+                    <span>Build</span>
+                    <select id="scan-art-action">
+                      <option value="missing">Add missing artwork</option>
+                      <option value="rebuild">Rebuild installed artwork</option>
+                      <option value="complete_gba" hidden>Complete GBA pack</option>
+                    </select>
+                  </label>
+                </div>
+                <p class="field-note artwork-size-note">DS Style calls wide artwork <strong>Title</strong> and square artwork <strong>Box</strong> in Settings.</p>
+
+                <div class="library-source-panel" id="gba-pack-options" hidden>
+                  <div class="field-row split">
+                    <label class="field grow">
+                      <span>GBA pack regions</span>
+                      <select id="scan-gba-regions">
+                        <option value="all">All regions</option>
+                        <option value="usa_europe">USA and Europe</option>
+                        <option value="usa">USA</option>
+                        <option value="europe">Europe</option>
+                        <option value="japan">Japan</option>
+                      </select>
+                    </label>
+                    <label class="field">
+                      <span>Artwork priority</span>
+                      <select id="scan-gba-priority">
+                        <option value="usa">USA first</option>
+                        <option value="europe">Europe first</option>
+                        <option value="japan">Japan first</option>
+                      </select>
+                    </label>
+                  </div>
+                  <p class="field-note">When releases share a header code, the preferred region supplies the artwork.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="preview-column pack-preview-column">
+              <div class="preview-heading">
+                <div><span class="section-kicker">Pack setup</span><strong id="pack-preview-title">Custom artwork pack</strong></div>
+                <span class="format-label">GBA-ready BMP</span>
+              </div>
+
+              <div class="library-position" id="library-position">
                 <div class="section-heading-row compact">
                   <div>
                     <h3>Artwork position</h3>
-                    <p class="field-note">Saved separately for each console.</p>
+                    <p class="field-note" id="library-position-note">Choose one console to adjust its crop. Each console remembers its own position.</p>
                   </div>
                   <button class="text-button" id="reset-library-position" type="button"><i data-lucide="rotate-ccw"></i> Reset</button>
                 </div>
-                <label class="range-field">
-                  <span><b>Zoom</b><output id="library-zoom-output">100%</output></span>
-                  <input id="library-zoom" type="range" min="100" max="240" value="100" step="1">
-                </label>
-                <label class="range-field">
-                  <span><b>Horizontal</b><output id="library-pan-x-output">0</output></span>
-                  <input id="library-pan-x" type="range" min="-100" max="100" value="0" step="1">
-                </label>
-                <label class="range-field">
-                  <span><b>Vertical</b><output id="library-pan-y-output">0</output></span>
-                  <input id="library-pan-y" type="range" min="-100" max="100" value="0" step="1">
-                </label>
-                <div class="library-preview-stage" aria-label="Library artwork crop preview">
-                  <canvas id="library-wide-preview" width="120" height="80"></canvas>
-                  <canvas id="library-square-preview" width="80" height="80"></canvas>
+                <div id="library-position-controls">
+                  <label class="range-field">
+                    <span><b>Zoom</b><output id="library-zoom-output">100%</output></span>
+                    <input id="library-zoom" type="range" min="100" max="240" value="100" step="1">
+                  </label>
+                  <label class="range-field">
+                    <span><b>Horizontal</b><output id="library-pan-x-output">0</output></span>
+                    <input id="library-pan-x" type="range" min="-100" max="100" value="0" step="1">
+                  </label>
+                  <label class="range-field">
+                    <span><b>Vertical</b><output id="library-pan-y-output">0</output></span>
+                    <input id="library-pan-y" type="range" min="-100" max="100" value="0" step="1">
+                  </label>
+                  <div class="library-preview-stage" aria-label="Pack artwork crop preview">
+                    <canvas id="library-wide-preview" width="120" height="80"></canvas>
+                    <canvas id="library-square-preview" width="80" height="80"></canvas>
+                  </div>
                 </div>
               </div>
 
+              <div class="pack-note" id="pack-limit-note">
+                <i data-lucide="info"></i>
+                <p>Emulated games use exact-name CUSTOM artwork. Each CUSTOM folder supports up to 256 images.</p>
+              </div>
               <div class="library-actions">
                 <button class="button primary" id="scan-sd-artwork" type="button" disabled>
                   <i data-lucide="scan-search"></i><span>Add missing artwork</span>
@@ -482,110 +629,10 @@
                   <i data-lucide="x"></i><span>Stop</span>
                 </button>
               </div>
-              <p class="field-note scan-status" id="sd-artwork-scan-status" aria-live="polite">Connect an SD card to find installed games without artwork.</p>
-            </div>
-
-            <div class="form-section">
-              <h2>Output</h2>
-              <div class="field-row split">
-                <label class="field grow">
-                  <span>Match artwork by</span>
-                  <select id="art-match-mode">
-                    <option value="custom">File or folder name</option>
-                    <option value="gba">GBA header code</option>
-                  </select>
-                </label>
-                <label class="field grow">
-                  <span>Sizes</span>
-                  <select id="art-size-mode">
-                    <option value="both">Wide and square</option>
-                    <option value="wide">Wide, 120 x 80</option>
-                    <option value="square">Square, 80 x 80</option>
-                  </select>
-                </label>
-              </div>
-
-              <div id="custom-name-fields">
-                <label class="field">
-                  <span>Exact name</span>
-                  <span class="input-with-button">
-                    <input id="custom-art-name" type="text" maxlength="96" placeholder="Pokemon Emerald Rogue">
-                    <button class="icon-button compact" id="pick-art-target-file" type="button" title="Use a file name">
-                      <i data-lucide="file"></i><span class="sr-only">Use a file name</span>
-                    </button>
-                    <button class="icon-button compact" id="pick-art-target-folder" type="button" title="Use a folder name">
-                      <i data-lucide="folder"></i><span class="sr-only">Use a folder name</span>
-                    </button>
-                  </span>
-                  <small>Use the name exactly as it appears on the SD card, without the extension.</small>
-                </label>
-              </div>
-
-              <div id="gba-code-fields" hidden>
-                <label class="field">
-                  <span>GBA header code</span>
-                  <span class="input-with-button">
-                    <input id="gba-art-code" type="text" maxlength="4" placeholder="BPEE">
-                    <button class="button inline" id="read-gba-code" type="button">
-                      <i data-lucide="gamepad-2"></i><span>Read ROM</span>
-                    </button>
-                  </span>
-                  <small id="gba-code-note">Four letters or numbers from the ROM header.</small>
-                </label>
-              </div>
-            </div>
-
-            <div class="form-section">
-              <h2>Position</h2>
-              <label class="range-field">
-                <span><b>Zoom</b><output id="zoom-output">100%</output></span>
-                <input id="art-zoom" type="range" min="100" max="240" value="100" step="1">
-              </label>
-              <label class="range-field">
-                <span><b>Horizontal</b><output id="pan-x-output">0</output></span>
-                <input id="art-pan-x" type="range" min="-100" max="100" value="0" step="1">
-              </label>
-              <label class="range-field">
-                <span><b>Vertical</b><output id="pan-y-output">0</output></span>
-                <input id="art-pan-y" type="range" min="-100" max="100" value="0" step="1">
-              </label>
-              <button class="text-button" id="reset-art-position" type="button"><i data-lucide="rotate-ccw"></i> Reset position</button>
+              <p class="field-note scan-status" id="sd-artwork-scan-status" aria-live="polite">Connect an SD card to scan installed games.</p>
             </div>
           </div>
-
-          <div class="preview-column">
-            <div class="preview-heading">
-              <div>
-                <span class="section-kicker">Preview</span>
-                <strong id="art-preview-name">No image selected</strong>
-              </div>
-              <span class="format-label">GBA-ready BMP</span>
-            </div>
-
-            <div class="preview-stage">
-              <div class="preview-item">
-                <span>Wide</span>
-                <canvas id="wide-preview" width="120" height="80" aria-label="120 by 80 artwork preview"></canvas>
-                <small>120 x 80</small>
-              </div>
-              <div class="preview-item">
-                <span>Square</span>
-                <canvas id="square-preview" width="80" height="80" aria-label="80 by 80 artwork preview"></canvas>
-                <small>80 x 80</small>
-              </div>
-            </div>
-
-            <div class="preview-actions">
-              <button class="button primary" id="save-art-to-sd" type="button" disabled>
-                <i data-lucide="save"></i><span>Save to SD card</span>
-              </button>
-              <button class="button secondary" id="download-art" type="button" disabled>
-                <i data-lucide="download"></i><span>Download</span>
-              </button>
-            </div>
-            <p class="field-note">Save to SD card writes the finished image directly to the correct DS Style folder. Each CUSTOM folder supports up to 256 images.</p>
-          </div>
-        </div>
+        </section>
       </section>
 
       <section class="view" id="view-styles" data-view="styles" hidden>

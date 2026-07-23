@@ -1116,6 +1116,55 @@ h3 {
   font-size: 13px;
 }
 
+.artwork-workflow-tabs {
+  margin-bottom: 8px;
+}
+
+.artwork-workflow-tabs button {
+  min-width: 126px;
+}
+
+.artwork-workflow-panel[hidden] {
+  display: none;
+}
+
+.workflow-intro {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.workflow-symbol {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(167, 128, 224, 0.42);
+  border-radius: 6px;
+  background: var(--purple-wash);
+  color: var(--purple-bright);
+}
+
+.workflow-symbol svg {
+  width: 20px;
+  height: 20px;
+}
+
+.workflow-intro h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.workflow-intro p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .artwork-layout {
   display: grid;
   grid-template-columns: minmax(320px, 0.78fr) minmax(460px, 1.22fr);
@@ -1205,6 +1254,12 @@ h3 {
   border-top: 1px solid var(--line);
 }
 
+.form-section.workflow-first-section {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
 .form-section h2 {
   margin-bottom: 16px;
   font-size: 15px;
@@ -1275,6 +1330,11 @@ h3 {
   flex: 1.4;
 }
 
+.pack-output-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
 .field > span:first-child,
 .range-field > span:first-child {
   color: var(--text-soft);
@@ -1287,6 +1347,15 @@ h3 {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
+}
+
+.artwork-size-note {
+  margin: -5px 0 17px;
+  line-height: 1.5;
+}
+
+.artwork-size-note strong {
+  color: var(--text-soft);
 }
 
 .checkbox-field {
@@ -1347,8 +1416,6 @@ h3 {
 
 .library-position {
   margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
 }
 
 .library-preview-stage {
@@ -1386,6 +1453,42 @@ h3 {
 
 .library-actions .button {
   min-width: 0;
+}
+
+.pack-preview-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.pack-preview-column .library-position {
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.pack-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 20px;
+  padding: 13px 14px;
+  border-left: 3px solid var(--purple);
+  background: rgba(124, 87, 176, 0.1);
+}
+
+.pack-note svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  margin-top: 1px;
+  color: var(--purple-bright);
+}
+
+.pack-note p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 input[type="text"],
@@ -2150,6 +2253,21 @@ input[type="range"] {
   .field-row {
     flex-direction: column;
     gap: 0;
+  }
+
+  .artwork-workflow-tabs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .artwork-workflow-tabs button {
+    min-width: 0;
+    padding-inline: 8px;
+  }
+
+  .workflow-intro {
+    align-items: flex-start;
   }
 
   .section-heading-row {

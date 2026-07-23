@@ -40,6 +40,8 @@ const LIBRETRO_SYSTEMS = {
   "Arcadia 2001": { repo: "Emerson_-_Arcadia_2001", extensions: [".arc"] },
   "Super Cassette Vision": { repo: "Epoch_-_Super_Cassette_Vision", extensions: [".sc"] },
 };
+const ALL_EMULATED_SYSTEMS = "__all_emulated__";
+const EMULATED_SYSTEMS = Object.keys(LIBRETRO_SYSTEMS).filter((system) => system !== DEFAULT_SYSTEM);
 const SYSTEM_BY_EXTENSION = new Map(
   Object.entries(LIBRETRO_SYSTEMS).flatMap(([system, details]) => details.extensions.map((extension) => [extension, system])),
 );
@@ -62,6 +64,14 @@ const ART_SIZES = {
   wide: { width: 120, height: 80, folder: "IMGS" },
   square: { width: 80, height: 80, folder: "IMGS2" },
 };
+
+function emptyScanStats(scanned = 0) {
+  return { scanned, unmatched: 0, existing: 0, limited: 0, invalid: 0 };
+}
+
+function mergeScanStats(target, source) {
+  for (const key of Object.keys(target)) target[key] += source[key] || 0;
+}
 
 function normalizeSearch(value) {
   return String(value || "")
@@ -359,6 +369,7 @@ export class ArtworkController {
     this.libraryPreviewSource = null;
     this.libraryTransformSystem = DEFAULT_LIBRARY_SYSTEM;
     this.libraryTransforms = this.loadLibraryTransforms();
+    this.artworkWorkflow = "single";
 
     this.wideCanvas = document.querySelector("#wide-preview");
     this.squareCanvas = document.querySelector("#square-preview");
@@ -386,6 +397,7 @@ export class ArtworkController {
     this.scanSource = document.querySelector("#scan-art-source");
     this.scanSizeMode = document.querySelector("#scan-art-size-mode");
     this.scanAction = document.querySelector("#scan-art-action");
+    this.scanIncludeGba = document.querySelector("#scan-include-gba");
     this.scanGbaRegions = document.querySelector("#scan-gba-regions");
     this.scanGbaPriority = document.querySelector("#scan-gba-priority");
     this.artworkFolderName = document.querySelector("#artwork-folder-name");
@@ -400,12 +412,17 @@ export class ArtworkController {
     this.bind();
     this.refreshSystemMode();
     this.loadLibraryTransform(DEFAULT_LIBRARY_SYSTEM);
+    this.switchArtworkWorkflow("single");
     this.refreshLibraryUi();
     this.drawEmptyPreviews();
     this.drawEmptyLibraryPreviews();
   }
 
   bind() {
+    document.querySelectorAll("[data-art-workflow]").forEach((button) => {
+      button.addEventListener("click", () => this.switchArtworkWorkflow(button.dataset.artWorkflow));
+    });
+
     this.imageInput.addEventListener("change", () => {
       const file = this.imageInput.files?.[0];
       if (file) this.loadSource(file, file.name);
@@ -476,16 +493,18 @@ export class ArtworkController {
     });
     this.scanSystem.addEventListener("change", () => {
       this.saveLibraryTransform();
-      this.libraryTransformSystem = this.scanSystem.value;
-      this.loadLibraryTransform(this.scanSystem.value);
+      this.libraryTransformSystem = this.scanSystem.value === ALL_EMULATED_SYSTEMS ? null : this.scanSystem.value;
+      if (this.libraryTransformSystem) this.loadLibraryTransform(this.libraryTransformSystem);
       this.refreshLibraryUi();
       this.refreshLibraryPreview();
+      this.updatePackReadyStatus();
     });
     this.scanProvider.addEventListener("change", () => {
       this.refreshLibraryUi();
       this.refreshLibraryPreview();
     });
     this.scanAction.addEventListener("change", () => this.refreshLibraryUi());
+    this.scanIncludeGba.addEventListener("change", () => this.refreshLibraryUi());
     this.scanGbaRegions.addEventListener("change", () => this.refreshLibraryUi());
     this.scanGbaPriority.addEventListener("change", () => this.refreshLibraryUi());
     document.querySelector("#choose-artwork-folder").addEventListener("click", () => this.chooseArtworkFolder());
@@ -520,6 +539,35 @@ export class ArtworkController {
     });
     document.querySelector("#local-art-panel").hidden = source !== "local";
     document.querySelector("#libretro-art-panel").hidden = source !== "libretro";
+  }
+
+  switchArtworkWorkflow(workflow) {
+    if (!["single", "custom-pack", "gba-pack"].includes(workflow)) return;
+    this.artworkWorkflow = workflow;
+    document.querySelectorAll("[data-art-workflow]").forEach((button) => {
+      const active = button.dataset.artWorkflow === workflow;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-selected", String(active));
+    });
+    document.querySelectorAll("[data-art-workflow-panel]").forEach((panel) => {
+      const panelName = panel.dataset.artWorkflowPanel;
+      panel.hidden = workflow === "single" ? panelName !== "single" : panelName !== "pack";
+    });
+
+    if (workflow === "single") return;
+    this.saveLibraryTransform();
+    if (workflow === "gba-pack") {
+      this.scanAction.value = "complete_gba";
+      this.libraryTransformSystem = DEFAULT_SYSTEM;
+      this.loadLibraryTransform(DEFAULT_SYSTEM);
+    } else {
+      if (this.scanAction.value === "complete_gba") this.scanAction.value = "missing";
+      this.libraryTransformSystem = this.scanSystem.value === ALL_EMULATED_SYSTEMS ? null : this.scanSystem.value;
+      if (this.libraryTransformSystem) this.loadLibraryTransform(this.libraryTransformSystem);
+    }
+    this.refreshLibraryUi();
+    this.refreshLibraryPreview();
+    this.updatePackReadyStatus();
   }
 
   refreshRangeOutputs() {
@@ -564,6 +612,15 @@ export class ArtworkController {
       zoom: Number(this.libraryZoom.value) / 100,
       x: Number(this.libraryPanX.value) / 100,
       y: Number(this.libraryPanY.value) / 100,
+    };
+  }
+
+  libraryTransformForSystem(system) {
+    const transform = this.libraryTransforms[system] || { zoom: 100, x: 0, y: 0 };
+    return {
+      zoom: Number(transform.zoom ?? 100) / 100,
+      x: Number(transform.x ?? 0) / 100,
+      y: Number(transform.y ?? 0) / 100,
     };
   }
 
@@ -618,7 +675,7 @@ export class ArtworkController {
   }
 
   async refreshLibraryPreview() {
-    if (this.scanProvider.value !== "folder" || !this.artworkFolderFiles?.length) {
+    if (!this.libraryTransformSystem || this.scanProvider.value !== "folder" || !this.artworkFolderFiles?.length) {
       this.drawEmptyLibraryPreviews();
       return;
     }
@@ -637,15 +694,44 @@ export class ArtworkController {
 
   refreshLibraryUi() {
     const isFolder = this.scanProvider.value === "folder";
-    const isGba = this.scanSystem.value === DEFAULT_SYSTEM;
+    const isGbaPack = this.artworkWorkflow === "gba-pack";
+    const scansAllSystems = !isGbaPack && this.scanSystem.value === ALL_EMULATED_SYSTEMS;
+    const includesGba = !isGbaPack && this.scanIncludeGba.checked;
     document.querySelector("#scan-libretro-options").hidden = isFolder;
     document.querySelector("#scan-folder-options").hidden = !isFolder;
+    document.querySelector("#scan-system-field").hidden = isGbaPack;
+    document.querySelector("#scan-include-gba-field").hidden = isGbaPack;
+    document.querySelector("#scan-action-field").hidden = isGbaPack;
+    document.querySelector("#gba-pack-options").hidden = !isGbaPack;
 
-    const completeOption = this.scanAction.querySelector('option[value="complete_gba"]');
-    completeOption.hidden = !isGba;
-    completeOption.disabled = !isGba;
-    if (!isGba && this.scanAction.value === "complete_gba") this.scanAction.value = "missing";
-    document.querySelector("#gba-pack-options").hidden = !(isGba && this.scanAction.value === "complete_gba");
+    if (isGbaPack) {
+      this.scanAction.value = "complete_gba";
+      document.querySelector("#pack-workflow-title").textContent = "Build a complete GBA pack";
+      document.querySelector("#pack-workflow-copy").textContent = "Prepare a broad GBA artwork library by region, whether or not every game is already on the card.";
+      document.querySelector("#pack-games-note").textContent = "Choose which GBA regions to include and which release should supply artwork when a header code is shared.";
+      document.querySelector("#pack-preview-title").textContent = "Complete GBA artwork pack";
+      document.querySelector("#pack-limit-note p").textContent = "Recognised GBA releases use compact header-code artwork in the standard IMGS and IMGS2 folders.";
+    } else {
+      if (this.scanAction.value === "complete_gba") this.scanAction.value = "missing";
+      document.querySelector("#pack-workflow-title").textContent = "Build a custom pack";
+      document.querySelector("#pack-workflow-copy").textContent = "Scan the connected SD card and fill artwork for installed emulated games. Missing GBA artwork can be included too.";
+      document.querySelector("#pack-games-note").textContent = "Scan every supported emulated system, or tune one console at a time.";
+      document.querySelector("#pack-preview-title").textContent = "Custom artwork pack";
+      document.querySelector("#pack-limit-note p").textContent = includesGba
+        ? "Emulated games use exact-name CUSTOM artwork. Recognised GBA releases use the standard artwork folders. Each CUSTOM folder supports up to 256 images."
+        : "Emulated games use exact-name CUSTOM artwork. Each CUSTOM folder supports up to 256 images.";
+    }
+
+    const positionControls = document.querySelector("#library-position-controls");
+    const resetPosition = document.querySelector("#reset-library-position");
+    const positionNote = document.querySelector("#library-position-note");
+    positionControls.hidden = scansAllSystems;
+    resetPosition.hidden = scansAllSystems;
+    if (scansAllSystems) {
+      positionNote.textContent = "Each console uses its saved crop. Choose one console above if you want to adjust its position first.";
+    } else {
+      positionNote.textContent = "Saved separately for each console.";
+    }
 
     const labels = {
       missing: "Add missing artwork",
@@ -656,6 +742,24 @@ export class ArtworkController {
     this.scanButton.disabled = !this.getSdRoot() || this.scanRunning || (isFolder && !this.artworkFolder);
     this.scanCancelButton.hidden = !this.scanRunning;
     this.scanCancelButton.disabled = !this.scanRunning || this.scanCancelRequested;
+  }
+
+  updatePackReadyStatus() {
+    if (this.scanRunning) return;
+    const connected = Boolean(this.getSdRoot());
+    if (this.artworkWorkflow === "gba-pack") {
+      this.scanStatus.textContent = connected
+        ? "Ready to build a complete GBA artwork pack."
+        : "Connect an SD card to build a complete GBA artwork pack.";
+    } else if (this.scanSystem.value === ALL_EMULATED_SYSTEMS) {
+      this.scanStatus.textContent = connected
+        ? "Ready to scan all supported emulated games on the connected card."
+        : "Connect an SD card to scan installed emulated games.";
+    } else {
+      this.scanStatus.textContent = connected
+        ? `Ready to scan installed ${this.scanSystem.value} games.`
+        : `Connect an SD card to scan installed ${this.scanSystem.value} games.`;
+    }
   }
 
   async chooseArtworkFolder() {
@@ -730,6 +834,12 @@ export class ArtworkController {
   onSdChanged() {
     this.updateButtons();
     this.refreshLibraryUi();
+    if (!this.scanRunning) {
+      const status = this.scanStatus.textContent;
+      if (!this.getSdRoot() || status.startsWith("Connect an SD card") || status.startsWith("Ready to ")) {
+        this.updatePackReadyStatus();
+      }
+    }
   }
 
   selectedSizes() {
@@ -913,6 +1023,27 @@ export class ArtworkController {
     });
   }
 
+  async installedGamesForSystems(root, systems) {
+    const requested = new Set(systems);
+    const extensions = [...new Set(systems.flatMap((system) => LIBRETRO_SYSTEMS[system]?.extensions || []))];
+    const grouped = new Map(systems.map((system) => [system, []]));
+    if (!extensions.length) return grouped;
+
+    const files = await listFilesRecursive(root, {
+      extensions,
+      maxDepth: 12,
+      maxFiles: 12000,
+      excludeDirectories: SCAN_EXCLUDED_FOLDERS,
+    });
+    for (const file of files) {
+      const lowerName = file.name.toLocaleLowerCase();
+      if (lowerName === "ezkernel.bin" || lowerName === "ezkernelnew.bin") continue;
+      const system = systemForFilename(file.name);
+      if (system && requested.has(system)) grouped.get(system).push(file);
+    }
+    return grouped;
+  }
+
   bestOfficialGbaEntry(filename, code, library) {
     const candidates = library.byCode.get(code) || [];
     let best = null;
@@ -998,11 +1129,15 @@ export class ArtworkController {
       localIndex,
       sizes,
       overwrite,
+      files: suppliedFiles,
+      reservations: sharedReservations,
+      transform,
     } = options;
-    const files = await this.installedGames(root, system);
-    const stats = { scanned: files.length, unmatched: 0, existing: 0, limited: 0, invalid: 0 };
+    const files = suppliedFiles || await this.installedGames(root, system);
+    const stats = emptyScanStats(files.length);
     const tasks = [];
-    const reservations = await this.outputReservations(root, sizes);
+    if (!files.length) return { tasks, stats };
+    const reservations = sharedReservations || await this.outputReservations(root, sizes);
     const gbaLibrary = system === DEFAULT_SYSTEM ? await this.getGbaLibrary() : null;
     const libretroIndex = provider === "libretro" ? await this.getLibretroIndex(system, libretroFolder) : null;
 
@@ -1043,6 +1178,7 @@ export class ArtworkController {
           identity: game.identity,
           sizes: outputSizes,
           source,
+          transform: transform || this.libraryTransformForSystem(system),
         });
       }
     }
@@ -1057,13 +1193,15 @@ export class ArtworkController {
       sizes,
       gbaRegions,
       gbaPriority,
+      reservations: sharedReservations,
+      transform,
     } = options;
     const library = await this.getGbaLibrary();
     const entries = canonicalGbaEntries(library.entries, gbaRegions, gbaPriority);
     const libretroIndex = provider === "libretro" ? await this.getLibretroIndex(DEFAULT_SYSTEM, libretroFolder) : null;
     const tasks = [];
-    const stats = { scanned: entries.length, unmatched: 0, existing: 0, limited: 0, invalid: 0 };
-    const reservations = await this.outputReservations(root, sizes);
+    const stats = emptyScanStats(entries.length);
+    const reservations = sharedReservations || await this.outputReservations(root, sizes);
 
     for (let index = 0; index < entries.length; index += 1) {
       if (this.scanCancelRequested) break;
@@ -1091,14 +1229,19 @@ export class ArtworkController {
       const identity = { mode: "gba", value: validateGbaCode(entry.code) };
       const outputSizes = await this.reserveOutputSizes(root, identity, sizes, true, reservations, stats);
       if (outputSizes.length) {
-        tasks.push({ label: entry.title, identity, sizes: outputSizes, source });
+        tasks.push({
+          label: entry.title,
+          identity,
+          sizes: outputSizes,
+          source,
+          transform: transform || this.libraryTransformForSystem(DEFAULT_SYSTEM),
+        });
       }
     }
     return { tasks, stats };
   }
 
   async executeArtworkTasks(root, tasks) {
-    const transform = this.currentLibraryTransform();
     const result = { completed: 0, savedImages: 0, failed: 0, cancelled: false };
     let cursor = 0;
     const worker = async () => {
@@ -1120,7 +1263,7 @@ export class ArtworkController {
             const canvas = document.createElement("canvas");
             canvas.width = ART_SIZES[size].width;
             canvas.height = ART_SIZES[size].height;
-            drawCroppedImage(canvas, source, transform);
+            drawCroppedImage(canvas, source, task.transform || this.currentLibraryTransform());
             await writeFile(root, this.outputPath(task.identity, size), canvasToGbaBmp(canvas));
             result.savedImages += 1;
           }
@@ -1165,30 +1308,43 @@ export class ArtworkController {
     }
     if (this.scanRunning) return;
 
-    const system = this.scanSystem.value;
+    const isGbaPack = this.artworkWorkflow === "gba-pack";
+    const selectedSystem = this.scanSystem.value;
+    const systems = isGbaPack
+      ? [DEFAULT_SYSTEM]
+      : selectedSystem === ALL_EMULATED_SYSTEMS
+        ? [...EMULATED_SYSTEMS]
+        : [selectedSystem];
+    if (!isGbaPack && this.scanIncludeGba.checked && !systems.includes(DEFAULT_SYSTEM)) {
+      systems.push(DEFAULT_SYSTEM);
+    }
     const provider = this.scanProvider.value;
-    const action = this.scanAction.value;
+    const action = isGbaPack ? "complete_gba" : this.scanAction.value;
     const sizes = this.scanSelectedSizes();
     if (provider === "folder" && !this.artworkFolder) {
       this.toast("Choose an artwork folder first.", "error");
       return;
     }
-    if (!(await this.confirmArtworkAction(action, system, sizes))) return;
+    const systemLabel = isGbaPack
+      ? DEFAULT_SYSTEM
+      : selectedSystem === ALL_EMULATED_SYSTEMS
+        ? this.scanIncludeGba.checked ? "all installed games" : "all installed emulated games"
+        : this.scanIncludeGba.checked ? `${selectedSystem} and GBA` : selectedSystem;
+    if (!(await this.confirmArtworkAction(action, systemLabel, sizes))) return;
 
     this.scanRunning = true;
     this.scanCancelRequested = false;
     this.refreshLibraryUi();
-    this.scanStatus.textContent = action === "complete_gba"
+    this.scanStatus.textContent = isGbaPack
       ? "Preparing the complete GBA artwork pack..."
-      : `Scanning installed ${system} games...`;
+      : `Scanning ${systemLabel}...`;
 
     try {
       let localIndex = null;
       if (provider === "folder") {
         localIndex = buildLocalArtworkIndex(this.artworkFolderFiles);
       }
-      const options = {
-        system,
+      const commonOptions = {
         provider,
         libretroFolder: this.scanSource.value,
         localIndex,
@@ -1197,9 +1353,36 @@ export class ArtworkController {
         gbaRegions: this.scanGbaRegions.value,
         gbaPriority: this.scanGbaPriority.value,
       };
-      const prepared = action === "complete_gba"
-        ? await this.createCompleteGbaTasks(root, options)
-        : await this.createInstalledTasks(root, options);
+      let prepared;
+      if (isGbaPack) {
+        prepared = await this.createCompleteGbaTasks(root, {
+          ...commonOptions,
+          transform: this.libraryTransformForSystem(DEFAULT_SYSTEM),
+        });
+      } else {
+        const installedBySystem = await this.installedGamesForSystems(root, systems);
+        const totalInstalled = [...installedBySystem.values()].reduce((total, files) => total + files.length, 0);
+        const combined = { tasks: [], stats: emptyScanStats() };
+        if (totalInstalled) {
+          const reservations = await this.outputReservations(root, sizes);
+          for (const system of systems) {
+            if (this.scanCancelRequested) break;
+            const files = installedBySystem.get(system) || [];
+            if (!files.length) continue;
+            this.scanStatus.textContent = `Matching ${system} artwork...`;
+            const result = await this.createInstalledTasks(root, {
+              ...commonOptions,
+              system,
+              files,
+              reservations,
+              transform: this.libraryTransformForSystem(system),
+            });
+            combined.tasks.push(...result.tasks);
+            mergeScanStats(combined.stats, result.stats);
+          }
+        }
+        prepared = combined;
+      }
 
       if (this.scanCancelRequested) {
         this.scanStatus.textContent = "Artwork preparation stopped.";
@@ -1207,6 +1390,7 @@ export class ArtworkController {
       }
       if (!prepared.tasks.length) {
         const details = [];
+        if (!prepared.stats.scanned) details.push("No supported games were found on the connected card.");
         if (prepared.stats.existing) details.push("All matched artwork is already present.");
         if (prepared.stats.unmatched) details.push(`${prepared.stats.unmatched} game${prepared.stats.unmatched === 1 ? "" : "s"} had no matching artwork.`);
         if (prepared.stats.limited) details.push("A CUSTOM folder has reached its 256-image limit.");
