@@ -151,7 +151,6 @@ const { installBundledStyle, installDsStyle, loadPersonalisation, savePersonalis
     clock: "12 hour",
     sounds: "Off",
     quickStart: "L",
-    launchMode: "Addon",
   });
   assert.equal(result.version, "7.2");
   assert.equal(result.personalised, true);
@@ -179,7 +178,6 @@ const { installBundledStyle, installDsStyle, loadPersonalisation, savePersonalis
   assert.match(settings, /^Clock format = 12 hour$/m);
   assert.match(settings, /^Sounds = Off$/m);
   assert.match(settings, /^Quick start hotkey = L$/m);
-  assert.match(settings, /^Last launch mode = Addon$/m);
 
   const style = await installBundledStyle(root, "omega_de", "analogue");
   assert.equal(style.label, "Analogue Style");

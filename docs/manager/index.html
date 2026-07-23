@@ -293,30 +293,6 @@
             <div class="controls-column">
               <div class="form-section workflow-first-section">
                 <h2>Choose artwork</h2>
-                <label class="field">
-                  <span>System / console</span>
-                  <select id="libretro-system">
-                    <option>Game Boy Advance</option>
-                    <option>Game Boy</option>
-                    <option>Game Boy Color</option>
-                    <option>Nintendo Entertainment System</option>
-                    <option>Master System</option>
-                    <option>Game Gear</option>
-                    <option>SG-1000</option>
-                    <option>PC Engine</option>
-                    <option>Neo Geo Pocket</option>
-                    <option>Neo Geo Pocket Color</option>
-                    <option>WonderSwan</option>
-                    <option>WonderSwan Color</option>
-                    <option>MSX</option>
-                    <option>Watara Supervision</option>
-                    <option>ZX Spectrum</option>
-                    <option>ColecoVision</option>
-                    <option>Arcadia 2001</option>
-                    <option>Super Cassette Vision</option>
-                  </select>
-                </label>
-
                 <div class="segmented" role="group" aria-label="Artwork source">
                   <button class="is-active" type="button" data-art-source="local">Upload image</button>
                   <button type="button" data-art-source="libretro">Search Libretro</button>
@@ -332,6 +308,29 @@
                 </div>
 
                 <div class="control-panel" id="libretro-art-panel" hidden>
+                  <label class="field">
+                    <span>System / console</span>
+                    <select id="libretro-system">
+                      <option>Game Boy Advance</option>
+                      <option>Game Boy</option>
+                      <option>Game Boy Color</option>
+                      <option>Nintendo Entertainment System</option>
+                      <option>Master System</option>
+                      <option>Game Gear</option>
+                      <option>SG-1000</option>
+                      <option>PC Engine</option>
+                      <option>Neo Geo Pocket</option>
+                      <option>Neo Geo Pocket Color</option>
+                      <option>WonderSwan</option>
+                      <option>WonderSwan Color</option>
+                      <option>MSX</option>
+                      <option>Watara Supervision</option>
+                      <option>ZX Spectrum</option>
+                      <option>ColecoVision</option>
+                      <option>Arcadia 2001</option>
+                      <option>Super Cassette Vision</option>
+                    </select>
+                  </label>
                   <label class="field">
                     <span>Artwork type</span>
                     <select id="libretro-source">
@@ -417,6 +416,7 @@
                       <option value="solid">Colour</option>
                       <option value="checkerboard">Checkerboard</option>
                       <option value="blur">Blurred artwork</option>
+                      <option value="blend">Blended artwork</option>
                     </select>
                   </label>
                   <label class="field fit-color-field" id="art-fill-color-field">
@@ -425,6 +425,10 @@
                       <input id="art-fill-color" data-fit-fill-color type="color" value="#000000">
                       <output data-fit-fill-color-output>#000000</output>
                     </span>
+                  </label>
+                  <label class="checkbox-field compact-checkbox fit-blend-field">
+                    <input data-fit-blend-border type="checkbox">
+                    <span><strong>Blend border</strong><small>Soften the join between the image and its background fill.</small></span>
                   </label>
                 </div>
                 <div id="art-manual-position-controls">
@@ -623,7 +627,10 @@
                     <h3>Artwork position</h3>
                     <p class="field-note" id="library-position-note">Choose one console to adjust its crop. Each console remembers its own position.</p>
                   </div>
-                  <button class="text-button" id="reset-library-position" type="button"><i data-lucide="rotate-ccw"></i> Reset</button>
+                  <div class="position-reset-actions">
+                    <button class="text-button" id="reset-library-position" type="button"><i data-lucide="rotate-ccw"></i> Reset</button>
+                    <button class="text-button" id="reset-all-library-positions" type="button" hidden><i data-lucide="rotate-ccw"></i> Reset all</button>
+                  </div>
                 </div>
                 <div id="library-position-controls">
                   <label class="checkbox-field compact-checkbox" id="library-fit-field">
@@ -637,6 +644,7 @@
                         <option value="solid">Colour</option>
                         <option value="checkerboard">Checkerboard</option>
                         <option value="blur">Blurred artwork</option>
+                        <option value="blend">Blended artwork</option>
                       </select>
                     </label>
                     <label class="field fit-color-field" id="library-fill-color-field">
@@ -645,6 +653,10 @@
                         <input id="library-fill-color" data-fit-fill-color type="color" value="#000000">
                         <output data-fit-fill-color-output>#000000</output>
                       </span>
+                    </label>
+                    <label class="checkbox-field compact-checkbox fit-blend-field">
+                      <input data-fit-blend-border type="checkbox">
+                      <span><strong>Blend border</strong><small>Soften the join between the image and its background fill.</small></span>
                     </label>
                   </div>
                   <div id="library-manual-position-controls">

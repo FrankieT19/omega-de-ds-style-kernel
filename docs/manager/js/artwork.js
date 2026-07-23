@@ -23,7 +23,8 @@ const LIBRARY_FIT_KEY = "ds-style-manager-library-fit-v1";
 const SINGLE_FIT_KEY = "ds-style-manager-single-fit-v1";
 const FIT_FILL_MODE_KEY = "ds-style-manager-fit-fill-mode-v1";
 const FIT_FILL_COLOR_KEY = "ds-style-manager-fit-fill-color-v1";
-const FIT_FILL_MODES = new Set(["solid", "checkerboard", "blur"]);
+const FIT_BLEND_BORDER_KEY = "ds-style-manager-fit-blend-border-v1";
+const FIT_FILL_MODES = new Set(["solid", "checkerboard", "blur", "blend"]);
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".bmp", ".webp"];
 const LIBRETRO_SYSTEMS = {
   "Game Boy Advance": { repo: "Nintendo_-_Game_Boy_Advance", extensions: [".gba", ".agb", ".bin", ".mb"] },
@@ -535,8 +536,10 @@ export class ArtworkController {
     this.libraryPreviewCaption = document.querySelector("#library-preview-caption");
     this.fitFillMode = this.loadFitFillMode();
     this.fitFillColor = this.loadFitFillColor();
+    this.fitBlendBorder = this.loadFitBlendBorder();
     this.fitFillModeInputs = [...document.querySelectorAll("[data-fit-fill-mode]")];
     this.fitFillColorInputs = [...document.querySelectorAll("[data-fit-fill-color]")];
+    this.fitBlendBorderInputs = [...document.querySelectorAll("[data-fit-blend-border]")];
     this.scanRunning = false;
     this.scanCancelRequested = false;
 
@@ -623,6 +626,15 @@ export class ArtworkController {
         this.renderLibraryPreview();
       });
     }
+    for (const input of this.fitBlendBorderInputs) {
+      input.addEventListener("change", () => {
+        this.fitBlendBorder = input.checked;
+        this.saveFitFillSettings();
+        this.syncFitFillControls();
+        this.render();
+        this.renderLibraryPreview();
+      });
+    }
     document.querySelector("#reset-art-position").addEventListener("click", () => {
       this.zoom.value = "100";
       this.panX.value = "0";
@@ -702,6 +714,16 @@ export class ArtworkController {
       this.refreshLibraryRangeOutputs();
       this.saveLibraryTransform();
       this.renderLibraryPreview();
+    });
+    document.querySelector("#reset-all-library-positions").addEventListener("click", () => {
+      this.libraryTransforms = {};
+      this.saveLibraryTransforms();
+      this.libraryZoom.value = "100";
+      this.libraryPanX.value = "0";
+      this.libraryPanY.value = "0";
+      this.refreshLibraryRangeOutputs();
+      this.renderLibraryPreview();
+      this.toast("All saved artwork positions were reset.", "success");
     });
     this.scanButton.addEventListener("click", () => {
       if (this.artworkWorkflow === "gba-pack") this.addMissingGbaArtwork();
@@ -870,10 +892,19 @@ export class ArtworkController {
     }
   }
 
+  loadFitBlendBorder() {
+    try {
+      return localStorage.getItem(FIT_BLEND_BORDER_KEY) === "true";
+    } catch {
+      return false;
+    }
+  }
+
   saveFitFillSettings() {
     try {
       localStorage.setItem(FIT_FILL_MODE_KEY, this.fitFillMode);
       localStorage.setItem(FIT_FILL_COLOR_KEY, this.fitFillColor);
+      localStorage.setItem(FIT_BLEND_BORDER_KEY, String(this.fitBlendBorder));
     } catch {
       // Background choices remain available even when browser storage is unavailable.
     }
@@ -882,6 +913,7 @@ export class ArtworkController {
   syncFitFillControls() {
     for (const input of this.fitFillModeInputs) input.value = this.fitFillMode;
     for (const input of this.fitFillColorInputs) input.value = this.fitFillColor;
+    for (const input of this.fitBlendBorderInputs) input.checked = this.fitBlendBorder;
     for (const output of document.querySelectorAll("[data-fit-fill-color-output]")) {
       output.value = this.fitFillColor.toLocaleUpperCase();
     }
@@ -900,6 +932,7 @@ export class ArtworkController {
     return {
       fillMode: this.fitFillMode,
       fillColor: this.fitFillColor,
+      blendBorder: this.fitBlendBorder,
     };
   }
 
@@ -1079,10 +1112,12 @@ export class ArtworkController {
 
     const manualPositionControls = document.querySelector("#library-manual-position-controls");
     const resetPosition = document.querySelector("#reset-library-position");
+    const resetAllPositions = document.querySelector("#reset-all-library-positions");
     const positionNote = document.querySelector("#library-position-note");
     const fitsWholeImage = this.libraryFit.checked;
     manualPositionControls.hidden = scansAllSystems || fitsWholeImage;
     resetPosition.hidden = scansAllSystems || fitsWholeImage;
+    resetAllPositions.hidden = !scansAllSystems || fitsWholeImage;
     this.refreshFitControls();
     if (fitsWholeImage) {
       positionNote.textContent = "Every image is centred without cropping.";

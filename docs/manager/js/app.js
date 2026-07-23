@@ -105,6 +105,11 @@ function formatBytes(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function sdCardLabel(handle) {
+  const name = String(handle?.name || "").trim();
+  return name && !/^[\\/]+$/.test(name) ? name : "Connected SD card";
+}
+
 function setSetupState(copy) {
   $("#setup-state").textContent = copy;
 }
@@ -347,7 +352,7 @@ function renderSdSummary() {
   $("#sd-wide-count").textContent = summary.wideCount.toLocaleString();
   $("#sd-square-count").textContent = summary.squareCount.toLocaleString();
   $("#sd-style-count").textContent = summary.styleCount.toLocaleString();
-  $("#sd-connection-title").textContent = state.sdRoot.name;
+  $("#sd-connection-title").textContent = sdCardLabel(state.sdRoot);
   $("#sd-connection-copy").textContent = info
     ? summary.hasDsStyle
       ? "Existing DS Style install found. Ready to update the kernel or manage artwork and styles."

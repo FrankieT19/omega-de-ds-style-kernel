@@ -1607,6 +1607,19 @@ h3 {
   margin: 0;
 }
 
+.fit-blend-field {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.position-reset-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
 .color-picker-row {
   min-height: 40px;
   display: flex;
