@@ -1581,19 +1581,66 @@ h3 {
   margin-bottom: 16px;
 }
 
+#art-manual-position-controls,
 #library-manual-position-controls {
   display: grid;
   gap: 13px;
 }
 
+.fit-background-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 0.8fr);
+  gap: 12px;
+  margin: 0 0 17px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(10, 12, 20, 0.34);
+}
+
+.fit-background-options[hidden] {
+  display: none;
+}
+
+.fit-background-options .field {
+  min-width: 0;
+  margin: 0;
+}
+
+.color-picker-row {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-picker-row input[type="color"] {
+  width: 48px;
+  height: 38px;
+  padding: 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.color-picker-row output {
+  color: var(--text-soft);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
 .library-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 9px;
   margin-top: 18px;
 }
 
 .library-actions .button {
+  flex: 1 1 160px;
   min-width: 0;
 }
 
@@ -2411,6 +2458,10 @@ input[type="range"] {
   .field-row {
     flex-direction: column;
     gap: 0;
+  }
+
+  .fit-background-options {
+    grid-template-columns: 1fr;
   }
 
   .artwork-workflow-tabs {

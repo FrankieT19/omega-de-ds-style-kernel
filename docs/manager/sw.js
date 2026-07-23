@@ -1,4 +1,4 @@
-const CACHE_NAME = "ds-style-manager-v14";
+const CACHE_NAME = "ds-style-manager-v15";
 const CORE_ASSETS = [
   "./",
   "./index.html",

@@ -33,6 +33,40 @@ function sourceDimensions(source) {
   };
 }
 
+function fillCheckerboard(context, width, height) {
+  const square = 4;
+  const colors = ["#727272", "#b8b8b8"];
+  for (let y = 0; y < height; y += square) {
+    for (let x = 0; x < width; x += square) {
+      context.fillStyle = colors[((x / square) + (y / square)) % 2];
+      context.fillRect(x, y, square, square);
+    }
+  }
+}
+
+function fitFillColor(value) {
+  return /^#[0-9a-f]{6}$/i.test(String(value || "")) ? value : "#000000";
+}
+
+function drawFitBackground(context, source, width, height, mode, color) {
+  if (mode === "checkerboard") {
+    fillCheckerboard(context, width, height);
+    return;
+  }
+
+  context.fillStyle = fitFillColor(color);
+  context.fillRect(0, 0, width, height);
+  if (mode !== "blur") return;
+
+  const padding = 6;
+  context.save();
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.filter = "blur(4px)";
+  context.drawImage(source, -padding, -padding, width + (padding * 2), height + (padding * 2));
+  context.restore();
+}
+
 export function drawCroppedImage(canvas, source, transform = {}) {
   const context = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
   const { width: sourceWidth, height: sourceHeight } = sourceDimensions(source);
@@ -42,6 +76,9 @@ export function drawCroppedImage(canvas, source, transform = {}) {
   const panX = Math.max(-1, Math.min(1, Number(transform.x || 0)));
   const panY = Math.max(-1, Math.min(1, Number(transform.y || 0)));
   const fit = Boolean(transform.fit);
+  const fillMode = ["solid", "checkerboard", "blur"].includes(transform.fillMode)
+    ? transform.fillMode
+    : "solid";
 
   context.save();
   context.fillStyle = "#000";
@@ -50,6 +87,7 @@ export function drawCroppedImage(canvas, source, transform = {}) {
     context.restore();
     return;
   }
+  if (fit) drawFitBackground(context, source, targetWidth, targetHeight, fillMode, transform.fillColor);
 
   const baseScale = fit
     ? Math.min(targetWidth / sourceWidth, targetHeight / sourceHeight)

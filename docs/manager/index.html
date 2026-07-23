@@ -406,19 +406,42 @@
 
               <div class="form-section">
                 <h2>Position</h2>
-                <label class="range-field">
-                  <span><b>Zoom</b><output id="zoom-output">100%</output></span>
-                  <input id="art-zoom" type="range" min="100" max="240" value="100" step="1">
+                <label class="checkbox-field compact-checkbox">
+                  <input id="art-fit" type="checkbox">
+                  <span><strong>Fit whole image</strong><small>Centre the complete image without cropping.</small></span>
                 </label>
-                <label class="range-field">
-                  <span><b>Horizontal</b><output id="pan-x-output">0</output></span>
-                  <input id="art-pan-x" type="range" min="-100" max="100" value="0" step="1">
-                </label>
-                <label class="range-field">
-                  <span><b>Vertical</b><output id="pan-y-output">0</output></span>
-                  <input id="art-pan-y" type="range" min="-100" max="100" value="0" step="1">
-                </label>
-                <button class="text-button" id="reset-art-position" type="button"><i data-lucide="rotate-ccw"></i> Reset position</button>
+                <div class="fit-background-options" id="art-fit-options" hidden>
+                  <label class="field">
+                    <span>Background fill</span>
+                    <select id="art-fill-mode" data-fit-fill-mode>
+                      <option value="solid">Colour</option>
+                      <option value="checkerboard">Checkerboard</option>
+                      <option value="blur">Blurred artwork</option>
+                    </select>
+                  </label>
+                  <label class="field fit-color-field" id="art-fill-color-field">
+                    <span>Background colour</span>
+                    <span class="color-picker-row">
+                      <input id="art-fill-color" data-fit-fill-color type="color" value="#000000">
+                      <output data-fit-fill-color-output>#000000</output>
+                    </span>
+                  </label>
+                </div>
+                <div id="art-manual-position-controls">
+                  <label class="range-field">
+                    <span><b>Zoom</b><output id="zoom-output">100%</output></span>
+                    <input id="art-zoom" type="range" min="100" max="240" value="100" step="1">
+                  </label>
+                  <label class="range-field">
+                    <span><b>Horizontal</b><output id="pan-x-output">0</output></span>
+                    <input id="art-pan-x" type="range" min="-100" max="100" value="0" step="1">
+                  </label>
+                  <label class="range-field">
+                    <span><b>Vertical</b><output id="pan-y-output">0</output></span>
+                    <input id="art-pan-y" type="range" min="-100" max="100" value="0" step="1">
+                  </label>
+                  <button class="text-button" id="reset-art-position" type="button"><i data-lucide="rotate-ccw"></i> Reset position</button>
+                </div>
               </div>
             </div>
 
@@ -605,8 +628,25 @@
                 <div id="library-position-controls">
                   <label class="checkbox-field compact-checkbox" id="library-fit-field">
                     <input id="library-fit" type="checkbox">
-                    <span><strong>Fit whole image</strong><small>Centre every image without cropping. Any unused space is filled with black.</small></span>
+                    <span><strong>Fit whole image</strong><small>Centre every image without cropping.</small></span>
                   </label>
+                  <div class="fit-background-options" id="library-fit-options" hidden>
+                    <label class="field">
+                      <span>Background fill</span>
+                      <select id="library-fill-mode" data-fit-fill-mode>
+                        <option value="solid">Colour</option>
+                        <option value="checkerboard">Checkerboard</option>
+                        <option value="blur">Blurred artwork</option>
+                      </select>
+                    </label>
+                    <label class="field fit-color-field" id="library-fill-color-field">
+                      <span>Background colour</span>
+                      <span class="color-picker-row">
+                        <input id="library-fill-color" data-fit-fill-color type="color" value="#000000">
+                        <output data-fit-fill-color-output>#000000</output>
+                      </span>
+                    </label>
+                  </div>
                   <div id="library-manual-position-controls">
                     <label class="range-field">
                       <span><b>Zoom</b><output id="library-zoom-output">100%</output></span>
@@ -645,8 +685,11 @@
                 <button class="button primary" id="scan-sd-artwork" type="button" disabled>
                   <i data-lucide="scan-search"></i><span>Add missing artwork</span>
                 </button>
+                <button class="button secondary" id="save-gba-pack-to-sd" type="button" hidden>
+                  <i data-lucide="save"></i><span>Save complete pack</span>
+                </button>
                 <button class="button primary" id="download-gba-pack" type="button" hidden>
-                  <i data-lucide="download"></i><span>Download GBA pack</span>
+                  <i data-lucide="download"></i><span>Download complete pack</span>
                 </button>
                 <button class="button secondary" id="cancel-sd-artwork" type="button" hidden>
                   <i data-lucide="x"></i><span>Stop</span>
