@@ -297,15 +297,6 @@
                 <span>PNG, JPG or BMP</span>
               </div>
               <input id="art-image-input" type="file" accept="image/png,image/jpeg,image/bmp,.png,.jpg,.jpeg,.bmp" hidden>
-              <!-- Kept hidden for one cache generation so the previous Manager script can upgrade cleanly. -->
-              <div hidden aria-hidden="true">
-                <button id="choose-art-image" type="button"></button>
-                <div id="web-art-panel" hidden>
-                  <input id="web-art-query" type="search">
-                  <button id="web-art-search" type="button"></button>
-                  <button id="choose-web-image" type="button"></button>
-                </div>
-              </div>
             </div>
 
             <div class="control-panel" id="libretro-art-panel" hidden>
@@ -356,10 +347,48 @@
             </div>
 
             <div class="form-section sd-library-scan">
-              <h2>Scan SD library</h2>
-              <p class="field-note">Find matching Libretro artwork for supported games already on the connected card. Results are saved as CUSTOM artwork without changing any game files.</p>
+              <div class="section-heading-row">
+                <div>
+                  <h2>Artwork for installed games</h2>
+                  <p class="field-note">Choose one console at a time. Emulated games use exact-name CUSTOM artwork; recognised GBA releases use the standard artwork folders.</p>
+                </div>
+                <span class="beta-label">SD card</span>
+              </div>
               <div class="field-row split">
                 <label class="field grow">
+                  <span>System / console</span>
+                  <select id="scan-art-system">
+                    <option>Game Boy Color</option>
+                    <option>Game Boy</option>
+                    <option>Nintendo Entertainment System</option>
+                    <option>Master System</option>
+                    <option>Game Gear</option>
+                    <option>SG-1000</option>
+                    <option>PC Engine</option>
+                    <option>Neo Geo Pocket</option>
+                    <option>Neo Geo Pocket Color</option>
+                    <option>WonderSwan</option>
+                    <option>WonderSwan Color</option>
+                    <option>MSX</option>
+                    <option>Watara Supervision</option>
+                    <option>ZX Spectrum</option>
+                    <option>ColecoVision</option>
+                    <option>Arcadia 2001</option>
+                    <option>Super Cassette Vision</option>
+                    <option>Game Boy Advance</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Artwork source</span>
+                  <select id="scan-art-provider">
+                    <option value="libretro">Libretro</option>
+                    <option value="folder">Artwork folder</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="library-source-panel" id="scan-libretro-options">
+                <label class="field">
                   <span>Artwork type</span>
                   <select id="scan-art-source">
                     <option value="Named_Boxarts">Box art</option>
@@ -367,23 +396,93 @@
                     <option value="Named_Snaps">Gameplay screenshot</option>
                   </select>
                 </label>
-                <label class="field grow">
+              </div>
+
+              <div class="library-source-panel artwork-folder-picker" id="scan-folder-options" hidden>
+                <button class="button secondary" id="choose-artwork-folder" type="button">
+                  <i data-lucide="folder-open"></i><span>Choose artwork folder</span>
+                </button>
+                <p class="field-note" id="artwork-folder-name">No artwork folder selected.</p>
+              </div>
+
+              <div class="field-row split">
+                <label class="field">
                   <span>Sizes</span>
                   <select id="scan-art-size-mode">
-                    <option value="both">Wide and square</option>
+                    <option value="both">Both sizes</option>
                     <option value="wide">Wide, 120 x 80</option>
                     <option value="square">Square, 80 x 80</option>
                   </select>
                 </label>
+                <label class="field grow">
+                  <span>Action</span>
+                  <select id="scan-art-action">
+                    <option value="missing">Add missing artwork</option>
+                    <option value="rebuild">Rebuild installed</option>
+                    <option value="complete_gba">Complete GBA pack</option>
+                  </select>
+                </label>
               </div>
-              <label class="checkbox-field">
-                <input id="scan-include-gba" type="checkbox">
-                <span><strong>Include Game Boy Advance files</strong><small>GBA artwork is normally supplied by a standard thumbnail pack.</small></span>
-              </label>
-              <button class="button primary" id="scan-sd-artwork" type="button" disabled>
-                <i data-lucide="scan-search"></i><span>Scan connected SD card</span>
-              </button>
-              <p class="field-note scan-status" id="sd-artwork-scan-status" aria-live="polite">Connect an SD card to scan its installed games.</p>
+
+              <div class="library-source-panel" id="gba-pack-options" hidden>
+                <div class="field-row split">
+                  <label class="field grow">
+                    <span>GBA pack regions</span>
+                    <select id="scan-gba-regions">
+                      <option value="all">All regions</option>
+                      <option value="usa_europe">USA and Europe</option>
+                      <option value="usa">USA</option>
+                      <option value="europe">Europe</option>
+                      <option value="japan">Japan</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>Artwork priority</span>
+                    <select id="scan-gba-priority">
+                      <option value="usa">USA first</option>
+                      <option value="europe">Europe first</option>
+                      <option value="japan">Japan first</option>
+                    </select>
+                  </label>
+                </div>
+                <p class="field-note">When releases share a header code, the preferred region supplies the artwork.</p>
+              </div>
+
+              <div class="library-position">
+                <div class="section-heading-row compact">
+                  <div>
+                    <h3>Artwork position</h3>
+                    <p class="field-note">Saved separately for each console.</p>
+                  </div>
+                  <button class="text-button" id="reset-library-position" type="button"><i data-lucide="rotate-ccw"></i> Reset</button>
+                </div>
+                <label class="range-field">
+                  <span><b>Zoom</b><output id="library-zoom-output">100%</output></span>
+                  <input id="library-zoom" type="range" min="100" max="240" value="100" step="1">
+                </label>
+                <label class="range-field">
+                  <span><b>Horizontal</b><output id="library-pan-x-output">0</output></span>
+                  <input id="library-pan-x" type="range" min="-100" max="100" value="0" step="1">
+                </label>
+                <label class="range-field">
+                  <span><b>Vertical</b><output id="library-pan-y-output">0</output></span>
+                  <input id="library-pan-y" type="range" min="-100" max="100" value="0" step="1">
+                </label>
+                <div class="library-preview-stage" aria-label="Library artwork crop preview">
+                  <canvas id="library-wide-preview" width="120" height="80"></canvas>
+                  <canvas id="library-square-preview" width="80" height="80"></canvas>
+                </div>
+              </div>
+
+              <div class="library-actions">
+                <button class="button primary" id="scan-sd-artwork" type="button" disabled>
+                  <i data-lucide="scan-search"></i><span>Add missing artwork</span>
+                </button>
+                <button class="button secondary" id="cancel-sd-artwork" type="button" hidden>
+                  <i data-lucide="x"></i><span>Stop</span>
+                </button>
+              </div>
+              <p class="field-note scan-status" id="sd-artwork-scan-status" aria-live="polite">Connect an SD card to find installed games without artwork.</p>
             </div>
 
             <div class="form-section">

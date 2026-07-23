@@ -743,6 +743,7 @@ const launcherPreview = new LauncherPreview(
 const artwork = new ArtworkController({
   getSdRoot: () => state.sdRoot,
   toast,
+  confirm: requestConfirmation,
   onSaved: scanSd,
 });
 

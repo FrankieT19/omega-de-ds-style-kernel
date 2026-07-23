@@ -5,6 +5,7 @@ import {
   getDirectory,
   listDirectory,
   listFilesRecursive,
+  pathExists,
   writeFile,
 } from "./filesystem.js";
 import {
@@ -15,6 +16,10 @@ import {
 } from "./images.js";
 
 const DEFAULT_SYSTEM = "Game Boy Advance";
+const DEFAULT_LIBRARY_SYSTEM = "Game Boy Color";
+const GBA_LIBRARY_URL = new URL("../data/gba-library.json", import.meta.url);
+const LIBRARY_TRANSFORMS_KEY = "ds-style-manager-library-transforms-v1";
+const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".bmp", ".webp"];
 const LIBRETRO_SYSTEMS = {
   "Game Boy Advance": { repo: "Nintendo_-_Game_Boy_Advance", extensions: [".gba", ".agb", ".bin", ".mb"] },
   "Game Boy": { repo: "Nintendo_-_Game_Boy", extensions: [".gb"] },
@@ -132,6 +137,146 @@ function stemOfFilename(name) {
   return dot > 0 ? trimmed.slice(0, dot) : trimmed;
 }
 
+function stemOfImage(name) {
+  return String(name || "").replace(/\.(png|jpe?g|bmp|webp)$/i, "");
+}
+
+function titleWords(value) {
+  return artworkMatchKey(value)
+    .split(" ")
+    .filter((word) => word.length > 1 && !["the", "version", "edition", "game"].includes(word));
+}
+
+function titleMatchConfidence(query, candidate) {
+  const queryKey = artworkMatchKey(query);
+  const candidateKey = artworkMatchKey(candidate);
+  if (!queryKey || !candidateKey) return 0;
+  if (queryKey === candidateKey) return 1;
+  const queryWords = titleWords(query);
+  const candidateWords = new Set(titleWords(candidate));
+  if (!queryWords.length || !candidateWords.size) return 0;
+  const matches = queryWords.filter((word) => candidateWords.has(word)).length;
+  const coverage = matches / queryWords.length;
+  const reverseCoverage = matches / candidateWords.size;
+  return (coverage * 0.72) + (reverseCoverage * 0.28);
+}
+
+function paddedSearch(value) {
+  const normalized = normalizeSearch(value);
+  return normalized ? ` ${normalized} ` : "";
+}
+
+function preferredRegionalMatch(candidates, name) {
+  const normalized = paddedSearch(name);
+  const preferredRegion = normalized.includes(" usa ")
+    ? "usa"
+    : normalized.includes(" europe ")
+      ? "europe"
+      : normalized.includes(" japan ")
+        ? "japan"
+        : "";
+  return [...candidates].sort((a, b) => {
+    const aName = paddedSearch(a.title || a.name || "");
+    const bName = paddedSearch(b.title || b.name || "");
+    const aRank = preferredRegion && aName.includes(` ${preferredRegion} `) ? 0 : aName.includes(" usa ") ? 1 : aName.includes(" europe ") ? 2 : 3;
+    const bRank = preferredRegion && bName.includes(` ${preferredRegion} `) ? 0 : bName.includes(" usa ") ? 1 : bName.includes(" europe ") ? 2 : 3;
+    return aRank - bRank || aName.localeCompare(bName);
+  })[0] || null;
+}
+
+function gbaEntryRegions(title) {
+  const value = paddedSearch(title);
+  const regions = [];
+  if (value.includes(" usa ")) regions.push("usa");
+  if (value.includes(" europe ")) regions.push("europe");
+  if (value.includes(" japan ")) regions.push("japan");
+  if (!regions.length) regions.push("other");
+  return regions;
+}
+
+function gbaRegionAllowed(title, filter) {
+  if (filter === "all") return true;
+  const regions = gbaEntryRegions(title);
+  if (filter === "usa_europe") return regions.includes("usa") || regions.includes("europe");
+  return regions.includes(filter);
+}
+
+function gbaEntryRank(entry, priority) {
+  const regions = gbaEntryRegions(entry.title);
+  const regionOrder = {
+    usa: ["usa", "europe", "japan", "other"],
+    europe: ["europe", "usa", "japan", "other"],
+    japan: ["japan", "usa", "europe", "other"],
+  }[priority] || ["usa", "europe", "japan", "other"];
+  const regionRank = Math.min(...regions.map((region) => regionOrder.indexOf(region)));
+  const preRelease = /\((beta|proto|sample|demo|kiosk|preview|debug)/i.test(entry.title) ? 1 : 0;
+  const rerelease = /\((virtual console|switch online|classic mini)/i.test(entry.title) ? 1 : 0;
+  return [preRelease, regionRank, rerelease, entry.title.length, entry.title];
+}
+
+function compareRanks(a, b) {
+  for (let index = 0; index < Math.max(a.length, b.length); index += 1) {
+    if (a[index] === b[index]) continue;
+    if (typeof a[index] === "number" && typeof b[index] === "number") return a[index] - b[index];
+    return String(a[index]).localeCompare(String(b[index]));
+  }
+  return 0;
+}
+
+function canonicalGbaEntries(entries, regionFilter, priority) {
+  const byCode = new Map();
+  for (const entry of entries) {
+    if (!gbaRegionAllowed(entry.title, regionFilter)) continue;
+    const current = byCode.get(entry.code);
+    if (!current || compareRanks(gbaEntryRank(entry, priority), gbaEntryRank(current, priority)) < 0) {
+      byCode.set(entry.code, entry);
+    }
+  }
+  return [...byCode.values()].sort((a, b) => a.title.localeCompare(b.title));
+}
+
+function buildLocalArtworkIndex(files) {
+  const exact = new Map();
+  const cleaned = new Map();
+  const primary = [];
+  const europe = [];
+  for (const file of files) {
+    const title = stemOfImage(file.name);
+    const record = { ...file, title };
+    const parts = file.path.split("/").map((part) => part.toLocaleLowerCase());
+    const collection = parts.includes("europe") ? europe : primary;
+    collection.push(record);
+    const exactKey = normalizeSearch(title);
+    const cleanedKey = artworkMatchKey(title);
+    if (!exact.has(exactKey)) exact.set(exactKey, []);
+    if (!cleaned.has(cleanedKey)) cleaned.set(cleanedKey, []);
+    exact.get(exactKey).push(record);
+    cleaned.get(cleanedKey).push(record);
+  }
+  return { exact, cleaned, primary, europe };
+}
+
+function findLocalArtwork(title, index) {
+  const exact = index.exact.get(normalizeSearch(title));
+  if (exact?.length) return preferredRegionalMatch(exact, title);
+  const cleaned = index.cleaned.get(artworkMatchKey(title));
+  if (cleaned?.length) return preferredRegionalMatch(cleaned, title);
+
+  let best = null;
+  let bestScore = 0;
+  for (const collection of [index.primary, index.europe]) {
+    for (const candidate of collection) {
+      const score = titleMatchConfidence(title, candidate.title);
+      if (score > bestScore) {
+        best = candidate;
+        bestScore = score;
+      }
+    }
+    if (bestScore >= 0.82) break;
+  }
+  return bestScore >= 0.72 ? best : null;
+}
+
 function validateCustomName(value) {
   let name = String(value || "").trim();
   if (name.toLocaleLowerCase().endsWith(".bmp")) name = name.slice(0, -4).trimEnd();
@@ -199,14 +344,21 @@ async function customFileCount(root, folder) {
 }
 
 export class ArtworkController {
-  constructor({ getSdRoot, toast, onSaved }) {
+  constructor({ getSdRoot, toast, confirm, onSaved }) {
     this.getSdRoot = getSdRoot;
     this.toast = toast;
+    this.confirm = confirm;
     this.onSaved = onSaved;
     this.source = null;
     this.sourceName = "";
     this.libretroIndexes = new Map();
     this.searchToken = 0;
+    this.gbaLibraryPromise = null;
+    this.artworkFolder = null;
+    this.artworkFolderFiles = [];
+    this.libraryPreviewSource = null;
+    this.libraryTransformSystem = DEFAULT_LIBRARY_SYSTEM;
+    this.libraryTransforms = this.loadLibraryTransforms();
 
     this.wideCanvas = document.querySelector("#wide-preview");
     this.squareCanvas = document.querySelector("#square-preview");
@@ -227,15 +379,30 @@ export class ArtworkController {
     this.libretroResults = document.querySelector("#libretro-results");
     this.libretroStatus = document.querySelector("#libretro-status");
     this.scanButton = document.querySelector("#scan-sd-artwork");
+    this.scanCancelButton = document.querySelector("#cancel-sd-artwork");
     this.scanStatus = document.querySelector("#sd-artwork-scan-status");
+    this.scanSystem = document.querySelector("#scan-art-system");
+    this.scanProvider = document.querySelector("#scan-art-provider");
     this.scanSource = document.querySelector("#scan-art-source");
     this.scanSizeMode = document.querySelector("#scan-art-size-mode");
-    this.scanIncludeGba = document.querySelector("#scan-include-gba");
+    this.scanAction = document.querySelector("#scan-art-action");
+    this.scanGbaRegions = document.querySelector("#scan-gba-regions");
+    this.scanGbaPriority = document.querySelector("#scan-gba-priority");
+    this.artworkFolderName = document.querySelector("#artwork-folder-name");
+    this.libraryZoom = document.querySelector("#library-zoom");
+    this.libraryPanX = document.querySelector("#library-pan-x");
+    this.libraryPanY = document.querySelector("#library-pan-y");
+    this.libraryWideCanvas = document.querySelector("#library-wide-preview");
+    this.librarySquareCanvas = document.querySelector("#library-square-preview");
     this.scanRunning = false;
+    this.scanCancelRequested = false;
 
     this.bind();
     this.refreshSystemMode();
+    this.loadLibraryTransform(DEFAULT_LIBRARY_SYSTEM);
+    this.refreshLibraryUi();
     this.drawEmptyPreviews();
+    this.drawEmptyLibraryPreviews();
   }
 
   bind() {
@@ -307,7 +474,42 @@ export class ArtworkController {
       this.libretroStatus.textContent = `Search the public ${this.libretroSystem.value} artwork library.`;
       if (this.libretroQuery.value.trim()) this.searchLibretro();
     });
+    this.scanSystem.addEventListener("change", () => {
+      this.saveLibraryTransform();
+      this.libraryTransformSystem = this.scanSystem.value;
+      this.loadLibraryTransform(this.scanSystem.value);
+      this.refreshLibraryUi();
+      this.refreshLibraryPreview();
+    });
+    this.scanProvider.addEventListener("change", () => {
+      this.refreshLibraryUi();
+      this.refreshLibraryPreview();
+    });
+    this.scanAction.addEventListener("change", () => this.refreshLibraryUi());
+    this.scanGbaRegions.addEventListener("change", () => this.refreshLibraryUi());
+    this.scanGbaPriority.addEventListener("change", () => this.refreshLibraryUi());
+    document.querySelector("#choose-artwork-folder").addEventListener("click", () => this.chooseArtworkFolder());
+    for (const input of [this.libraryZoom, this.libraryPanX, this.libraryPanY]) {
+      input.addEventListener("input", () => {
+        this.refreshLibraryRangeOutputs();
+        this.saveLibraryTransform();
+        this.renderLibraryPreview();
+      });
+    }
+    document.querySelector("#reset-library-position").addEventListener("click", () => {
+      this.libraryZoom.value = "100";
+      this.libraryPanX.value = "0";
+      this.libraryPanY.value = "0";
+      this.refreshLibraryRangeOutputs();
+      this.saveLibraryTransform();
+      this.renderLibraryPreview();
+    });
     this.scanButton.addEventListener("click", () => this.scanSdLibrary());
+    this.scanCancelButton.addEventListener("click", () => {
+      this.scanCancelRequested = true;
+      this.scanCancelButton.disabled = true;
+      this.scanStatus.textContent = "Stopping after the current artwork...";
+    });
     this.saveButton.addEventListener("click", () => this.saveToSd());
     this.downloadButton.addEventListener("click", () => this.download());
   }
@@ -338,6 +540,142 @@ export class ArtworkController {
     gbaOption.disabled = !isGba;
     if (!isGba && this.matchMode.value === "gba") this.matchMode.value = "custom";
     this.refreshMatchMode();
+  }
+
+  loadLibraryTransforms() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(LIBRARY_TRANSFORMS_KEY) || "{}");
+      return saved && typeof saved === "object" ? saved : {};
+    } catch {
+      return {};
+    }
+  }
+
+  saveLibraryTransforms() {
+    try {
+      localStorage.setItem(LIBRARY_TRANSFORMS_KEY, JSON.stringify(this.libraryTransforms));
+    } catch {
+      // Position memory is optional when browser storage is unavailable.
+    }
+  }
+
+  currentLibraryTransform() {
+    return {
+      zoom: Number(this.libraryZoom.value) / 100,
+      x: Number(this.libraryPanX.value) / 100,
+      y: Number(this.libraryPanY.value) / 100,
+    };
+  }
+
+  saveLibraryTransform() {
+    if (!this.libraryTransformSystem) return;
+    this.libraryTransforms[this.libraryTransformSystem] = {
+      zoom: Number(this.libraryZoom.value),
+      x: Number(this.libraryPanX.value),
+      y: Number(this.libraryPanY.value),
+    };
+    this.saveLibraryTransforms();
+  }
+
+  loadLibraryTransform(system) {
+    const transform = this.libraryTransforms[system] || { zoom: 100, x: 0, y: 0 };
+    this.libraryZoom.value = String(transform.zoom ?? 100);
+    this.libraryPanX.value = String(transform.x ?? 0);
+    this.libraryPanY.value = String(transform.y ?? 0);
+    this.refreshLibraryRangeOutputs();
+  }
+
+  refreshLibraryRangeOutputs() {
+    document.querySelector("#library-zoom-output").value = `${this.libraryZoom.value}%`;
+    document.querySelector("#library-pan-x-output").value = this.libraryPanX.value;
+    document.querySelector("#library-pan-y-output").value = this.libraryPanY.value;
+  }
+
+  drawEmptyLibraryPreviews() {
+    for (const canvas of [this.libraryWideCanvas, this.librarySquareCanvas]) {
+      const context = canvas.getContext("2d", { alpha: false });
+      context.fillStyle = "#0b0d14";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.strokeStyle = "#32374a";
+      context.lineWidth = 1;
+      for (let x = -canvas.height; x < canvas.width; x += 8) {
+        context.beginPath();
+        context.moveTo(x, 0);
+        context.lineTo(x + canvas.height, canvas.height);
+        context.stroke();
+      }
+    }
+  }
+
+  renderLibraryPreview() {
+    if (!this.libraryPreviewSource) {
+      this.drawEmptyLibraryPreviews();
+      return;
+    }
+    const transform = this.currentLibraryTransform();
+    drawCroppedImage(this.libraryWideCanvas, this.libraryPreviewSource, transform);
+    drawCroppedImage(this.librarySquareCanvas, this.libraryPreviewSource, transform);
+  }
+
+  async refreshLibraryPreview() {
+    if (this.scanProvider.value !== "folder" || !this.artworkFolderFiles?.length) {
+      this.drawEmptyLibraryPreviews();
+      return;
+    }
+    try {
+      const file = await this.artworkFolderFiles[0].handle.getFile();
+      const source = await imageSourceFromBlob(file);
+      if (this.libraryPreviewSource && typeof this.libraryPreviewSource.close === "function") {
+        this.libraryPreviewSource.close();
+      }
+      this.libraryPreviewSource = source;
+      this.renderLibraryPreview();
+    } catch {
+      this.drawEmptyLibraryPreviews();
+    }
+  }
+
+  refreshLibraryUi() {
+    const isFolder = this.scanProvider.value === "folder";
+    const isGba = this.scanSystem.value === DEFAULT_SYSTEM;
+    document.querySelector("#scan-libretro-options").hidden = isFolder;
+    document.querySelector("#scan-folder-options").hidden = !isFolder;
+
+    const completeOption = this.scanAction.querySelector('option[value="complete_gba"]');
+    completeOption.hidden = !isGba;
+    completeOption.disabled = !isGba;
+    if (!isGba && this.scanAction.value === "complete_gba") this.scanAction.value = "missing";
+    document.querySelector("#gba-pack-options").hidden = !(isGba && this.scanAction.value === "complete_gba");
+
+    const labels = {
+      missing: "Add missing artwork",
+      rebuild: "Rebuild installed artwork",
+      complete_gba: "Build complete GBA pack",
+    };
+    this.scanButton.querySelector("span").textContent = labels[this.scanAction.value] || labels.missing;
+    this.scanButton.disabled = !this.getSdRoot() || this.scanRunning || (isFolder && !this.artworkFolder);
+    this.scanCancelButton.hidden = !this.scanRunning;
+    this.scanCancelButton.disabled = !this.scanRunning || this.scanCancelRequested;
+  }
+
+  async chooseArtworkFolder() {
+    try {
+      const handle = await chooseDirectory({ id: "ds-style-artwork-folder", mode: "read" });
+      const files = await listFilesRecursive(handle, {
+        extensions: IMAGE_EXTENSIONS,
+        maxDepth: 12,
+        maxFiles: 12000,
+      });
+      if (!files.length) throw new Error("No supported images were found in that folder.");
+      this.artworkFolder = handle;
+      this.artworkFolderFiles = files;
+      this.artworkFolderName.textContent = `${handle.name} - ${files.length} image${files.length === 1 ? "" : "s"}`;
+      this.scanStatus.textContent = "Artwork folder ready. Connect an SD card and choose how it should be installed.";
+      await this.refreshLibraryPreview();
+      this.refreshLibraryUi();
+    } catch (error) {
+      if (error.name !== "AbortError") this.toast(error.message, "error");
+    }
   }
 
   drawEmptyPreviews() {
@@ -391,7 +729,7 @@ export class ArtworkController {
 
   onSdChanged() {
     this.updateButtons();
-    this.scanButton.disabled = !this.getSdRoot() || this.scanRunning;
+    this.refreshLibraryUi();
   }
 
   selectedSizes() {
@@ -533,10 +871,290 @@ export class ArtworkController {
     return names;
   }
 
+  async getGbaLibrary() {
+    if (!this.gbaLibraryPromise) {
+      this.gbaLibraryPromise = fetch(GBA_LIBRARY_URL)
+        .then((response) => {
+          if (!response.ok) throw new Error(`GBA library request failed (${response.status}).`);
+          return response.json();
+        })
+        .then((entries) => {
+          const byCode = new Map();
+          for (const entry of entries) {
+            const code = validateGbaCode(entry.code);
+            const normalized = { title: String(entry.title || "").trim(), code };
+            if (!byCode.has(code)) byCode.set(code, []);
+            byCode.get(code).push(normalized);
+          }
+          return { entries, byCode };
+        });
+    }
+    return this.gbaLibraryPromise;
+  }
+
   async existingCustomNames(root, size) {
     const directory = await getDirectory(root, `SYSTEM/${ART_SIZES[size].folder}/CUSTOM`, true);
     const entries = await listDirectory(directory, { filesOnly: true, extension: ".bmp" });
     return new Set(entries.map((entry) => entry.name.toLocaleLowerCase()));
+  }
+
+  async installedGames(root, system) {
+    const extensions = LIBRETRO_SYSTEMS[system]?.extensions || [];
+    const files = await listFilesRecursive(root, {
+      extensions,
+      maxDepth: 12,
+      maxFiles: 12000,
+      excludeDirectories: SCAN_EXCLUDED_FOLDERS,
+    });
+    return files.filter((file) => {
+      const lowerName = file.name.toLocaleLowerCase();
+      if (lowerName === "ezkernel.bin" || lowerName === "ezkernelnew.bin") return false;
+      return systemForFilename(file.name) === system;
+    });
+  }
+
+  bestOfficialGbaEntry(filename, code, library) {
+    const candidates = library.byCode.get(code) || [];
+    let best = null;
+    let bestScore = 0;
+    const title = stemOfFilename(filename);
+    for (const entry of candidates) {
+      const score = titleMatchConfidence(title, entry.title);
+      if (score > bestScore) {
+        best = entry;
+        bestScore = score;
+      }
+    }
+    return bestScore >= 0.82 ? best : null;
+  }
+
+  async describeInstalledGame(candidate, system, gbaLibrary = null) {
+    const targetName = validateCustomName(stemOfFilename(candidate.name));
+    if (system !== DEFAULT_SYSTEM) {
+      return {
+        candidate,
+        identity: { mode: "custom", value: targetName },
+        searchTitle: targetName,
+      };
+    }
+
+    const file = await candidate.handle.getFile();
+    const header = await readGbaHeader(file);
+    const official = this.bestOfficialGbaEntry(candidate.name, header.code, gbaLibrary);
+    return {
+      candidate,
+      identity: official ? { mode: "gba", value: official.code } : { mode: "custom", value: targetName },
+      searchTitle: official?.title || targetName,
+    };
+  }
+
+  async outputReservations(root, sizes) {
+    const customNames = {};
+    const customAvailable = {};
+    for (const size of sizes) {
+      customNames[size] = await this.existingCustomNames(root, size);
+      customAvailable[size] = Math.max(0, CUSTOM_LIMIT - customNames[size].size);
+    }
+    return { customNames, customAvailable, outputs: new Set() };
+  }
+
+  async reserveOutputSizes(root, identity, sizes, overwrite, reservations, stats) {
+    const outputSizes = [];
+    for (const size of sizes) {
+      const outputPath = this.outputPath(identity, size);
+      const outputKey = outputPath.toLocaleLowerCase();
+      if (reservations.outputs.has(outputKey)) continue;
+
+      const exists = overwrite ? false : await pathExists(root, outputPath, "file");
+      if (exists && !overwrite) {
+        stats.existing += 1;
+        continue;
+      }
+
+      if (identity.mode === "custom") {
+        const filename = `${identity.value}.bmp`.toLocaleLowerCase();
+        const alreadyCounted = reservations.customNames[size].has(filename);
+        if (!alreadyCounted && reservations.customAvailable[size] <= 0) {
+          stats.limited += 1;
+          continue;
+        }
+        if (!alreadyCounted) {
+          reservations.customNames[size].add(filename);
+          reservations.customAvailable[size] -= 1;
+        }
+      }
+
+      reservations.outputs.add(outputKey);
+      outputSizes.push(size);
+    }
+    return outputSizes;
+  }
+
+  async createInstalledTasks(root, options) {
+    const {
+      system,
+      provider,
+      libretroFolder,
+      localIndex,
+      sizes,
+      overwrite,
+    } = options;
+    const files = await this.installedGames(root, system);
+    const stats = { scanned: files.length, unmatched: 0, existing: 0, limited: 0, invalid: 0 };
+    const tasks = [];
+    const reservations = await this.outputReservations(root, sizes);
+    const gbaLibrary = system === DEFAULT_SYSTEM ? await this.getGbaLibrary() : null;
+    const libretroIndex = provider === "libretro" ? await this.getLibretroIndex(system, libretroFolder) : null;
+
+    for (let index = 0; index < files.length; index += 1) {
+      if (this.scanCancelRequested) break;
+      this.scanStatus.textContent = `Matching installed games... ${index + 1}/${files.length}`;
+      let game;
+      try {
+        game = await this.describeInstalledGame(files[index], system, gbaLibrary);
+      } catch {
+        stats.invalid += 1;
+        continue;
+      }
+
+      let source;
+      if (provider === "libretro") {
+        const artName = findLibretroArtworkName(game.searchTitle, libretroIndex)
+          || findLibretroArtworkName(game.identity.value, libretroIndex);
+        if (!artName) {
+          stats.unmatched += 1;
+          continue;
+        }
+        source = { kind: "url", url: libretroRawUrl(system, libretroFolder, artName) };
+      } else {
+        const art = findLocalArtwork(game.searchTitle, localIndex)
+          || findLocalArtwork(stemOfFilename(files[index].name), localIndex);
+        if (!art) {
+          stats.unmatched += 1;
+          continue;
+        }
+        source = { kind: "file", handle: art.handle };
+      }
+
+      const outputSizes = await this.reserveOutputSizes(root, game.identity, sizes, overwrite, reservations, stats);
+      if (outputSizes.length) {
+        tasks.push({
+          label: game.searchTitle,
+          identity: game.identity,
+          sizes: outputSizes,
+          source,
+        });
+      }
+    }
+    return { tasks, stats };
+  }
+
+  async createCompleteGbaTasks(root, options) {
+    const {
+      provider,
+      libretroFolder,
+      localIndex,
+      sizes,
+      gbaRegions,
+      gbaPriority,
+    } = options;
+    const library = await this.getGbaLibrary();
+    const entries = canonicalGbaEntries(library.entries, gbaRegions, gbaPriority);
+    const libretroIndex = provider === "libretro" ? await this.getLibretroIndex(DEFAULT_SYSTEM, libretroFolder) : null;
+    const tasks = [];
+    const stats = { scanned: entries.length, unmatched: 0, existing: 0, limited: 0, invalid: 0 };
+    const reservations = await this.outputReservations(root, sizes);
+
+    for (let index = 0; index < entries.length; index += 1) {
+      if (this.scanCancelRequested) break;
+      if (index % 20 === 0) {
+        this.scanStatus.textContent = `Preparing the GBA pack... ${index + 1}/${entries.length}`;
+        await new Promise((resolve) => window.setTimeout(resolve, 0));
+      }
+      const entry = entries[index];
+      let source;
+      if (provider === "libretro") {
+        const artName = findLibretroArtworkName(entry.title, libretroIndex);
+        if (!artName) {
+          stats.unmatched += 1;
+          continue;
+        }
+        source = { kind: "url", url: libretroRawUrl(DEFAULT_SYSTEM, libretroFolder, artName) };
+      } else {
+        const art = findLocalArtwork(entry.title, localIndex);
+        if (!art) {
+          stats.unmatched += 1;
+          continue;
+        }
+        source = { kind: "file", handle: art.handle };
+      }
+      const identity = { mode: "gba", value: validateGbaCode(entry.code) };
+      const outputSizes = await this.reserveOutputSizes(root, identity, sizes, true, reservations, stats);
+      if (outputSizes.length) {
+        tasks.push({ label: entry.title, identity, sizes: outputSizes, source });
+      }
+    }
+    return { tasks, stats };
+  }
+
+  async executeArtworkTasks(root, tasks) {
+    const transform = this.currentLibraryTransform();
+    const result = { completed: 0, savedImages: 0, failed: 0, cancelled: false };
+    let cursor = 0;
+    const worker = async () => {
+      while (cursor < tasks.length && !this.scanCancelRequested) {
+        const task = tasks[cursor];
+        cursor += 1;
+        let source = null;
+        try {
+          let blob;
+          if (task.source.kind === "file") {
+            blob = await task.source.handle.getFile();
+          } else {
+            const response = await fetch(task.source.url);
+            if (!response.ok) throw new Error(`Artwork request failed (${response.status}).`);
+            blob = await response.blob();
+          }
+          source = await imageSourceFromBlob(blob);
+          for (const size of task.sizes) {
+            const canvas = document.createElement("canvas");
+            canvas.width = ART_SIZES[size].width;
+            canvas.height = ART_SIZES[size].height;
+            drawCroppedImage(canvas, source, transform);
+            await writeFile(root, this.outputPath(task.identity, size), canvasToGbaBmp(canvas));
+            result.savedImages += 1;
+          }
+        } catch {
+          result.failed += 1;
+        } finally {
+          if (source && typeof source.close === "function") source.close();
+        }
+        result.completed += 1;
+        this.scanStatus.textContent = `Adding artwork... ${result.completed}/${tasks.length}`;
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(4, tasks.length) }, () => worker()));
+    result.cancelled = this.scanCancelRequested;
+    return result;
+  }
+
+  async confirmArtworkAction(action, system, sizes) {
+    if (action === "missing") return true;
+    const sizeLabel = sizes.length === 2 ? "wide and square" : sizes[0];
+    if (action === "complete_gba") {
+      return this.confirm(
+        "Build the complete GBA pack?",
+        `This will replace existing ${sizeLabel} GBA artwork wherever a match is found. The complete pack can take some time to prepare.`,
+        "Build full pack",
+        { danger: true },
+      );
+    }
+    return this.confirm(
+      `Rebuild ${system} artwork?`,
+      `This will replace existing ${sizeLabel} artwork for the installed ${system} games that can be matched.`,
+      "Rebuild artwork",
+      { danger: true },
+    );
   }
 
   async scanSdLibrary() {
@@ -547,147 +1165,73 @@ export class ArtworkController {
     }
     if (this.scanRunning) return;
 
-    this.scanRunning = true;
-    this.scanButton.disabled = true;
-    this.scanStatus.textContent = "Scanning the connected SD card...";
-    const folder = this.scanSource.value;
+    const system = this.scanSystem.value;
+    const provider = this.scanProvider.value;
+    const action = this.scanAction.value;
     const sizes = this.scanSelectedSizes();
-    const includeGba = this.scanIncludeGba.checked;
+    if (provider === "folder" && !this.artworkFolder) {
+      this.toast("Choose an artwork folder first.", "error");
+      return;
+    }
+    if (!(await this.confirmArtworkAction(action, system, sizes))) return;
+
+    this.scanRunning = true;
+    this.scanCancelRequested = false;
+    this.refreshLibraryUi();
+    this.scanStatus.textContent = action === "complete_gba"
+      ? "Preparing the complete GBA artwork pack..."
+      : `Scanning installed ${system} games...`;
 
     try {
-      const files = await listFilesRecursive(root, {
-        extensions: [...SYSTEM_BY_EXTENSION.keys()],
-        maxDepth: 12,
-        maxFiles: 12000,
-        excludeDirectories: SCAN_EXCLUDED_FOLDERS,
-      });
-      const candidates = [];
-      const seenNames = new Set();
-      let invalidNames = 0;
-      for (const file of files) {
-        if (["ezkernel.bin", "ezkernelnew.bin"].includes(file.name.toLocaleLowerCase())) continue;
-        const system = systemForFilename(file.name);
-        if (!system || (!includeGba && system === DEFAULT_SYSTEM)) continue;
-        let targetName;
-        try {
-          targetName = validateCustomName(stemOfFilename(file.name));
-        } catch {
-          invalidNames += 1;
-          continue;
-        }
-        const key = targetName.toLocaleLowerCase();
-        if (seenNames.has(key)) continue;
-        seenNames.add(key);
-        candidates.push({ ...file, system, targetName });
+      let localIndex = null;
+      if (provider === "folder") {
+        localIndex = buildLocalArtworkIndex(this.artworkFolderFiles);
       }
-
-      if (!candidates.length) {
-        this.scanStatus.textContent = includeGba
-          ? "No supported game files were found."
-          : "No supported non-GBA game files were found.";
-        return;
-      }
-
-      const existingBySize = {};
-      const availableBySize = {};
-      for (const size of sizes) {
-        existingBySize[size] = await this.existingCustomNames(root, size);
-        availableBySize[size] = Math.max(0, CUSTOM_LIMIT - existingBySize[size].size);
-      }
-
-      const indexes = new Map();
-      const systems = [...new Set(candidates.map((candidate) => candidate.system))];
-      for (let index = 0; index < systems.length; index += 1) {
-        const system = systems[index];
-        this.scanStatus.textContent = `Loading ${system} artwork... ${index + 1}/${systems.length}`;
-        indexes.set(system, await this.getLibretroIndex(system, folder));
-      }
-
-      const tasks = [];
-      let unmatched = 0;
-      let existing = 0;
-      let limited = 0;
-      for (const candidate of candidates) {
-        const artName = findLibretroArtworkName(candidate.targetName, indexes.get(candidate.system) || []);
-        if (!artName) {
-          unmatched += 1;
-          continue;
-        }
-        const outputName = `${candidate.targetName}.bmp`.toLocaleLowerCase();
-        const neededSizes = [];
-        for (const size of sizes) {
-          if (existingBySize[size].has(outputName)) {
-            existing += 1;
-            continue;
-          }
-          if (availableBySize[size] <= 0) {
-            limited += 1;
-            continue;
-          }
-          availableBySize[size] -= 1;
-          existingBySize[size].add(outputName);
-          neededSizes.push(size);
-        }
-        if (neededSizes.length) tasks.push({ ...candidate, artName, sizes: neededSizes });
-      }
-
-      if (!tasks.length) {
-        const note = unmatched ? `${unmatched} files had no Libretro match.` : "All matched artwork is already present.";
-        this.scanStatus.textContent = note;
-        return;
-      }
-
-      let cursor = 0;
-      let completed = 0;
-      let savedImages = 0;
-      let failed = 0;
-      const worker = async () => {
-        while (cursor < tasks.length) {
-          const task = tasks[cursor];
-          cursor += 1;
-          try {
-            const response = await fetch(libretroRawUrl(task.system, folder, task.artName));
-            if (!response.ok) throw new Error(`Artwork request failed (${response.status}).`);
-            const source = await imageSourceFromBlob(await response.blob());
-            try {
-              for (const size of task.sizes) {
-                const canvas = document.createElement("canvas");
-                canvas.width = ART_SIZES[size].width;
-                canvas.height = ART_SIZES[size].height;
-                drawCroppedImage(canvas, source, { zoom: 1, x: 0, y: 0 });
-                await writeFile(
-                  root,
-                  `SYSTEM/${ART_SIZES[size].folder}/CUSTOM/${task.targetName}.bmp`,
-                  canvasToGbaBmp(canvas),
-                );
-                savedImages += 1;
-              }
-            } finally {
-              if (typeof source.close === "function") source.close();
-            }
-          } catch {
-            failed += 1;
-          }
-          completed += 1;
-          this.scanStatus.textContent = `Adding artwork... ${completed}/${tasks.length}`;
-        }
+      const options = {
+        system,
+        provider,
+        libretroFolder: this.scanSource.value,
+        localIndex,
+        sizes,
+        overwrite: action === "rebuild",
+        gbaRegions: this.scanGbaRegions.value,
+        gbaPriority: this.scanGbaPriority.value,
       };
-      await Promise.all(Array.from({ length: Math.min(4, tasks.length) }, () => worker()));
+      const prepared = action === "complete_gba"
+        ? await this.createCompleteGbaTasks(root, options)
+        : await this.createInstalledTasks(root, options);
 
-      const details = [`Added ${savedImages} image${savedImages === 1 ? "" : "s"} for ${tasks.length - failed} file${tasks.length - failed === 1 ? "" : "s"}.`];
-      if (unmatched) details.push(`${unmatched} had no Libretro match.`);
-      if (existing) details.push(`${existing} existing image${existing === 1 ? " was" : "s were"} kept.`);
-      if (limited) details.push(`${limited} could not be added because a CUSTOM folder reached 256 images.`);
-      if (invalidNames) details.push(`${invalidNames} unsupported filename${invalidNames === 1 ? " was" : "s were"} skipped.`);
-      if (failed) details.push(`${failed} download${failed === 1 ? "" : "s"} failed.`);
+      if (this.scanCancelRequested) {
+        this.scanStatus.textContent = "Artwork preparation stopped.";
+        return;
+      }
+      if (!prepared.tasks.length) {
+        const details = [];
+        if (prepared.stats.existing) details.push("All matched artwork is already present.");
+        if (prepared.stats.unmatched) details.push(`${prepared.stats.unmatched} game${prepared.stats.unmatched === 1 ? "" : "s"} had no matching artwork.`);
+        if (prepared.stats.limited) details.push("A CUSTOM folder has reached its 256-image limit.");
+        this.scanStatus.textContent = details.join(" ") || "No matching games or artwork were found.";
+        return;
+      }
+
+      const result = await this.executeArtworkTasks(root, prepared.tasks);
+      const details = [];
+      if (result.cancelled) details.push("Stopped early.");
+      details.push(`Added ${result.savedImages} image${result.savedImages === 1 ? "" : "s"} for ${result.completed - result.failed} game${result.completed - result.failed === 1 ? "" : "s"}.`);
+      if (prepared.stats.existing) details.push(`${prepared.stats.existing} existing image${prepared.stats.existing === 1 ? " was" : "s were"} kept.`);
+      if (prepared.stats.unmatched) details.push(`${prepared.stats.unmatched} had no artwork match.`);
+      if (prepared.stats.limited) details.push(`${prepared.stats.limited} could not be added because a CUSTOM folder reached 256 images.`);
+      if (prepared.stats.invalid) details.push(`${prepared.stats.invalid} game file${prepared.stats.invalid === 1 ? " was" : "s were"} skipped.`);
+      if (result.failed) details.push(`${result.failed} item${result.failed === 1 ? "" : "s"} could not be written.`);
       this.scanStatus.textContent = details.join(" ");
-      this.toast(`SD scan complete. ${details[0]}`, failed ? "error" : "success");
-      if (savedImages && this.onSaved) await this.onSaved();
+      this.toast(details[0] === "Stopped early." ? details[1] : details[0], result.failed ? "error" : "success");
+      if (result.savedImages && this.onSaved) await this.onSaved();
     } catch (error) {
       this.scanStatus.textContent = error.message;
       this.toast(error.message, "error");
     } finally {
       this.scanRunning = false;
+      this.scanCancelRequested = false;
       this.onSdChanged();
     }
   }

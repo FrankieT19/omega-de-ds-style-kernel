@@ -1210,6 +1210,51 @@ h3 {
   font-size: 15px;
 }
 
+.section-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.section-heading-row > div {
+  min-width: 0;
+}
+
+.section-heading-row h2,
+.section-heading-row h3 {
+  margin: 0;
+}
+
+.section-heading-row h3 {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.section-heading-row .field-note {
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+.section-heading-row.compact {
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.beta-label {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  border: 1px solid rgba(167, 128, 224, 0.44);
+  border-radius: 4px;
+  background: var(--purple-wash);
+  color: var(--purple-bright);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
 .field-row {
   display: flex;
   gap: 14px;
@@ -1272,6 +1317,75 @@ h3 {
 
 .scan-status {
   margin-top: 10px;
+}
+
+.library-source-panel {
+  margin: 2px 0 15px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(10, 12, 20, 0.34);
+}
+
+.library-source-panel > .field:last-child,
+.library-source-panel > .field-row:last-child > .field {
+  margin-bottom: 0;
+}
+
+.artwork-folder-picker {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.artwork-folder-picker .field-note {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.library-position {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.library-preview-stage {
+  min-height: 126px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 15px;
+  padding: 16px;
+  border: 1px solid #222738;
+  border-radius: 6px;
+  background: #090b13;
+}
+
+.library-preview-stage canvas {
+  display: block;
+  width: auto;
+  height: 96px;
+  border: 1px solid var(--line-strong);
+  background: #05060a;
+  image-rendering: pixelated;
+}
+
+#library-square-preview {
+  height: 96px;
+}
+
+.library-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.library-actions .button {
+  min-width: 0;
 }
 
 input[type="text"],
@@ -2036,6 +2150,34 @@ input[type="range"] {
   .field-row {
     flex-direction: column;
     gap: 0;
+  }
+
+  .section-heading-row {
+    gap: 10px;
+  }
+
+  .artwork-folder-picker,
+  .library-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .artwork-folder-picker .button,
+  .library-actions .button {
+    width: 100%;
+  }
+
+  .artwork-folder-picker .field-note {
+    white-space: normal;
+  }
+
+  .library-preview-stage {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .library-preview-stage canvas {
+    max-width: 100%;
   }
 
   .preview-column {
