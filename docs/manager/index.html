@@ -190,6 +190,7 @@
                     <span class="toggle-copy"><strong>Hide system files</strong><small>Keep support files out of the root browser.</small></span>
                     <input id="setup-hide-system" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span>
                   </label>
+                  <label class="setup-field"><span>Quick start button</span><select id="setup-quick-start"><option>Start</option><option>Select</option><option>L</option><option>A</option><option>B</option></select></label>
                 </div>
               </details>
 
@@ -205,12 +206,6 @@
                 </div>
               </details>
 
-              <details class="settings-group">
-                <summary><span><i data-lucide="gamepad-2"></i> Game launching</span><i data-lucide="chevron-down"></i></summary>
-                <div class="setup-grid">
-                  <label class="setup-field"><span>Quick start button</span><select id="setup-quick-start"><option>Start</option><option>Select</option><option>L</option><option>A</option><option>B</option></select></label>
-                </div>
-              </details>
             </div>
 
             <aside class="launcher-preview-panel" aria-labelledby="launcher-preview-title">
@@ -284,7 +279,7 @@
 
         <div class="artwork-workflow-tabs tabs" role="tablist" aria-label="Artwork task">
           <button class="is-active" type="button" role="tab" data-art-workflow="single" aria-selected="true">Single artwork</button>
-          <button type="button" role="tab" data-art-workflow="custom-pack" aria-selected="false">Custom pack</button>
+          <button type="button" role="tab" data-art-workflow="custom-pack" aria-selected="false">Emulated pack</button>
           <button type="button" role="tab" data-art-workflow="gba-pack" aria-selected="false">GBA pack</button>
         </div>
 
@@ -372,7 +367,6 @@
                   <label class="field grow">
                     <span>Output size</span>
                     <select id="art-size-mode">
-                      <option value="both">Wide and square</option>
                       <option value="wide">Wide, 120 x 80</option>
                       <option value="square">Square, 80 x 80</option>
                     </select>
@@ -438,12 +432,12 @@
               </div>
 
               <div class="preview-stage">
-                <div class="preview-item">
+                <div class="preview-item" data-single-preview-size="wide">
                   <span>Wide</span>
                   <canvas id="wide-preview" width="120" height="80" aria-label="120 by 80 artwork preview"></canvas>
                   <small>120 x 80</small>
                 </div>
-                <div class="preview-item">
+                <div class="preview-item" data-single-preview-size="square" hidden>
                   <span>Square</span>
                   <canvas id="square-preview" width="80" height="80" aria-label="80 by 80 artwork preview"></canvas>
                   <small>80 x 80</small>
@@ -466,7 +460,7 @@
         <section class="artwork-workflow-panel" data-art-workflow-panel="pack" hidden>
           <div class="workflow-intro">
             <span class="workflow-symbol"><i data-lucide="images"></i></span>
-            <div><h2 id="pack-workflow-title">Build a custom pack</h2><p id="pack-workflow-copy">Scan installed emulated games and add matching artwork to the connected SD card.</p></div>
+            <div><h2 id="pack-workflow-title">Build an emulated artwork pack</h2><p id="pack-workflow-copy">Scan installed emulated games and add matching artwork to the connected SD card.</p></div>
           </div>
 
           <div class="artwork-layout artwork-pack-layout">
@@ -498,10 +492,6 @@
                     <option>Arcadia 2001</option>
                     <option>Super Cassette Vision</option>
                   </select>
-                </label>
-                <label class="checkbox-field" id="scan-include-gba-field">
-                  <input id="scan-include-gba" type="checkbox">
-                  <span><strong>Also add missing GBA artwork</strong><small>Recognised releases use the standard artwork folders; homebrew and unmatched games use CUSTOM.</small></span>
                 </label>
               </div>
 
@@ -540,7 +530,6 @@
                   <label class="field">
                     <span>Output size</span>
                     <select id="scan-art-size-mode">
-                      <option value="both">Wide and square</option>
                       <option value="wide">Wide, 120 x 80</option>
                       <option value="square">Square, 80 x 80</option>
                     </select>
@@ -601,7 +590,7 @@
 
             <div class="preview-column pack-preview-column">
               <div class="preview-heading">
-                <div><span class="section-kicker">Pack setup</span><strong id="pack-preview-title">Custom artwork pack</strong></div>
+                <div><span class="section-kicker">Pack setup</span><strong id="pack-preview-title">Emulated artwork pack</strong></div>
                 <span class="format-label">GBA-ready BMP</span>
               </div>
 
@@ -614,21 +603,36 @@
                   <button class="text-button" id="reset-library-position" type="button"><i data-lucide="rotate-ccw"></i> Reset</button>
                 </div>
                 <div id="library-position-controls">
-                  <label class="range-field">
-                    <span><b>Zoom</b><output id="library-zoom-output">100%</output></span>
-                    <input id="library-zoom" type="range" min="100" max="240" value="100" step="1">
+                  <label class="checkbox-field compact-checkbox" id="library-fit-field">
+                    <input id="library-fit" type="checkbox">
+                    <span><strong>Fit whole image</strong><small>Centre every image without cropping. Any unused space is filled with black.</small></span>
                   </label>
-                  <label class="range-field">
-                    <span><b>Horizontal</b><output id="library-pan-x-output">0</output></span>
-                    <input id="library-pan-x" type="range" min="-100" max="100" value="0" step="1">
-                  </label>
-                  <label class="range-field">
-                    <span><b>Vertical</b><output id="library-pan-y-output">0</output></span>
-                    <input id="library-pan-y" type="range" min="-100" max="100" value="0" step="1">
-                  </label>
+                  <div id="library-manual-position-controls">
+                    <label class="range-field">
+                      <span><b>Zoom</b><output id="library-zoom-output">100%</output></span>
+                      <input id="library-zoom" type="range" min="100" max="240" value="100" step="1">
+                    </label>
+                    <label class="range-field">
+                      <span><b>Horizontal</b><output id="library-pan-x-output">0</output></span>
+                      <input id="library-pan-x" type="range" min="-100" max="100" value="0" step="1">
+                    </label>
+                    <label class="range-field">
+                      <span><b>Vertical</b><output id="library-pan-y-output">0</output></span>
+                      <input id="library-pan-y" type="range" min="-100" max="100" value="0" step="1">
+                    </label>
+                  </div>
                   <div class="library-preview-stage" aria-label="Pack artwork crop preview">
-                    <canvas id="library-wide-preview" width="120" height="80"></canvas>
-                    <canvas id="library-square-preview" width="80" height="80"></canvas>
+                    <div class="library-preview-item" data-library-preview-size="wide">
+                      <span>Wide</span>
+                      <canvas id="library-wide-preview" width="120" height="80"></canvas>
+                      <small>120 x 80</small>
+                    </div>
+                    <div class="library-preview-item" data-library-preview-size="square" hidden>
+                      <span>Square</span>
+                      <canvas id="library-square-preview" width="80" height="80"></canvas>
+                      <small>80 x 80</small>
+                    </div>
+                    <p class="library-preview-caption" id="library-preview-caption">Loading preview artwork...</p>
                   </div>
                 </div>
               </div>

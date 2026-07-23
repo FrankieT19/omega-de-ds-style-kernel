@@ -41,6 +41,7 @@ export function drawCroppedImage(canvas, source, transform = {}) {
   const zoom = Math.max(1, Number(transform.zoom || 1));
   const panX = Math.max(-1, Math.min(1, Number(transform.x || 0)));
   const panY = Math.max(-1, Math.min(1, Number(transform.y || 0)));
+  const fit = Boolean(transform.fit);
 
   context.save();
   context.fillStyle = "#000";
@@ -50,14 +51,20 @@ export function drawCroppedImage(canvas, source, transform = {}) {
     return;
   }
 
-  const baseScale = Math.max(targetWidth / sourceWidth, targetHeight / sourceHeight);
-  const scale = baseScale * zoom;
+  const baseScale = fit
+    ? Math.min(targetWidth / sourceWidth, targetHeight / sourceHeight)
+    : Math.max(targetWidth / sourceWidth, targetHeight / sourceHeight);
+  const scale = baseScale * (fit ? 1 : zoom);
   const drawWidth = sourceWidth * scale;
   const drawHeight = sourceHeight * scale;
-  const availableX = Math.max(0, drawWidth - targetWidth);
-  const availableY = Math.max(0, drawHeight - targetHeight);
-  const drawX = -availableX * ((panX + 1) / 2);
-  const drawY = -availableY * ((panY + 1) / 2);
+  const availableX = drawWidth - targetWidth;
+  const availableY = drawHeight - targetHeight;
+  const drawX = fit
+    ? (targetWidth - drawWidth) / 2
+    : -Math.max(0, availableX) * ((panX + 1) / 2);
+  const drawY = fit
+    ? (targetHeight - drawHeight) / 2
+    : -Math.max(0, availableY) * ((panY + 1) / 2);
 
   context.imageSmoothingEnabled = true;
   context.imageSmoothingQuality = "high";

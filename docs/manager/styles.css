@@ -1525,29 +1525,65 @@ h3 {
 }
 
 .library-preview-stage {
-  min-height: 126px;
-  display: flex;
+  min-height: 270px;
+  display: grid;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 12px;
   margin-top: 15px;
-  padding: 16px;
+  padding: 22px;
   border: 1px solid #222738;
   border-radius: 6px;
   background: #090b13;
 }
 
+.library-preview-item {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+}
+
+.library-preview-item > span {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.library-preview-item > small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
 .library-preview-stage canvas {
   display: block;
   width: auto;
-  height: 96px;
+  height: 180px;
+  max-width: 100%;
   border: 1px solid var(--line-strong);
   background: #05060a;
   image-rendering: pixelated;
 }
 
 #library-square-preview {
-  height: 96px;
+  height: 180px;
+}
+
+.library-preview-caption {
+  max-width: 360px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.compact-checkbox {
+  margin-bottom: 16px;
+}
+
+#library-manual-position-controls {
+  display: grid;
+  gap: 13px;
 }
 
 .library-actions {
@@ -1822,7 +1858,7 @@ input[type="range"] {
 .style-card {
   min-width: 0;
   display: grid;
-  grid-template-rows: 150px minmax(112px, auto) auto;
+  grid-template-rows: auto minmax(112px, auto) auto;
   gap: 0;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1832,7 +1868,8 @@ input[type="range"] {
 
 .style-card > img {
   width: 100%;
-  height: 150px;
+  height: auto;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   object-position: center 26%;
   border-bottom: 1px solid var(--line);
@@ -2306,11 +2343,11 @@ input[type="range"] {
   }
 
   .style-card {
-    grid-template-rows: 180px auto auto;
+    grid-template-rows: auto auto auto;
   }
 
   .style-card > img {
-    height: 180px;
+    height: auto;
   }
 
   .installed-styles-heading {
@@ -2411,12 +2448,24 @@ input[type="range"] {
   }
 
   .library-preview-stage {
-    flex-wrap: wrap;
+    min-height: 0;
     gap: 16px;
+    padding: 18px;
   }
 
   .library-preview-stage canvas {
+    width: auto;
+    height: auto;
     max-width: 100%;
+  }
+
+  #library-wide-preview {
+    width: min(360px, 100%);
+  }
+
+  #library-square-preview {
+    width: min(280px, 100%);
+    height: auto;
   }
 
   .preview-column {
