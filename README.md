@@ -12,7 +12,7 @@ Read the complete [DS Style User Guide](https://frankiet19.github.io/omega-de-ds
 ## Web
 
 - [DS Style homepage](https://frankiet19.github.io/omega-de-ds-style-kernel/project/)
-- [DS Style Manager (Beta)](https://frankiet19.github.io/omega-de-ds-style-kernel/manager/) - guided installation, starting preferences, artwork and style tools
+- [DS Style Manager](https://frankiet19.github.io/omega-de-ds-style-kernel/manager/) - guided installation, starting preferences, artwork and style tools
 
 ## Features
 

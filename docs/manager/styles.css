@@ -148,21 +148,6 @@ svg {
   line-height: 1.15;
 }
 
-.beta-tag {
-  display: inline-flex;
-  align-items: center;
-  min-height: 19px;
-  padding: 0 6px;
-  border: 1px solid rgba(169, 139, 226, 0.55);
-  border-radius: 3px;
-  background: var(--purple-wash);
-  color: var(--purple-bright);
-  font-size: 9px;
-  font-weight: 800;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
 .brand-copy small {
   color: var(--muted);
   font-size: 12px;
