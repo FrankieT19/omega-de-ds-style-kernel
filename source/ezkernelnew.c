@@ -3435,6 +3435,40 @@ static char *Launcher_NorMenuText(u32 line)
 	}
 }
 //---------------------------------------------------------------------------------
+#define ROM_MENU_SAVE_TYPE_LABEL_GLYPHS 10
+
+static const char *Launcher_RomMenuSaveTypeValue(u32 save_num)
+{
+	switch(save_num)
+	{
+	case 1: return ": SRAM 32kb";
+	case 2: return ": EEPROM 8kb";
+	case 3: return ": EEPROM 512b";
+	case 4: return ": Flash 64kb";
+	case 5: return ": Flash 128kb";
+	default: return ": Auto Detect";
+	}
+}
+
+static void Launcher_RedrawRomMenuSaveTypeValue(u32 save_num)
+{
+	const u32 popup_x = 36;
+	const u32 popup_y = 25;
+	const u32 popup_w = 168;
+	const u32 value_x = 112;
+	const u32 value_y = 30 + 4 * 14;
+	const u32 value_w = 86;
+	const u32 value_h = 13;
+	const u32 src_x = value_x - popup_x;
+	const u32 src_y = value_y - popup_y;
+
+	Launcher_DrawPicClipStride(((u16*)gImage_MENU) + src_y * popup_w + src_x,
+		popup_w, value_x, value_y, value_w, value_h);
+	Clear(value_x, value_y, value_w, value_h, gl_color_selectBG_sd, 1);
+	DrawHZText12((char*)Launcher_RomMenuSaveTypeValue(save_num), 32,
+		60+54, value_y, LAUNCHER_SELECTED_TEXT, 1);
+}
+
 static void Show_MENU_Row(u32 line, u32 menu_select, PAGE_NUM page, u32 havecht, u32 Save_num)
 {
 	u32 y_offset= 30;
@@ -3484,33 +3518,14 @@ static void Show_MENU_Row(u32 line, u32 menu_select, PAGE_NUM page, u32 havecht,
 			DrawHZText12(msg, 32, 47, row_y, name_color,1);
 		}
 		else{
-			DrawHZText12(Launcher_RomMenuText(line), 32, 47, row_y, name_color,1);
+			DrawHZText12(Launcher_RomMenuText(line),
+				(line == 4) ? ROM_MENU_SAVE_TYPE_LABEL_GLYPHS : 32,
+				47, row_y, name_color,1);
 
-			if(line == 4)//save tpye
+			if(line == 4)//save type
 			{
-				switch(Save_num)
-				{
-				case 1:
-					sprintf(msg, "%s", ": SRAM 32kb");//0x11
-					break;
-				case 2:
-					sprintf(msg, "%s", ": EEPROM 8kb");//0x22
-					break;
-				case 3:
-					sprintf(msg, "%s", ": EEPROM 512b");//0x23
-					break;
-				case 4:
-					sprintf(msg, "%s", ": Flash 64kb");//0x32
-					break;
-				case 5:
-					sprintf(msg, "%s", ": Flash 128kb");//0x31
-					break;
-				case 0:
-				default:
-					sprintf(msg, "%s", ": Auto Detect");
-					break;
-				}
-				DrawHZText12(msg, 32, 60+54, row_y, name_color,1);
+				DrawHZText12((char*)Launcher_RomMenuSaveTypeValue(Save_num),
+					32, 60+54, row_y, name_color,1);
 			}
 		}
 	}
@@ -4140,7 +4155,10 @@ void Launcher_DrawCheatCounter(u32 totalcount, u32 select)
 	sprintf(msg, "%lu/%lu", select, totalcount);
 	len = strlen(msg);
 	launcher_cheat_counter_x = 184 + ((len < 9) ? (51 - len * 6) : 0);
-	clear_x = launcher_cheat_counter_x;
+	/* Clear from the next whole title-glyph boundary. If the counter grows
+	   leftwards, this removes the complete final title glyph rather than
+	   leaving its left half beside the new counter. */
+	clear_x = 3 + Launcher_CheatTitleMaxChars() * 6;
 	if(launcher_cheat_counter_valid && (launcher_cheat_counter_last_x < clear_x))
 		clear_x = launcher_cheat_counter_last_x;
 	Launcher_ClearWithThemeBG(bg, clear_x, 3, 240 - clear_x, 13);
@@ -8550,11 +8568,45 @@ u32 SD_list_L_START(u32 show_offset,u32 file_select,u32 folder_total)
 
 static void Launcher_CycleViewModeAndRedraw(u32 page_num, u32 show_offset, u32 file_select, u32 *updata)
 {
+	u32 old_view = Launcher_ActiveViewMode();
+	u32 new_view;
+
 	UIAudio_PlaySfx(UI_SFX_MENU);
 	Launcher_ViewModeCycle(1);
 	Launcher_SaveUnifiedSettings();
 	launcher_active_page = page_num;
 	Launcher_UpdateEffectiveViewMode();
+	new_view = Launcher_ActiveViewMode();
+
+	if(old_view == LAUNCHER_VIEW_LIST && new_view == LAUNCHER_VIEW_LIST_ART &&
+	((page_num == SD_list) || (page_num == NOR_list)))
+	{
+		u32 absolute_index = show_offset + file_select;
+		u32 selected_has_art = 0;
+		int x, y, w, h;
+
+		Launcher_ActivateThumbnailWorkspace(LAUNCHER_VIEW_LIST_ART);
+		if(absolute_index < Launcher_GetTotalEntries())
+		{
+			Launcher_GetListArtRect(&x, &y, &w, &h);
+			if(Launcher_LoadListArtScaledSlot(absolute_index, w, h) >= 0)
+				selected_has_art = Launcher_GetListArtCachedState(absolute_index,
+					&x, &y, &w, &h, 0) > 0;
+		}
+
+		Launcher_ListArtPrepareSpanCache();
+		Launcher_BuildAllCachedListRows(show_offset, file_select, selected_has_art);
+		Launcher_BuildSelectedListRowScratch(show_offset, file_select, selected_has_art);
+		launcher_list_art_screen_has_art = (u8)selected_has_art;
+		if(selected_has_art)
+			Launcher_DrawCurrentListArtImageOnly();
+
+		launcher_force_full_redraw = 0;
+		if(updata)
+			*updata = 0;
+		return;
+	}
+
 	if(page_num == SD_list)
 	{
 		Launcher_DrawThemeBGFull(Launcher_GetBGImage());
@@ -15617,10 +15669,9 @@ if (is_EMU == 0xff)
 			if(MENU_line==4){//save type
 				if(Save_num){
 					Save_num--;
-					re_menu=1;
+					re_menu=0;
 					UIAudio_PlaySfx(UI_SFX_MOVE);
-					DrawPic((u16*)gImage_MENU, 36, 25, 168, 110, 1, 0, 1);//show menu pic
-					Show_MENU_btn();
+					Launcher_RedrawRomMenuSaveTypeValue(Save_num);
 				}
 			}
 		}
@@ -15629,10 +15680,9 @@ if (is_EMU == 0xff)
 			if(MENU_line==4){//save type
 				if(Save_num<5){
 					Save_num++;
-					re_menu=1;
+					re_menu=0;
 					UIAudio_PlaySfx(UI_SFX_MOVE);
-					DrawPic((u16*)gImage_MENU, 36, 25, 168, 110, 1, 0, 1);//show menu pic
-					Show_MENU_btn();
+					Launcher_RedrawRomMenuSaveTypeValue(Save_num);
 				}
 			}
 		}

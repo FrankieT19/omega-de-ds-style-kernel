@@ -1,5 +1,14 @@
 # Changelog
 
+## DS Style v7.3
+
+- Fixed translated save-type labels overlapping the detected save type in the game-launch menu, and limited save-type changes to the affected value.
+- Refined List + Art redraw handling when moving between entries with and without artwork or switching from List view.
+- Added source support for full-screen themes without a separate top bar.
+- Fixed the clock and page-number area not refreshing correctly on Help screens.
+- Refined cheat-screen redraw behaviour, including smoother list movement, clean counter changes and immediate updates to mutually exclusive selections.
+- Fixed artwork border flicker in the horizontal carousel.
+
 ## DS Style v7.2
 
 - Fixed Chinese text rendering on the game loading screen.

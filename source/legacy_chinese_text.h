@@ -34,7 +34,7 @@ const char zh_set_btn[]="\311\350\326\303";
 const char zh_ok_btn[]="\261\243\264\346";
 const char zh_formatnor_info[]="\310\267\266\250?\264\363\324\2744\267\326\326\323";
 
-const char zh_theme_credit[]="DS Style v7.2";
+const char zh_theme_credit[]="DS Style v7.3";
 const char zh_theme_credit2[]="by FrankieT19";
 
 const char zh_check_sav[]="\274\354\262\351SAV\316\304\274\376";
@@ -115,4 +115,3 @@ const char *zh_nor_op[5]={
 	"\274\323\324\330\264\346\265\265\265\275FRAM",
 	"\261\243\264\346FRAM\264\346\265\265",
 };
-

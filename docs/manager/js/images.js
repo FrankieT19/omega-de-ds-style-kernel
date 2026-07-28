@@ -48,178 +48,7 @@ function fitFillColor(value) {
   return /^#[0-9a-f]{6}$/i.test(String(value || "")) ? value : "#000000";
 }
 
-function drawMirroredRegion(context, source, sourceRect, targetRect, flipX = false, flipY = false) {
-  context.save();
-  context.translate(
-    targetRect.x + (flipX ? targetRect.width : 0),
-    targetRect.y + (flipY ? targetRect.height : 0),
-  );
-  context.scale(flipX ? -1 : 1, flipY ? -1 : 1);
-  context.drawImage(
-    source,
-    sourceRect.x,
-    sourceRect.y,
-    sourceRect.width,
-    sourceRect.height,
-    0,
-    0,
-    targetRect.width,
-    targetRect.height,
-  );
-  context.restore();
-}
-
-function drawExtendedArtworkBackground(context, source, sourceWidth, sourceHeight, targetWidth, targetHeight, rect) {
-  const leftGap = Math.max(0, rect.x);
-  const topGap = Math.max(0, rect.y);
-  const rightGap = Math.max(0, targetWidth - rect.x - rect.width);
-  const bottomGap = Math.max(0, targetHeight - rect.y - rect.height);
-  const edgeWidth = Math.max(1, Math.min(8, Math.round(sourceWidth * 0.02)));
-  const edgeHeight = Math.max(1, Math.min(8, Math.round(sourceHeight * 0.02)));
-  const underlap = Math.max(1, Math.min(5, Math.floor(rect.width / 2), Math.floor(rect.height / 2)));
-
-  context.save();
-  context.imageSmoothingEnabled = true;
-  context.imageSmoothingQuality = "high";
-
-  if (leftGap > 0) {
-    drawMirroredRegion(
-      context,
-      source,
-      { x: 0, y: 0, width: edgeWidth, height: sourceHeight },
-      { x: 0, y: rect.y, width: leftGap, height: rect.height },
-      true,
-    );
-  }
-  if (rightGap > 0) {
-    drawMirroredRegion(
-      context,
-      source,
-      { x: sourceWidth - edgeWidth, y: 0, width: edgeWidth, height: sourceHeight },
-      { x: rect.x + rect.width, y: rect.y, width: rightGap, height: rect.height },
-      true,
-    );
-  }
-  if (topGap > 0) {
-    drawMirroredRegion(
-      context,
-      source,
-      { x: 0, y: 0, width: sourceWidth, height: edgeHeight },
-      { x: rect.x, y: 0, width: rect.width, height: topGap },
-      false,
-      true,
-    );
-  }
-  if (bottomGap > 0) {
-    drawMirroredRegion(
-      context,
-      source,
-      { x: 0, y: sourceHeight - edgeHeight, width: sourceWidth, height: edgeHeight },
-      { x: rect.x, y: rect.y + rect.height, width: rect.width, height: bottomGap },
-      false,
-      true,
-    );
-  }
-
-  if (leftGap > 0 && topGap > 0) {
-    drawMirroredRegion(
-      context,
-      source,
-      { x: 0, y: 0, width: edgeWidth, height: edgeHeight },
-      { x: 0, y: 0, width: leftGap, height: topGap },
-      true,
-      true,
-    );
-  }
-  if (rightGap > 0 && topGap > 0) {
-    drawMirroredRegion(
-      context,
-      source,
-      { x: sourceWidth - edgeWidth, y: 0, width: edgeWidth, height: edgeHeight },
-      { x: rect.x + rect.width, y: 0, width: rightGap, height: topGap },
-      true,
-      true,
-    );
-  }
-  if (leftGap > 0 && bottomGap > 0) {
-    drawMirroredRegion(
-      context,
-      source,
-      { x: 0, y: sourceHeight - edgeHeight, width: edgeWidth, height: edgeHeight },
-      { x: 0, y: rect.y + rect.height, width: leftGap, height: bottomGap },
-      true,
-      true,
-    );
-  }
-  if (rightGap > 0 && bottomGap > 0) {
-    drawMirroredRegion(
-      context,
-      source,
-      { x: sourceWidth - edgeWidth, y: sourceHeight - edgeHeight, width: edgeWidth, height: edgeHeight },
-      { x: rect.x + rect.width, y: rect.y + rect.height, width: rightGap, height: bottomGap },
-      true,
-      true,
-    );
-  }
-
-  // Continue the sampled edge beneath the optional feather so the blend
-  // reveals matching artwork instead of the canvas fallback colour.
-  if (leftGap > 0) {
-    context.drawImage(
-      source,
-      0,
-      0,
-      edgeWidth,
-      sourceHeight,
-      rect.x,
-      rect.y,
-      underlap,
-      rect.height,
-    );
-  }
-  if (rightGap > 0) {
-    context.drawImage(
-      source,
-      sourceWidth - edgeWidth,
-      0,
-      edgeWidth,
-      sourceHeight,
-      rect.x + rect.width - underlap,
-      rect.y,
-      underlap,
-      rect.height,
-    );
-  }
-  if (topGap > 0) {
-    context.drawImage(
-      source,
-      0,
-      0,
-      sourceWidth,
-      edgeHeight,
-      rect.x,
-      rect.y,
-      rect.width,
-      underlap,
-    );
-  }
-  if (bottomGap > 0) {
-    context.drawImage(
-      source,
-      0,
-      sourceHeight - edgeHeight,
-      sourceWidth,
-      edgeHeight,
-      rect.x,
-      rect.y + rect.height - underlap,
-      rect.width,
-      underlap,
-    );
-  }
-  context.restore();
-}
-
-function drawFitBackground(context, source, sourceWidth, sourceHeight, width, height, mode, color, rect) {
+function drawFitBackground(context, source, width, height, mode, color) {
   if (mode === "checkerboard") {
     fillCheckerboard(context, width, height);
     return;
@@ -227,10 +56,6 @@ function drawFitBackground(context, source, sourceWidth, sourceHeight, width, he
 
   context.fillStyle = mode === "solid" ? fitFillColor(color) : "#000000";
   context.fillRect(0, 0, width, height);
-  if (mode === "blend") {
-    drawExtendedArtworkBackground(context, source, sourceWidth, sourceHeight, width, height, rect);
-    return;
-  }
   if (mode !== "blur") return;
 
   const padding = 6;
@@ -345,13 +170,10 @@ export function drawCroppedImage(canvas, source, transform = {}) {
     drawFitBackground(
       context,
       source,
-      sourceWidth,
-      sourceHeight,
       targetWidth,
       targetHeight,
       fillMode,
       transform.fillColor,
-      rect,
     );
     drawFittedImage(context, source, rect, targetWidth, targetHeight, blendBorder);
   } else {

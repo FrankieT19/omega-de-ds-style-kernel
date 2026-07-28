@@ -1174,7 +1174,9 @@ void Open_cht_file(TCHAR *gamefilename,u32 havecht)
 				{
 					if(re_show>1)
 					{
-						Launcher_ClearCheatRegion(0, 19, 240, 160-19);
+						/* Each row restores its own exact background before drawing.
+						   Clearing the whole body first made page movement visibly
+						   flash and did no useful work. */
 						Show_KEY_val(all_count,Select,showoffset);
 					}
 					else if(old_showoffset == showoffset)

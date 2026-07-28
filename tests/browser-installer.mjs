@@ -152,7 +152,7 @@ const { installBundledStyle, installDsStyle, loadPersonalisation, savePersonalis
     sounds: "Off",
     quickStart: "L",
   });
-  assert.equal(result.version, "7.2");
+  assert.equal(result.version, "7.3");
   assert.equal(result.personalised, true);
   assert.equal(await exists(root, "ezkernelnew.bin"), true);
   assert.equal(await exists(root, "ezkernel.bin"), false);

@@ -1,6 +1,6 @@
 {
     "schema":  1,
-    "version":  "7.2",
+    "version":  "7.3",
     "directories":  [
                         "SYSTEM/BACKUP/SAVER",
                         "SYSTEM/CHEAT",
@@ -277,15 +277,15 @@
                     "omega_de":  {
                                      "source":  "kernels/ezkernelnew.bin",
                                      "target":  "ezkernelnew.bin",
-                                     "size":  2089800,
-                                     "sha256":  "9dc8b0c350ff7ed0d60726f0dcd53f49d147f71ccc7be3112fa2f9454581f612",
+                                     "size":  2089832,
+                                     "sha256":  "4d37e7bbceae1d30debea411369ba07de4d35a0f54d7509474073d488c2d60c7",
                                      "policy":  "replace"
                                  },
                     "original":  {
                                      "source":  "kernels/ezkernel.bin",
                                      "target":  "ezkernel.bin",
-                                     "size":  2089648,
-                                     "sha256":  "2a80748c6d8d85c4114eb939b3c96d577e7ca4044f0a788acb46ff098a4dc1f1",
+                                     "size":  2089720,
+                                     "sha256":  "08df429afbc9cc603dc8c504f94affa1163c823fee8ed3bf989bb86cd7dd9bbe",
                                      "policy":  "replace"
                                  }
                 },

@@ -24,7 +24,7 @@ const SINGLE_FIT_KEY = "ds-style-manager-single-fit-v1";
 const FIT_FILL_MODE_KEY = "ds-style-manager-fit-fill-mode-v1";
 const FIT_FILL_COLOR_KEY = "ds-style-manager-fit-fill-color-v1";
 const FIT_BLEND_BORDER_KEY = "ds-style-manager-fit-blend-border-v1";
-const FIT_FILL_MODES = new Set(["solid", "checkerboard", "blur", "blend"]);
+const FIT_FILL_MODES = new Set(["solid", "checkerboard", "blur"]);
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".bmp", ".webp"];
 const LIBRETRO_SYSTEMS = {
   "Game Boy Advance": { repo: "Nintendo_-_Game_Boy_Advance", extensions: [".gba", ".agb", ".bin", ".mb"] },
