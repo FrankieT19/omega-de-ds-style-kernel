@@ -181,10 +181,10 @@ const { installBundledStyle, installDsStyle, loadPersonalisation, savePersonalis
 
   const style = await installBundledStyle(root, "omega_de", "analogue");
   assert.equal(style.label, "Analogue Style");
-  assert.equal(await exists(root, "SYSTEM/KERNELS/Analogue Style v7.2.bin"), true);
+  assert.equal(await exists(root, "SYSTEM/KERNELS/Analogue Style v7.3.bin"), true);
   const simpleStyle = await installBundledStyle(root, "omega_de", "simple");
   assert.equal(simpleStyle.label, "Simple Style");
-  assert.equal(await exists(root, "SYSTEM/KERNELS/Simple Style v7.2.bin"), true);
+  assert.equal(await exists(root, "SYSTEM/KERNELS/Simple Style v7.3.bin"), true);
 }
 
 {
@@ -203,8 +203,8 @@ const { installBundledStyle, installDsStyle, loadPersonalisation, savePersonalis
   assert.equal(result.preserved, 1);
   await installBundledStyle(root, "original", "analogue");
   await installBundledStyle(root, "original", "simple");
-  assert.equal(await exists(root, "SYSTEM/KERNELS/Analogue Style v7.2.bin"), true);
-  assert.equal(await exists(root, "SYSTEM/KERNELS/Simple Style v7.2.bin"), true);
+  assert.equal(await exists(root, "SYSTEM/KERNELS/Analogue Style v7.3.bin"), true);
+  assert.equal(await exists(root, "SYSTEM/KERNELS/Simple Style v7.3.bin"), true);
 }
 
 {
