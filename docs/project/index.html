@@ -516,6 +516,31 @@
       gap: 16px;
     }
 
+    .compatibility-notice {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.28fr) minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 20px;
+      padding: 20px 22px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(89, 64, 135, 0.2);
+      border-left: 4px solid var(--purple-deep);
+      border-radius: 6px;
+    }
+
+    .compatibility-notice h3 {
+      margin: 0;
+      color: var(--purple-deep);
+      font-size: 16px;
+    }
+
+    .compatibility-notice p {
+      margin: 0;
+      color: #3d4858;
+      font-size: 15px;
+    }
+
     .download {
       display: flex;
       align-items: center;
@@ -645,6 +670,7 @@
 
       .section-heading,
       .download-heading,
+      .compatibility-notice,
       .resource-grid {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -1009,11 +1035,20 @@
           </p>
         </div>
 
+        <aside class="compatibility-notice" aria-labelledby="omega-de-compatibility">
+          <h3 id="omega-de-compatibility">Omega DE compatibility</h3>
+          <p>
+            DS Style supports Omega Definitive Edition Rev.A and Rev.B cartridges. It does
+            not support the newer Omega Definitive Edition B, identified by a blue circuit
+            board marked <strong>EZODE-B</strong>. Rev.B and Omega DE B are different models.
+          </p>
+        </aside>
+
         <div class="download-grid">
           <article class="download">
             <div>
               <h3>Omega Definitive Edition</h3>
-              <p>For the EZ-Flash Omega Definitive Edition only.</p>
+              <p>For Omega Definitive Edition Rev.A and Rev.B.</p>
             </div>
             <a class="button dark" href="https://github.com/FrankieT19/omega-de-ds-style-kernel/releases/download/v7.3/DS-Style-Omega-DE-v7.3.zip">Download</a>
           </article>
