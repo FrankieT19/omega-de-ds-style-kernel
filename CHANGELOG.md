@@ -1,5 +1,12 @@
 # Changelog
 
+## DS Style v7.4
+
+- Added a new DS Style text and Markdown viewer with a clean English interface, light and dark modes, faster navigation, and simple formatting for headings, bold text and dividers.
+- Added optional wide and square console folder artwork for every emulated system supported by DS Style.
+- Fixed a crash when pressing A in an empty Recently Played or Favourites view.
+- Restored support for up to 512 files in a folder while reducing launcher RAM usage.
+
 ## DS Style v7.3
 
 - Fixed translated save-type labels overlapping the detected save type in the game-launch menu, and limited save-type changes to the affected value.

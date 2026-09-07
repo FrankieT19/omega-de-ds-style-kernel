@@ -2,7 +2,7 @@
 #define EZ_DEFINE_HEADER
 
 #define MAX_pReadCache_size 0x20000
-#define MAX_files     0x120
+#define MAX_files     0x200
 #define MAX_folder    0x60
 #define MAX_NOR				0x40
 

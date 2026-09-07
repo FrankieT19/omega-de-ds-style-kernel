@@ -23,6 +23,8 @@ Read the complete [DS Style User Guide](https://frankiet19.github.io/omega-de-ds
 - Title and box-art thumbnail modes
 - Favourite and recent game support
 - Multi-language launcher text, including Chinese and Thai
+- Bundled text and Markdown viewer with light and dark presentation modes
+- Optional folder artwork for every supported emulated system
 - UI sounds
 - Runtime settings stored in readable `SYSTEM/SETTINGS.TXT`
 

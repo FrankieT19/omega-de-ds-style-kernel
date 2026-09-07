@@ -441,15 +441,37 @@ static void Launcher_DrawThumbBorderEx(int x, int y, int w, int h, u32 selected)
 
 u32 list_game_total;
 
+/* Keep the sorted SD directory index in cartridge PSRAM.  The stock 512-file
+   allocation no longer fits alongside DS Style's artwork and audio caches in
+   the GBA's 256 KiB EWRAM, while this page-zero PSRAM tail is free whenever
+   the launcher is browsing.  A selected filename is copied back to EWRAM
+   before any game or plug-in is loaded over PSRAM. */
+#define LAUNCHER_FILE_LIST_PSRAM_ADDRESS 0x08FF0000
+#define LAUNCHER_FILE_LIST_PSRAM_SIZE 0x10000
+typedef char LauncherFileListFitsPSRAM[
+	(sizeof(FM_FILE_FS) * MAX_files <= LAUNCHER_FILE_LIST_PSRAM_SIZE) ? 1 : -1];
+#define pFilename_buffer ((FM_FILE_FS*)LAUNCHER_FILE_LIST_PSRAM_ADDRESS)
 
-FM_FILE_FS pFilename_buffer[MAX_files]EWRAM_BSS;
 FM_NOR_FS pNorFS[MAX_NOR]EWRAM_BSS;
 FM_Folder_FS pFolder[MAX_folder]EWRAM_BSS;
 
-FM_FILE_FS pFilename_temp;
+FM_FILE_FS pFilename_temp EWRAM_BSS;
+static FM_FILE_FS pFilename_sort_probe EWRAM_BSS;
 
 u32 FAT_table_buffer[FAT_table_size/4]EWRAM_BSS;
 u8 pReadCache [MAX_pReadCache_size]EWRAM_BSS;
+
+static void Launcher_StoreFileRecord(u32 index, const TCHAR *filename, u32 filesize)
+{
+	if((index >= MAX_files) || !filename)
+		return;
+	memset(&pFilename_temp, 0x00, sizeof(pFilename_temp));
+	strncpy(pFilename_temp.filename, filename, sizeof(pFilename_temp.filename) - 1);
+	pFilename_temp.filename[sizeof(pFilename_temp.filename) - 1] = '\0';
+	pFilename_temp.filesize = filesize;
+	dmaCopy(&pFilename_temp, &pFilename_buffer[index], sizeof(FM_FILE_FS));
+}
+
 static char (*Launcher_FavouritesBuffer(void))[LAUNCHER_FAVOURITE_PATH_LEN]
 {
 	return launcher_favourites_cache;
@@ -4338,7 +4360,6 @@ static u32 Build_favourites_virtual_list(void)
 	u32 size = 0;
 
 	Launcher_LoadFavourites();
-	memset(pFilename_buffer, 0x00, sizeof(FM_FILE_FS) * MAX_files);
 	memset(p_recently_play, 0x00, sizeof(p_recently_play));
 	memset(launcher_virtual_gamecode, 0, sizeof(launcher_virtual_gamecode));
 	memset(launcher_virtual_gamecode_valid, 0, sizeof(launcher_virtual_gamecode_valid));
@@ -4348,18 +4369,16 @@ static u32 Build_favourites_virtual_list(void)
 			continue;
 		strncpy(p_recently_play[count], Launcher_FavouritesBuffer()[i], sizeof(p_recently_play[count]) - 1);
 		p_recently_play[count][sizeof(p_recently_play[count]) - 1] = '\0';
-		strncpy(pFilename_buffer[count].filename, name, sizeof(pFilename_buffer[count].filename) - 1);
-		pFilename_buffer[count].filename[sizeof(pFilename_buffer[count].filename) - 1] = '\0';
 		if(Launcher_GetVirtualFileInfo(Launcher_FavouritesBuffer()[i], name, &size, launcher_virtual_gamecode[count]))
 		{
-			pFilename_buffer[count].filesize = size;
 			launcher_virtual_gamecode_valid[count] =
 				(strlen(name) >= 3) &&
 				(!strcasecmp(&(name[strlen(name) - 3]), "gba") ||
 				!strcasecmp(&(name[strlen(name) - 3]), "agb"));
 		}
 		else
-			pFilename_buffer[count].filesize = 0;
+			size = 0;
+		Launcher_StoreFileRecord(count, name, size);
 		count++;
 	}
 	return count;
@@ -4386,25 +4405,22 @@ static u32 Build_recent_virtual_list(void)
 	if(count > MAX_files)
 		count = MAX_files;
 
-	memset(pFilename_buffer, 0x00, sizeof(FM_FILE_FS) * MAX_files);
 	memset(launcher_virtual_gamecode, 0, sizeof(launcher_virtual_gamecode));
 	memset(launcher_virtual_gamecode_valid, 0, sizeof(launcher_virtual_gamecode_valid));
 	for(i = 0; i < count; i++)
 	{
 		if(Recent_GetPathAt(i, full_path, sizeof(full_path), name, sizeof(name)))
 		{
-			strncpy(pFilename_buffer[i].filename, name, sizeof(pFilename_buffer[i].filename) - 1);
-			pFilename_buffer[i].filename[sizeof(pFilename_buffer[i].filename) - 1] = '\0';
 			if(Launcher_GetVirtualFileInfo(full_path, name, &size, launcher_virtual_gamecode[i]))
 			{
-				pFilename_buffer[i].filesize = size;
 				launcher_virtual_gamecode_valid[i] =
 					(strlen(name) >= 3) &&
 					(!strcasecmp(&(name[strlen(name) - 3]), "gba") ||
 					!strcasecmp(&(name[strlen(name) - 3]), "agb"));
 			}
 			else
-				pFilename_buffer[i].filesize = 0;
+				size = 0;
+			Launcher_StoreFileRecord(i, name, size);
 		}
 	}
 	return count;
@@ -5561,23 +5577,25 @@ void Sort_folder(u32 folder_total)
 //Sort file
 void Sort_file(u32 game_total_SD)
 {
-	u32 ret;
+	u32 gap;
 	u32 i;
-	int get;
-	if(game_total_SD>1)
+	u32 j;
+
+	/* Shell sort keeps a 512-entry directory responsive and stages every
+	   comparison through EWRAM, avoiding unsupported PSRAM-to-PSRAM DMA. */
+	for(gap = game_total_SD / 2; gap > 0; gap /= 2)
 	{
-		for(ret=0;ret<game_total_SD-1;ret++)
+		for(i = gap; i < game_total_SD; i++)
 		{
-			for(i=0;i<game_total_SD-ret-1;i++)
+			dmaCopy(&pFilename_buffer[i], &pFilename_temp, sizeof(FM_FILE_FS));
+			for(j = i; j >= gap; j -= gap)
 			{
-				get = strcmp(pFilename_buffer[i].filename,pFilename_buffer[i+1].filename) ;
-				if(get>0)
-				{
-					dmaCopy(&pFilename_buffer[i+1],&pFilename_temp,sizeof(FM_FILE_FS));
-					dmaCopy(&pFilename_buffer[i],&pFilename_buffer[i+1],sizeof(FM_FILE_FS));
-					dmaCopy(&pFilename_temp,&pFilename_buffer[i],sizeof(FM_FILE_FS));
-				}
+				dmaCopy(&pFilename_buffer[j - gap], &pFilename_sort_probe, sizeof(FM_FILE_FS));
+				if(strcmp(pFilename_sort_probe.filename, pFilename_temp.filename) <= 0)
+					break;
+				dmaCopy(&pFilename_sort_probe, &pFilename_buffer[j], sizeof(FM_FILE_FS));
 			}
+			dmaCopy(&pFilename_temp, &pFilename_buffer[j], sizeof(FM_FILE_FS));
 		}
 	}
 }
@@ -10071,6 +10089,7 @@ static u32 Launcher_LoadStyleList(void)
     FRESULT res;
     u32 count = 0;
 
+    SetPSRampage(0);
     f_mkdir("/SYSTEM");
     f_mkdir("/SYSTEM/KERNELS");
 
@@ -10087,8 +10106,7 @@ static u32 Launcher_LoadStyleList(void)
             continue;
         if(!Is_bin_file(fileinfo.fname))
             continue;
-        memcpy(pFilename_buffer[count].filename, fileinfo.fname, 100);
-        pFilename_buffer[count].filename[99] = 0;
+        Launcher_StoreFileRecord(count, fileinfo.fname, fileinfo.fsize);
         count++;
     }
     f_closedir(&dir);
@@ -13806,6 +13824,8 @@ int main(void) {
 	}
 
 refind_file:
+	/* Directory records live in the reserved tail of PSRAM page zero. */
+	SetPSRampage(0);
 	Launcher_ResetThumbCache();
 	if((page_num == SD_list) || (page_num == NOR_list))
 		launcher_force_full_redraw = 1;
@@ -13841,20 +13861,19 @@ refind_file:
 					if(	(fileinfo.fattrib == AM_DIR) || (fileinfo.fattrib == 0x30))//DIR and exFAT dir
 					{
 						if ( folder_total >= MAX_folder )//cut
-						break;
+							continue;
 						memcpy(pFolder[folder_total].filename,fileinfo.fname,100);
 						pFolder[folder_total++].filename[99] = 0;
 					}
 					else if(	(fileinfo.fattrib == AM_ARC) || (fileinfo.fattrib == 0x21) )
 					{
 						if ( game_total_SD >= MAX_files )//cut
-						break;
-						memcpy(pFilename_buffer[game_total_SD].filename,fileinfo.fname,100);
-						pFilename_buffer[game_total_SD].filename[99] = 0;
+							continue;
+						Launcher_StoreFileRecord(game_total_SD, fileinfo.fname, fileinfo.fsize);
 						if(launcher_list_folders && (launcher_sd_launchable_file_count == 0) &&
-						Launcher_IsLaunchableFilename(pFilename_buffer[game_total_SD].filename))
+						Launcher_IsLaunchableFilename(fileinfo.fname))
 							launcher_sd_launchable_file_count = 1;
-						pFilename_buffer[game_total_SD++].filesize = fileinfo.fsize;
+						game_total_SD++;
 					}
 				}
 				f_closedir(&dir);
@@ -14531,6 +14550,10 @@ re_showfile:
 			u16 audio_keysdown = keysdown;
 			if(launcher_select_release_cooldown)
 				launcher_select_release_cooldown--;
+			if((audio_keysdown & KEY_A) &&
+			(((page_num == SD_list) && (game_folder_total == 0)) ||
+			 ((page_num == NOR_list) && (game_total_NOR == 0))))
+				audio_keysdown &= ~KEY_A;
 
 			if((page_num == SD_list) || (page_num == NOR_list))
 			{
@@ -15054,7 +15077,12 @@ re_showfile:
 			}
 			else if(keysdown & KEY_A)
 			{
-				if(page_num==SD_list){
+				if(((page_num == SD_list) && (game_folder_total == 0)) ||
+				   ((page_num == NOR_list) && (game_total_NOR == 0)))
+				{
+					/* Empty folders and virtual lists have no actionable entry. */
+				}
+				else if(page_num==SD_list){
 					//res = f_getcwd(currentpath, sizeof currentpath / sizeof *currentpath);
 		if( show_offset+file_select <  folder_total)
 		{
@@ -15462,10 +15490,23 @@ u8 SD_list_MENU(u32 show_offset,	u32 file_select,u32 play_re )
 
 	//press A, show boot MENU;
 	if(play_re==0xBB){
-		pfilename = pFilename_buffer[show_offset+file_select-folder_total].filename;
+		u32 absolute_index = show_offset + file_select;
+		if((absolute_index < folder_total) ||
+		   ((absolute_index - folder_total) >= game_total_SD))
+			return 0;
+		strncpy(current_filename,
+			pFilename_buffer[absolute_index - folder_total].filename,
+			sizeof(current_filename) - 1);
+		current_filename[sizeof(current_filename) - 1] = '\0';
+		pfilename = current_filename;
 	}
 	else{
-		char *p=strrchr(p_recently_play[play_re], '/');
+		char *p;
+		if((play_re >= 10) || (p_recently_play[play_re][0] == '\0'))
+			return 0;
+		p = strrchr(p_recently_play[play_re], '/');
+		if(!p || (p[1] == '\0'))
+			return 0;
 		strncpy(currentpath_temp, currentpath, 256);//old
 		memset(currentpath,00,256);
 		strncpy(currentpath, p_recently_play[play_re], p-p_recently_play[play_re]);
