@@ -266,7 +266,10 @@ void IWRAM_CODE SetRompageWithHardReset(u16 page,u32 bootmode)
 {
 	Set_RTC_status(gl_ingame_RTC_open_status);
 	SetRompage(page);
-	RegisterRamReset(RESET_PALETTE| RESET_VRAM|RESET_OAM |RESET_SIO | RESET_SOUND | RESET_OTHER);
+	u32 reset_flags = RESET_PALETTE | RESET_VRAM | RESET_OAM | RESET_SIO | RESET_SOUND | RESET_OTHER;
+	if(bootmode == 0)
+		reset_flags |= RESET_EWRAM;
+	RegisterRamReset(reset_flags);
 	if(bootmode==1) {
 		if(key_L)
 			SoftReset_now();

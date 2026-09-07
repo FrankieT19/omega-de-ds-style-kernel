@@ -6,6 +6,7 @@
 - Added optional wide and square console folder artwork for every emulated system supported by DS Style.
 - Fixed a crash when pressing A in an empty Recently Played or Favourites view.
 - Restored support for up to 512 files in a folder while reducing launcher RAM usage.
+- Fixed compatibility with games that require a clean software-boot memory state on the Omega Definitive Edition.
 
 ## DS Style v7.3
 

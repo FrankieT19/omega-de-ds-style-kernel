@@ -291,8 +291,8 @@
     "omega_de": {
       "source": "kernels/ezkernelnew.bin",
       "target": "ezkernelnew.bin",
-      "size": 2089688,
-      "sha256": "27c47bd13c57dec230f3e6d5241915b28888e4b76795e60eeaaa46e08f6d9086",
+      "size": 2089696,
+      "sha256": "16f71800f1d07d6b14359424927ef65091df4deb58160379cb9dd24304690ca9",
       "policy": "replace"
     },
     "original": {
