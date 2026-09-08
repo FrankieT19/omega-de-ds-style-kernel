@@ -4546,20 +4546,20 @@ void Make_recently_play_file(TCHAR* path,TCHAR* gamefilename)
 				dmaCopy(&(p_recently_play[i-1]),&(p_recently_play[i]), 512);
 			}
 		}
-		else if(count){
+		else{
 			for(i=count;i>0;i--){
 				memset(p_recently_play[i],0x00,512);
 				dmaCopy(&(p_recently_play[i-1]),&(p_recently_play[i]), 512);
 			}
+			count++;
 		}
 	}
 	dmaCopy(buf,&(p_recently_play[0]), 512);	//write first one
 
-	res = f_open(&gfile,"/SYSTEM/RECENT.txt", FA_WRITE | FA_OPEN_ALWAYS);
+	res = f_open(&gfile,"/SYSTEM/RECENT.txt", FA_WRITE | FA_CREATE_ALWAYS);
 	if(res == FR_OK)
 	{
-		f_lseek(&gfile, 0x0000);
-		for(i=0;i<count+1;i++){
+		for(i=0;i<count;i++){
 			res=f_printf(&gfile, "%s\n", p_recently_play[i]);
 		}
 		f_close(&gfile);

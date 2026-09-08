@@ -7,6 +7,7 @@
 - Fixed a crash when pressing A in an empty Recently Played or Favourites view.
 - Restored support for up to 512 files in a folder while reducing launcher RAM usage.
 - Fixed compatibility with games that require a clean software-boot memory state on the Omega Definitive Edition.
+- Fixed `RECENT.txt` corruption when Recently Played reached its ten-game limit.
 
 ## DS Style v7.3
 
