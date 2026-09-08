@@ -309,17 +309,17 @@
       "description": "A monochrome style inspired by the minimal Analogue Pocket interface.",
       "models": {
         "omega_de": {
-          "source": "styles/omega_de/Analogue Style v7.3.bin",
-          "target": "SYSTEM/KERNELS/Analogue Style v7.3.bin",
-          "size": 2098408,
-          "sha256": "9484ee4d700a48eba8615d51a015f4324dd32ae0329b8f003185f313c615273b",
+          "source": "styles/omega_de/Analogue Style v7.4.bin",
+          "target": "SYSTEM/KERNELS/Analogue Style v7.4.bin",
+          "size": 2098280,
+          "sha256": "d5e765ebf22082b290792b669cc871921fb4d0fda7a2c109c11dee8ebd0c99e3",
           "policy": "replace"
         },
         "original": {
-          "source": "styles/original/Analogue Style v7.3.bin",
-          "target": "SYSTEM/KERNELS/Analogue Style v7.3.bin",
-          "size": 2088112,
-          "sha256": "09093e914978b2a87d29ac848b06c77d2d28f43f57db408cfe09274eb0c2b0da",
+          "source": "styles/original/Analogue Style v7.4.bin",
+          "target": "SYSTEM/KERNELS/Analogue Style v7.4.bin",
+          "size": 2088000,
+          "sha256": "7a8a8f60af693c8bf7c7df7c8b28e0962d84953653e935de94da9d15558382ec",
           "policy": "replace"
         }
       }
@@ -329,17 +329,17 @@
       "description": "A homage to Sterophonick's Simple theme.",
       "models": {
         "omega_de": {
-          "source": "styles/omega_de/Simple Style v7.3.bin",
-          "target": "SYSTEM/KERNELS/Simple Style v7.3.bin",
-          "size": 2596432,
-          "sha256": "29017ac293490f233c572a4651cb382c6035b1ce63a16042da2cc932a12c28d9",
+          "source": "styles/omega_de/Simple Style v7.4.bin",
+          "target": "SYSTEM/KERNELS/Simple Style v7.4.bin",
+          "size": 2596288,
+          "sha256": "a0fe293f9cda35c14508264f0a2e049b34f852ba61fbf6ca2bdedaab51f3b41c",
           "policy": "replace"
         },
         "original": {
-          "source": "styles/original/Simple Style v7.3.bin",
-          "target": "SYSTEM/KERNELS/Simple Style v7.3.bin",
-          "size": 2088128,
-          "sha256": "536eb27edd710c6e5f1e97135c3ce7bae839313639bf20b87fd0326af7e2899f",
+          "source": "styles/original/Simple Style v7.4.bin",
+          "target": "SYSTEM/KERNELS/Simple Style v7.4.bin",
+          "size": 2088032,
+          "sha256": "b0558a428d75cea3d9b6c36a54f46b3d4856461bdd9b6c3eaa8e1ea95c17d875",
           "policy": "replace"
         }
       }
