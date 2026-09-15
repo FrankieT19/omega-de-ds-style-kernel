@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="DS Style is a Nintendo DS-inspired custom kernel for the EZ-Flash Omega and Omega Definitive Edition.">
+  <meta name="description" content="DS Style is a Nintendo DS-inspired launcher for EZ-Flash Omega cartridges and the Anbernic RG SP.">
   <meta name="theme-color" content="#101a2b">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/favicon.png">
@@ -498,6 +498,57 @@
       font-size: 14px;
     }
 
+    .rgsp-port {
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .port-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 0.72fr);
+      gap: clamp(42px, 7vw, 92px);
+      align-items: center;
+    }
+
+    .port-copy {
+      max-width: 620px;
+    }
+
+    .port-copy h2 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 54px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .port-copy > p:not(.eyebrow) {
+      margin: 22px 0 0;
+      color: #c7cfdb;
+      font-size: 17px;
+    }
+
+    .port-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .port-photo {
+      aspect-ratio: 3 / 4;
+      margin: 0;
+      overflow: hidden;
+      background: #0b1320;
+      border-radius: 6px;
+      box-shadow: 0 22px 54px rgba(0, 0, 0, 0.28);
+    }
+
+    .port-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
     .downloads {
       background: #e8e1f4;
     }
@@ -671,9 +722,20 @@
       .section-heading,
       .download-heading,
       .compatibility-notice,
+      .port-layout,
       .resource-grid {
         grid-template-columns: 1fr;
         gap: 20px;
+      }
+
+      .port-copy {
+        max-width: 720px;
+        padding-bottom: 18px;
+      }
+
+      .port-photo {
+        width: min(560px, 100%);
+        justify-self: center;
       }
 
       .feature-row {
@@ -778,6 +840,7 @@
       <a href="#features">Features</a>
       <a href="#tools">Tools</a>
       <a href="#themes">Themes</a>
+      <a href="#rg-sp">RG SP</a>
       <a href="#downloads">Downloads</a>
       <a href="#resources">Resources</a>
     </nav>
@@ -1022,6 +1085,26 @@
           <span>Chinese</span>
           <span>Thai</span>
         </div>
+      </div>
+    </section>
+
+    <section class="section rgsp-port" id="rg-sp">
+      <div class="section-inner port-layout">
+        <div class="port-copy">
+          <p class="eyebrow">Anbernic RG SP</p>
+          <h2>DS Style for RG SP.</h2>
+          <p>
+            The Nintendo DS-inspired launcher is now available for the Anbernic RG SP.
+            This separate port has its own download, updates, and source code.
+          </p>
+          <div class="port-actions">
+            <a class="button primary" href="https://github.com/FrankieT19/rg-sp-ds-style/releases/download/v1.0/DS-Style-RG-SP-v1.0.zip">Download</a>
+            <a class="button" href="https://github.com/FrankieT19/rg-sp-ds-style" target="_blank" rel="noopener noreferrer">View repository</a>
+          </div>
+        </div>
+        <figure class="port-photo">
+          <img src="assets/rg-sp-ds-style.jpg" alt="Anbernic RG SP running DS Style" loading="lazy">
+        </figure>
       </div>
     </section>
 
