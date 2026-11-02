@@ -179,6 +179,14 @@
                   <label class="setup-field"><span>Start screen game</span><select id="setup-start-source"><option>Last played</option><option>Favourites</option></select></label>
                   <label class="setup-field"><span>View mode</span><select id="setup-view-mode"><option>List</option><option>List + art</option><option>Horizontal</option><option>Vertical</option></select></label>
                   <label class="setup-field setup-toggle">
+                    <span class="toggle-copy"><strong>Carousel animations</strong><small>Smooth movement and a direct-launch pulse.</small></span>
+                    <input id="setup-animations" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span>
+                  </label>
+                  <label class="setup-field setup-toggle">
+                    <span class="toggle-copy"><strong>Wrap list</strong><small>Continue browsing past the first or last entry.</small></span>
+                    <input id="setup-wrap-list" type="checkbox"><span class="toggle-track" aria-hidden="true"><i></i></span>
+                  </label>
+                  <label class="setup-field setup-toggle">
                     <span class="toggle-copy"><strong>List folders</strong><small>Use list view for folders without games.</small></span>
                     <input id="setup-list-folders" type="checkbox"><span class="toggle-track" aria-hidden="true"><i></i></span>
                   </label>
@@ -198,6 +206,7 @@
                 <summary><span><i data-lucide="image"></i> Artwork</span><i data-lucide="chevron-down"></i></summary>
                 <div class="setup-grid">
                   <label class="setup-field"><span>Artwork shape</span><select id="setup-thumbnails"><option value="Title">Wide</option><option value="Box">Square</option></select></label>
+                  <label class="setup-field"><span>Carousel side size</span><select id="setup-side-size"><option>Small</option><option>Equal</option></select></label>
                   <label class="setup-field" id="setup-list-art-field"><span>List artwork position</span><select id="setup-list-art"><option>Top</option><option>Center</option><option>Bottom</option></select></label>
                   <label class="setup-field"><span>Artwork border</span><select id="setup-art-border"><option>Off</option><option>Accent</option><option>Black</option><option>Grey</option><option>White</option></select></label>
                   <label class="setup-field"><span>Rounded corners</span><select id="setup-rounded"><option value="Full">All artwork</option><option value="No Start">Except Start screen</option><option value="Off">Off</option></select></label>

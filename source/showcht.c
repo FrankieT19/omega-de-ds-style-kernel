@@ -311,12 +311,14 @@ void Get_KEY_val(FIL* file,char*KEY_section,char*KEY_secval,char getbuff[])
 				in_section = 0;
 
 				memset(section,0,MAX_KEY_LEN);
+				section_len = 0;
 				continue;
 			}
 
 			if(is_section == 1 && buf[i] != ']')
 			{
-				section[section_len++] = buf[i];
+				if(section_len < MAX_KEY_LEN - 1)
+					section[section_len++] = buf[i];
 				continue;
 			}
       else if (buf[i] == ']')
@@ -332,7 +334,7 @@ void Get_KEY_val(FIL* file,char*KEY_section,char*KEY_secval,char getbuff[])
 				// scan param key name
         if (_kv == 0 && buf[i] != '=')
         {
-            if (_klen >= MAX_KEY_LEN)
+		    if (_klen >= MAX_KEY_LEN - 1)
                 break;
             _paramk[_klen++] = buf[i];
             continue;
@@ -431,12 +433,14 @@ u32 Get_CHT_val(FIL* file,char*KEY_section,char*KEY_secval/*,char getbuff[]*/)
 				in_section = 0;
 
 				memset(section,0,MAX_KEY_LEN);
+				section_len = 0;
 				continue;
 			}
 
 			if(is_section == 1 && buf[i] != ']')
 			{
-				section[section_len++] = buf[i];
+				if(section_len < MAX_KEY_LEN - 1)
+					section[section_len++] = buf[i];
 				continue;
 			}
       else if (buf[i] == ']')
@@ -452,7 +456,7 @@ u32 Get_CHT_val(FIL* file,char*KEY_section,char*KEY_secval/*,char getbuff[]*/)
 				// scan param key name
         if (_kv == 0 && buf[i] != '=')
         {
-            if (_klen >= MAX_KEY_LEN)
+		    if (_klen >= MAX_KEY_LEN - 1)
                 break;
             _paramk[_klen++] = buf[i];
             continue;
@@ -470,7 +474,8 @@ u32 Get_CHT_val(FIL* file,char*KEY_section,char*KEY_secval/*,char getbuff[]*/)
 	    }
 
 	  }
-	  _vlen--; //remove 0xd
+	  if(_vlen > 0)
+		_vlen--; //remove 0xd
 
      //DEBUG_printf("KEY_section %s, section %s",KEY_section,section);
 		if( strcmp(KEY_section,section)== 0)
@@ -513,6 +518,8 @@ u32 Get_CHT_val(FIL* file,char*KEY_section,char*KEY_secval/*,char getbuff[]*/)
 		     	 	if (buf[i] == '=')
 		          goto endcht;
 		      }
+				if(buf_len > (int)(MAX_BUF_LEN - _vlen))
+					return 0;
 			    for (i=0; i<buf_len; ++i)
 		    	{
 						_paramv[_vlen++] = buf[i];
@@ -603,17 +610,20 @@ u32 Get_all_Section_val(FIL* file)
 				in_section = 0;
 
 				memset(section,0,MAX_KEY_LEN);
+				section_len = 0;
 				continue;
 			}
 
 			if(is_section == 1 && buf[i] != ']')
 			{
-				section[section_len++] = buf[i];
+				if(section_len < MAX_KEY_LEN - 1)
+					section[section_len++] = buf[i];
 				continue;
 			}
       else if (buf[i] == ']')
       {
       	memcpy(tmpCHTFS.LINEname,section,section_len);
+		tmpCHTFS.LINEname[section_len] = '\0';
       	tmpCHTFS.is_section = 1;
       	tmpCHTFS.len = section_len;
       	tmpCHTFS.select =0;
@@ -633,7 +643,7 @@ u32 Get_all_Section_val(FIL* file)
         // scan param key name
         if (_kv == 0 && buf[i] != '=')
         {
-            if (_klen >= MAX_KEY_LEN)
+		    if (_klen >= MAX_KEY_LEN - 1)
                 break;
             _paramk[_klen++] = buf[i];
             continue;
@@ -642,6 +652,7 @@ u32 Get_all_Section_val(FIL* file)
         {
       		//DEBUG_printf(":%s ",_paramk);
       		memcpy(tmpCHTFS.LINEname,_paramk,_klen);
+		tmpCHTFS.LINEname[_klen] = '\0';
       		tmpCHTFS.is_section = 0;
 
       		tmpCHTFS.select =0;
@@ -798,11 +809,13 @@ void Analyze_KEYVAL(FIL* file,u32 total)
 	//u32 address;
 	u32 address_len;
 	u32 val_len;
-	char address_buf[8];
+	char address_buf[9];
 	char val_buf[3];
 	u32 is_val;
 	u32 is_address;
 	u32 address_add;
+	u32 malformed_code;
+	u32 cheat_start_count;
 	//char BUF_val[256];
 
 	//DEBUG_printf("total %x  ",total);
@@ -819,19 +832,29 @@ void Analyze_KEYVAL(FIL* file,u32 total)
 		if( ((FM_CHT_LINE*)pCHTbuffer)[tol].select == 1)
 		{
 			gl_cheat_selected_count++;
-			u32 current_select = tol-1;
-			while(((FM_CHT_LINE*)pCHTbuffer)[current_select].is_section != 1)
+			cheat_start_count = gl_cheat_count;
+			if(tol == 0)
+				continue;
+			u32 current_select = tol - 1;
+			while(current_select > 0 && ((FM_CHT_LINE*)pCHTbuffer)[current_select].is_section != 1)
 			{
 				current_select--;
 			}
+			if(((FM_CHT_LINE*)pCHTbuffer)[current_select].is_section != 1)
+				continue;
 			//DEBUG_printf("section %s  ", ((FM_CHT_LINE*)pCHTbuffer)[current_select].LINEname);
-			buflen= Get_CHT_val(&gfile,((FM_CHT_LINE*)pCHTbuffer)[current_select].LINEname,((FM_CHT_LINE*)pCHTbuffer)[tol].LINEname);
+					buflen= Get_CHT_val(&gfile,((FM_CHT_LINE*)pCHTbuffer)[current_select].LINEname,((FM_CHT_LINE*)pCHTbuffer)[tol].LINEname);
+					if(buflen == 0)
+						continue;
 
 			address_len=0;
+			val_len=0;
 			is_val = 0;
 			is_address = 1;
 			address_add = 0;
-			memset(address_buf,0x00,8);
+			malformed_code = 0;
+			memset(address_buf,0x00,sizeof(address_buf));
+			memset(val_buf,0x00,sizeof(val_buf));
 			for(i=0;i<buflen;i++)
 			{
 	      if (_paramv[i] == ' '){
@@ -845,7 +868,7 @@ void Analyze_KEYVAL(FIL* file,u32 total)
 					else{	//next ','
 						//DEBUG_printf(",0x%x =%x", str2hex(address_buf)+address_add,str2hex(val_buf));
 						ST_entry cheat = { str2hex(address_buf)+address_add,str2hex(val_buf) };
-						if(gl_cheat_count < MAX_CHEAT_ENTRIES)
+						if(!malformed_code && gl_cheat_count < MAX_CHEAT_ENTRIES)
 							pCHEAT[gl_cheat_count++] = cheat;
 
 						address_add++;
@@ -857,28 +880,36 @@ void Analyze_KEYVAL(FIL* file,u32 total)
 				}
 				else if(_paramv[i] == ';'){
 					ST_entry cheat = { str2hex(address_buf)+address_add,str2hex(val_buf) };
-					if(gl_cheat_count < MAX_CHEAT_ENTRIES)
+					if(!malformed_code && gl_cheat_count < MAX_CHEAT_ENTRIES)
 						pCHEAT[gl_cheat_count++] = cheat;
 
 
 					is_val = 0;
 					is_address = 1;
 					address_add=0;
-					memset(address_buf,0x00,8);
+					memset(address_buf,0x00,sizeof(address_buf));
 					address_len=0;
 					continue;
 				}
 
 				if(is_val){
-					val_buf[val_len++] = _paramv[i];
+					if(val_len < sizeof(val_buf) - 1)
+						val_buf[val_len++] = _paramv[i];
+					else
+						malformed_code = 1;
 				}
 				else{
-					address_buf[address_len++] = _paramv[i];
+					if(address_len < sizeof(address_buf) - 1)
+						address_buf[address_len++] = _paramv[i];
+					else
+						malformed_code = 1;
 				}
 			}
 			ST_entry cheat = { str2hex(address_buf)+address_add,str2hex(val_buf) };
-			if(gl_cheat_count < MAX_CHEAT_ENTRIES)
+			if(!malformed_code && gl_cheat_count < MAX_CHEAT_ENTRIES)
 				pCHEAT[gl_cheat_count++] = cheat;
+			if(malformed_code)
+				gl_cheat_count = cheat_start_count;
 
 		}
 	}
@@ -995,11 +1026,14 @@ u32 Check_cheat_file(TCHAR *gamefilename)
 {
 	u32 res;
 	UINT ret;
-	TCHAR chtnamebuf[100];
+	TCHAR chtnamebuf[200];
 	u32 filesize;
 	u32 GAMEID=0;
 	u32 i;
+	u32 len;
 	cheat_use_chinese_folder = (gl_select_lang == 0xE2E2);
+	if(!gamefilename)
+		return 0;
 
 	res = f_open(&gfile, gamefilename, FA_READ);
 	if(res == FR_OK)
@@ -1010,8 +1044,11 @@ u32 Check_cheat_file(TCHAR *gamefilename)
 		if(GAMEID==0) return 0;
 	}
 
-	memcpy(chtnamebuf,gamefilename,100);
-	u32 len=strlen(chtnamebuf);
+	strncpy(chtnamebuf, gamefilename, sizeof(chtnamebuf) - 1);
+	chtnamebuf[sizeof(chtnamebuf) - 1] = '\0';
+	len = strlen(chtnamebuf);
+	if(len < 3)
+		return 0;
 	chtnamebuf[len-3] = 'c';
 	chtnamebuf[len-2] = 'h';
 	chtnamebuf[len-1] = 't';
@@ -1037,9 +1074,16 @@ u32 Check_cheat_file(TCHAR *gamefilename)
 			filesize = f_size(&gfile);
 			if(filesize > 0x10000) filesize=0x10000;
 			f_lseek(&gfile, 0x0);
-			f_read(&gfile, tempbuff, filesize, &ret);//pReadCache max 0x20000 Byte
+			res = f_read(&gfile, tempbuff, filesize, &ret);//pReadCache max 0x20000 Byte
+			if(res != FR_OK)
+			{
+				f_close(&gfile);
+				return 0;
+			}
 
-			for(i=0;i<filesize/4;i+=2)
+			/* Each mapping is a pair of 32-bit values. Ignore an incomplete
+			   trailing record, including when the read itself was short. */
+			for(i=0;i+1<ret/4;i+=2)
 			{
 
 				if(tempbuff[i]== GAMEID)
@@ -1070,6 +1114,7 @@ u32 Check_cheat_file(TCHAR *gamefilename)
 					}
 				}
 			}
+			f_close(&gfile);
 		}
 		return 0;
 	}

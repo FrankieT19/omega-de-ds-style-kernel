@@ -1,5 +1,15 @@
 # Changelog
 
+## DS Style v7.5
+
+- Added smooth carousel animations, enabled by default, with small or equal-size side previews and an option to turn animations off.
+- Added a selection pulse before directly launching from an animated carousel.
+- Completed square artwork borders in animated carousel views.
+- Refreshed the startup screen and emulated-system icons, contributed by Merkin.
+- Added an optional Wrap list setting for cycling between the first and last browser entries.
+- Added defensive save and real-time-save file checks so incomplete SD-card reads or writes are reported instead of being treated as successful.
+- Improved SD-card error handling, cheat-file bounds checking, and filename/path validation.
+
 ## DS Style v7.4
 
 - Added a new DS Style text and Markdown viewer with a clean English interface, light and dark modes, faster navigation, and simple formatting for headings, bold text and dividers.

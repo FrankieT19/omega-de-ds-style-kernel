@@ -136,6 +136,10 @@ $(OUTPUT).gba	:	$(OUTPUT).elf
 
 $(OUTPUT).elf	:	$(OFILES)
 
+# Size-optimise the launcher unit so the Original Omega stays below 2 MiB.
+# The animation pixel loop explicitly uses O2 in IWRAM.
+ezkernelnew.o: CFLAGS += -Os
+
 $(OFILES_SOURCES) : $(HFILES)
 
 #---------------------------------------------------------------------------------

@@ -98,6 +98,9 @@ const PREVIEW_CONTEXTS = {
   startSource: "start",
   clock: "start",
   viewMode: "browse",
+  animations: "browse",
+  sideSize: "browse",
+  wrapList: "browse",
   listArt: "browse",
   thumbnails: "browse",
   artBorder: "browse",
@@ -427,6 +430,18 @@ export class LauncherPreview {
 
   drawHorizontal(preferences, palette) {
     this.drawBrowserTopbar(preferences, palette, 11, 4);
+    if (preferences.animations !== "Off" && preferences.sideSize === "Equal") {
+      for (const [key, box, selected] of [
+        ["amke", [-65, 27, 120, 80], false],
+        ["bpee", [185, 27, 120, 80], false],
+        ["bmge", HORIZONTAL_LAYOUT.selected, true],
+      ]) this.drawArtworkInBox(key, box, preferences, {
+        rounded: preferences.roundedCorners !== "Off", border: preferences.artBorder !== "Off", selected,
+      });
+      this.drawWrappedTitle("Mario Golf: Advance Tour", HORIZONTAL_LAYOUT.title, palette.bodyText);
+      this.drawHeart(HORIZONTAL_LAYOUT.heart[0], HORIZONTAL_LAYOUT.heart[1], palette.bodyText);
+      return;
+    }
     const sideY = preferences.horizontalSide === "Top"
       ? HORIZONTAL_LAYOUT.selected[1]
       : preferences.horizontalSide === "Bottom"
@@ -447,6 +462,25 @@ export class LauncherPreview {
 
   drawVertical(preferences, palette) {
     this.drawBrowserTopbar(preferences, palette, 11, 4);
+    if (preferences.animations !== "Off" && preferences.sideSize === "Equal") {
+      for (const [key, box, selected] of [
+        ["amke", [7, 0, 84, 56], false],
+        ["bpee", [7, 124, 84, 56], false],
+        ["bmge", VERTICAL_LAYOUT.selected, true],
+      ]) {
+        this.context.save();
+        this.context.beginPath();
+        this.context.rect(0, 19, 240, 141);
+        this.context.clip();
+        this.drawArtworkInBox(key, box, preferences, {
+          rounded: preferences.roundedCorners !== "Off", border: preferences.artBorder !== "Off", selected,
+        });
+        this.context.restore();
+      }
+      this.drawWrappedTitle("Mario Golf: Advance Tour", VERTICAL_LAYOUT.title, palette.bodyText);
+      this.drawHeart(VERTICAL_LAYOUT.heart[0], VERTICAL_LAYOUT.heart[1], palette.bodyText);
+      return;
+    }
     const box = preferences.thumbnails === "Box";
     const mainVisibleX = box ? VERTICAL_LAYOUT.selected[0] + 14 : VERTICAL_LAYOUT.selected[0];
     const mainVisibleWidth = box ? 56 : VERTICAL_LAYOUT.selected[2];

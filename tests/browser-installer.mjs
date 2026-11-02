@@ -139,6 +139,9 @@ const { installBundledStyle, installDsStyle, loadPersonalisation, savePersonalis
     startSource: "Favourites",
     boot: "SD",
     viewMode: "List + art",
+    animations: "Off",
+    sideSize: "Equal",
+    wrapList: "On",
     listArt: "Top",
     thumbnails: "Box",
     artBorder: "Accent",
@@ -152,7 +155,7 @@ const { installBundledStyle, installDsStyle, loadPersonalisation, savePersonalis
     sounds: "Off",
     quickStart: "L",
   });
-  assert.equal(result.version, "7.4");
+  assert.equal(result.version, "7.5");
   assert.equal(result.personalised, true);
   assert.equal(await exists(root, "ezkernelnew.bin"), true);
   assert.equal(await exists(root, "ezkernel.bin"), false);
@@ -167,6 +170,9 @@ const { installBundledStyle, installDsStyle, loadPersonalisation, savePersonalis
   assert.match(settings, /^Start screen source = Favourites$/m);
   assert.match(settings, /^Boot to = SD$/m);
   assert.match(settings, /^View mode = List \+ art$/m);
+  assert.match(settings, /^Animations = Off$/m);
+  assert.match(settings, /^Side size = Equal$/m);
+  assert.match(settings, /^Wrap list = On$/m);
   assert.match(settings, /^List art = Top$/m);
   assert.match(settings, /^Thumbnails = Box$/m);
   assert.match(settings, /^Art border = Accent$/m);
@@ -181,10 +187,10 @@ const { installBundledStyle, installDsStyle, loadPersonalisation, savePersonalis
 
   const style = await installBundledStyle(root, "omega_de", "analogue");
   assert.equal(style.label, "Analogue Style");
-  assert.equal(await exists(root, "SYSTEM/KERNELS/Analogue Style v7.3.bin"), true);
+  assert.equal(await exists(root, "SYSTEM/KERNELS/Analogue Style v7.5.bin"), true);
   const simpleStyle = await installBundledStyle(root, "omega_de", "simple");
   assert.equal(simpleStyle.label, "Simple Style");
-  assert.equal(await exists(root, "SYSTEM/KERNELS/Simple Style v7.3.bin"), true);
+  assert.equal(await exists(root, "SYSTEM/KERNELS/Simple Style v7.5.bin"), true);
 }
 
 {
@@ -203,8 +209,8 @@ const { installBundledStyle, installDsStyle, loadPersonalisation, savePersonalis
   assert.equal(result.preserved, 1);
   await installBundledStyle(root, "original", "analogue");
   await installBundledStyle(root, "original", "simple");
-  assert.equal(await exists(root, "SYSTEM/KERNELS/Analogue Style v7.3.bin"), true);
-  assert.equal(await exists(root, "SYSTEM/KERNELS/Simple Style v7.3.bin"), true);
+  assert.equal(await exists(root, "SYSTEM/KERNELS/Analogue Style v7.5.bin"), true);
+  assert.equal(await exists(root, "SYSTEM/KERNELS/Simple Style v7.5.bin"), true);
 }
 
 {
@@ -292,6 +298,9 @@ const { installBundledStyle, installDsStyle, loadPersonalisation, savePersonalis
   const settings = await textAt(root, "SYSTEM/SETTINGS.TXT");
   assert.match(settings, /^Language = ภาษาไทย$/m);
   assert.match(settings, /^Rounded corners = No Start$/m);
+  assert.match(settings, /^Animations = On$/m);
+  assert.match(settings, /^Side size = Small$/m);
+  assert.match(settings, /^Wrap list = Off$/m);
 }
 
 console.log("Browser installer scenarios passed.");

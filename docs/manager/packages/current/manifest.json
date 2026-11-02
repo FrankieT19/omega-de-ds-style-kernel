@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "7.4",
+  "version": "7.5",
   "directories": [
     "SYSTEM/BACKUP/SAVER",
     "SYSTEM/CHEAT",
@@ -291,15 +291,15 @@
     "omega_de": {
       "source": "kernels/ezkernelnew.bin",
       "target": "ezkernelnew.bin",
-      "size": 2089672,
-      "sha256": "9c33d1f913a188e08d3ed7549eed66c3ac0bc8d08a7fe14c2b29b19a63942d07",
+      "size": 2087856,
+      "sha256": "375e3117e293ff9625a706e9307f8eaa1ae8027c95401285f0d3078523b895e8",
       "policy": "replace"
     },
     "original": {
       "source": "kernels/ezkernel.bin",
       "target": "ezkernel.bin",
-      "size": 2089576,
-      "sha256": "be118b3f2e3b575d8ae05ec604bde26ef8fe12b6e498bbb272a1659832d22e32",
+      "size": 2087880,
+      "sha256": "41c1dc762b0a84fba5ff6d4647ab647be036d142464a9639921ea97d9f5e5de4",
       "policy": "replace"
     }
   },
@@ -309,17 +309,17 @@
       "description": "A monochrome style inspired by the minimal Analogue Pocket interface.",
       "models": {
         "omega_de": {
-          "source": "styles/omega_de/Analogue Style v7.4.bin",
-          "target": "SYSTEM/KERNELS/Analogue Style v7.4.bin",
-          "size": 2098256,
-          "sha256": "9f4ffff36eada3b5655657a86ab26f103447e8ebae816e0f42d02ab7dbf6f7c1",
+          "source": "styles/omega_de/Analogue Style v7.5.bin",
+          "target": "SYSTEM/KERNELS/Analogue Style v7.5.bin",
+          "size": 2097928,
+          "sha256": "e8019cd3b7ee35b344de67d3fc4e7028f1221e8dac1e043ed7c94acb0f42fb10",
           "policy": "replace"
         },
         "original": {
-          "source": "styles/original/Analogue Style v7.4.bin",
-          "target": "SYSTEM/KERNELS/Analogue Style v7.4.bin",
-          "size": 2087976,
-          "sha256": "15fce037112b720faf5a3ebdbccbe68d5ffb062a580f5d7ea53704209f03e573",
+          "source": "styles/original/Analogue Style v7.5.bin",
+          "target": "SYSTEM/KERNELS/Analogue Style v7.5.bin",
+          "size": 2087848,
+          "sha256": "26397a52fffd4508a2f29ab222e69dd4707f23c02922b60f76ef1dbfd2c15af6",
           "policy": "replace"
         }
       }
@@ -329,17 +329,17 @@
       "description": "A homage to Sterophonick's Simple theme.",
       "models": {
         "omega_de": {
-          "source": "styles/omega_de/Simple Style v7.4.bin",
-          "target": "SYSTEM/KERNELS/Simple Style v7.4.bin",
-          "size": 2596264,
-          "sha256": "21c0930405ae4eea0d2531ce59b8e621aaa3b159787b2e7e899fc1e4184b176f",
+          "source": "styles/omega_de/Simple Style v7.5.bin",
+          "target": "SYSTEM/KERNELS/Simple Style v7.5.bin",
+          "size": 2596344,
+          "sha256": "95ed4ae45b1a35c964795a839ded2906c5497a3119257f2c4098268481b20c57",
           "policy": "replace"
         },
         "original": {
-          "source": "styles/original/Simple Style v7.4.bin",
-          "target": "SYSTEM/KERNELS/Simple Style v7.4.bin",
-          "size": 2088008,
-          "sha256": "c1fc2f671edd9e48e406ff40bde64d6552ef19d9b20dedb8fdc32036efb78bee",
+          "source": "styles/original/Simple Style v7.5.bin",
+          "target": "SYSTEM/KERNELS/Simple Style v7.5.bin",
+          "size": 2087848,
+          "sha256": "95b3e65ee023932a3862336fb89cf574fc78d59ce77beeb5f68b5656c0781e83",
           "policy": "replace"
         }
       }

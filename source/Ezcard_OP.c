@@ -117,6 +117,9 @@ u32 IWRAM_CODE Read_SD_sectors(u32 address,u16 count,u8* SDbuffer)
 				delay(5000);
 				goto read_again;
 			}
+			/* Do not expose stale SRAM contents as a successful sector read. */
+			SD_Disable();
+			return 1;
 		}
 		dmaCopy((void*)0x9E00000, SDbuffer+i*512, blocks*512);
 	}
@@ -147,7 +150,11 @@ u32 IWRAM_CODE Write_SD_sectors(u32 address,u16 count, const u8* SDbuffer)
 
 		res = Wait_SD_Response();
 		if(res==1)
+		{
+			/* Leave the cartridge SD interface in the same state as on success. */
+			SD_Disable();
 			return 1;
+		}
 	}
 	delay(3000);
 	SD_Disable();

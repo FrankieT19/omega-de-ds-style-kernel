@@ -12,7 +12,7 @@ Read the complete [DS Style User Guide](https://frankiet19.github.io/omega-de-ds
 ## Web
 
 - [DS Style homepage](https://frankiet19.github.io/omega-de-ds-style-kernel/project/)
-- [DS Style Manager](https://frankiet19.github.io/omega-de-ds-style-kernel/manager/) - guided installation, starting preferences, artwork and style tools
+- [DS Style Manager](https://frankiet19.github.io/omega-de-ds-style-kernel/manager/) - guided installation, preferences, artwork and styles
 
 ## Features
 
@@ -23,9 +23,11 @@ Read the complete [DS Style User Guide](https://frankiet19.github.io/omega-de-ds
 - Title and box-art thumbnail modes
 - Favourite and recent game support
 - Multi-language launcher text, including Chinese and Thai
-- Bundled text and Markdown viewer with light and dark presentation modes
-- Optional folder artwork for every supported emulated system
+- Bundled text and Markdown viewer with light and dark modes
+- Optional folder artwork for supported emulated systems
 - UI sounds
+- Smooth carousel animations enabled by default, adjustable side-preview sizes and a launch pulse
+- Optional browser wrapping and defensive save-file checks
 - Runtime settings stored in readable `SYSTEM/SETTINGS.TXT`
 
 ## Building
@@ -63,6 +65,7 @@ For normal users, the recommended route is **DS Style Customiser**, which create
 - Original kernel source by EZ-FLASH
 - SimpleLight custom kernel by Sterophonick
 - DS Style custom kernel by FrankieT19
+- Contributions by Merkin
 - Thai language support by aidiadayo
 - Case-sensitive `HZK12.h` include fix by Kekun
 - FatFs by ChaN, as used by the upstream kernel

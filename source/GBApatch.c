@@ -926,8 +926,13 @@ u32 Check_RTS(TCHAR* gamefilename)
 	u32 res;
 
 	TCHAR rtsnamebuf[100];
-	memcpy(rtsnamebuf,gamefilename,100);
-	u32 len=strlen(rtsnamebuf);
+	u32 len = 0;
+	while(len < sizeof(rtsnamebuf) && gamefilename[len])
+		len++;
+	if(len >= sizeof(rtsnamebuf) || len < 3)
+		return 0;
+	memcpy(rtsnamebuf,gamefilename,len);
+	rtsnamebuf[len] = '\0';
 	rtsnamebuf[len-3] = 'r';
 	rtsnamebuf[len-2] = 't';
 	rtsnamebuf[len-1] = 's';
@@ -952,21 +957,23 @@ u32 Check_RTS(TCHAR* gamefilename)
 		if(res==FR_OK)
 		{
 			int i;
-			unsigned int written;
+			UINT written;
+			FRESULT write_result = FR_OK;
+			FRESULT close_result;
 			memset(pReadCache,0xFF,0x200*4);
 			for(i=0;i<(0x70000)/0x800 ;i++)
 			{
-	      f_write(&gfile, pReadCache, 0x200*4, (UINT*)&written);
-	      if(written != 0x200*4) break;
-	    }
-	    f_close(&gfile);
-
-	    rtsfilesize = 0x70000;
+				write_result = f_write(&gfile, pReadCache, 0x200*4, &written);
+				if(write_result != FR_OK || written != 0x200*4) break;
+			}
+			close_result = f_close(&gfile);
+			rtsfilesize = (i == (0x70000)/0x800 && close_result == FR_OK) ? 0x70000 : 0;
 		}
 		else
 			rtsfilesize = 0;
 	}
-	LoadRTSfile(rtsnamebuf);
+	if(rtsfilesize && !LoadRTSfile(rtsnamebuf))
+		rtsfilesize = 0;
 	if(rtsfilesize)
 	{
 		res = Check_game_RTS_FAT(rtsnamebuf,3);//rts FAT

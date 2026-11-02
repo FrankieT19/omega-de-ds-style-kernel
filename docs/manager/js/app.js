@@ -38,6 +38,9 @@ const state = {
     startSource: "Last played",
     boot: "Start",
     viewMode: "Horizontal",
+    animations: "On",
+    sideSize: "Small",
+    wrapList: "Off",
     listArt: "Bottom",
     thumbnails: "Title",
     artBorder: "Off",
@@ -131,6 +134,9 @@ function renderPersonalisation() {
   $("#setup-start-source").value = preferences.startSource;
   $("#setup-boot").value = preferences.boot;
   $("#setup-view-mode").value = preferences.viewMode;
+  $("#setup-animations").checked = preferences.animations === "On";
+  $("#setup-side-size").value = preferences.sideSize;
+  $("#setup-wrap-list").checked = preferences.wrapList === "On";
   $("#setup-list-art").value = preferences.listArt;
   $("#setup-thumbnails").value = preferences.thumbnails;
   $("#setup-art-border").value = preferences.artBorder;
@@ -164,6 +170,7 @@ function refreshPersonalisationUi(preference = null) {
   const preferences = state.personalisation;
   $("#setup-start-source").disabled = preferences.startScreen === "Off";
   $("#setup-list-art-field").hidden = preferences.viewMode !== "List + art";
+  $("#setup-side-size").disabled = preferences.animations === "Off";
   if (preference) launcherPreview?.showPreference(preference);
   else launcherPreview?.render();
 }
@@ -686,6 +693,7 @@ const setupSelectBindings = {
   "#setup-start-source": "startSource",
   "#setup-boot": "boot",
   "#setup-view-mode": "viewMode",
+  "#setup-side-size": "sideSize",
   "#setup-list-art": "listArt",
   "#setup-thumbnails": "thumbnails",
   "#setup-art-border": "artBorder",
@@ -705,6 +713,8 @@ for (const [selector, preference] of Object.entries(setupSelectBindings)) {
 }
 const setupToggleBindings = {
   "#setup-start-screen": "startScreen",
+  "#setup-animations": "animations",
+  "#setup-wrap-list": "wrapList",
   "#setup-hide-system": "hideSystemFiles",
   "#setup-list-folders": "listFolders",
   "#setup-clean-list": "cleanList",
