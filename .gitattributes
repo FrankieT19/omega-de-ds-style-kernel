@@ -16,3 +16,6 @@
 *.pdf binary
 *.dll binary
 *.exe binary
+
+# Installer payloads are checksum-verified; preserve their exact download bytes.
+docs/manager/packages/current/common/** -text
