@@ -1,4 +1,4 @@
-const CACHE_NAME = "ds-style-manager-v75";
+const CACHE_NAME = "ds-style-manager-v80";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -8,6 +8,7 @@ const CORE_ASSETS = [
   "./js/filesystem.js",
   "./js/images.js",
   "./js/installer.js",
+  "./vendor/fflate.js",
   "./js/preview.js",
   "./data/gba-library.json",
   "./assets/preview/font.bin",

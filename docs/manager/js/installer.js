@@ -1,3 +1,4 @@
+import { unzipSync } from "../vendor/fflate.js";
 import {
   findEntryCaseInsensitive,
   getDirectory,
@@ -26,10 +27,9 @@ const KERNEL_FILES = {
 };
 const NAME_NOTE = "# The name shown on the top bar displays up to 11 characters.";
 const PERSONAL_SETTING_OPTIONS = {
-  "Theme": ["Light", "Dark"],
+  "Theme": ["Light", "Dark", "Auto"],
   "Colour": ["Pale Blue", "Light Blue", "Blue", "Dark Blue", "Green", "Pale Green", "Bright Green", "Lime", "Yellow", "Red", "Orange", "Brown", "Pink", "Pale Pink", "Magenta", "Purple"],
   "Language": ["English (UK)", "English (US)", "Español", "Français", "Português", "Deutsch", "Türkçe", "Italiano", "Nederlands", "Svenska", "Suomi", "Chinese", "ภาษาไทย"],
-  "Start screen": ["On", "Off"],
   "Start screen source": ["Last played", "Favourites"],
   "Boot to": ["Start", "SD", "NOR", "Last game", "Recents", "Favourites"],
   "View mode": ["List", "List + art", "Horizontal", "Vertical"],
@@ -42,9 +42,7 @@ const PERSONAL_SETTING_OPTIONS = {
   "Rounded corners": ["Full", "No Start", "Off"],
   "Vertical side": ["Center", "Left", "Right"],
   "Horizontal side": ["Center", "Top", "Bottom"],
-  "Hide system files": ["On", "Off"],
   "List folders": ["On", "Off"],
-  "Clean list": ["On", "Off"],
   "Clock format": ["24 hour", "12 hour"],
   "Sounds": ["On", "Off"],
   "Quick start hotkey": ["Start", "Select", "L", "A", "B"],
@@ -60,7 +58,7 @@ const PERSONAL_DEFAULTS = Object.freeze({
   viewMode: "Horizontal",
   animations: "On",
   sideSize: "Small",
-  wrapList: "Off",
+  wrapList: "On",
   listArt: "Bottom",
   thumbnails: "Title",
   artBorder: "Off",
@@ -68,8 +66,8 @@ const PERSONAL_DEFAULTS = Object.freeze({
   verticalSide: "Center",
   horizontalSide: "Center",
   hideSystemFiles: "On",
-  listFolders: "Off",
-  cleanList: "Off",
+  listFolders: "On",
+  cleanList: "On",
   clock: "24 hour",
   sounds: "On",
   quickStart: "Start",
@@ -78,7 +76,6 @@ const PREFERENCE_KEYS = {
   theme: "Theme",
   colour: "Colour",
   language: "Language",
-  startScreen: "Start screen",
   startSource: "Start screen source",
   boot: "Boot to",
   viewMode: "View mode",
@@ -91,9 +88,7 @@ const PREFERENCE_KEYS = {
   roundedCorners: "Rounded corners",
   verticalSide: "Vertical side",
   horizontalSide: "Horizontal side",
-  hideSystemFiles: "Hide system files",
   listFolders: "List folders",
-  cleanList: "Clean list",
   clock: "Clock format",
   sounds: "Sounds",
   quickStart: "Quick start hotkey",
@@ -377,6 +372,26 @@ async function preparePayload(model, onProgress) {
   }
 
   await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  if (manifest.artworkArchive) {
+    report(onProgress, { percent: 30, title: "Preparing included artwork", copy: "Downloading and verifying the artwork and cheat library..." });
+    const archive = await fetchPackageEntry(manifest.artworkArchive);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const files = unzipSync(new Uint8Array(archive.bytes), {
+      filter: ({ name, originalSize }) => {
+        if (name.endsWith("/")) return false;
+        if (!/^SYSTEM\/(IMGS|IMGS2|CHEAT)\//.test(name) || name.includes("..") || name.includes("\\") || originalSize > 4 * 1024 * 1024) {
+          throw new Error("The included artwork package contains an invalid path or file size.");
+        }
+        return true;
+      },
+    });
+    const entries = Object.entries(files);
+    const total = entries.reduce((sum, [, bytes]) => sum + bytes.length, 0);
+    if (entries.length !== manifest.artworkArchive.fileCount || total !== manifest.artworkArchive.uncompressedSize) {
+      throw new Error("The included artwork package is incomplete. Your card has not been changed.");
+    }
+    for (const [target, bytes] of entries) payload.push({ entry: { target, policy: "preserve" }, bytes });
+  }
   return { manifest, payload, kernelTarget: kernel.target };
 }
 

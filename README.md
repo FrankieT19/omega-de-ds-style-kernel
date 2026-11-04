@@ -5,6 +5,12 @@ DS Style is a custom kernel for the **EZ-FLASH OMEGA Definitive Edition**. It is
 > [!WARNING]
 > This repository is for the **EZ-FLASH OMEGA Definitive Edition only**. Do not flash this build to the original EZ-FLASH OMEGA.
 
+## Current Release
+
+DS Style v8.0. Copy the complete `SYSTEM` folder and the correct kernel file from the release to your SD-card root, then boot while holding **R**. Artwork is included; no separate optional-artwork step is needed. Back up your card first. Existing games, saves and settings remain compatible.
+
+Supports the original Omega DE **Rev.A and Rev.B**, not the newer **Omega Definitive Edition B (EZODE-B)**.
+
 ## User Guide
 
 Read the complete [DS Style User Guide](https://frankiet19.github.io/omega-de-ds-style-kernel/) for installation, everyday use, artwork, customisation and troubleshooting.
@@ -17,17 +23,17 @@ Read the complete [DS Style User Guide](https://frankiet19.github.io/omega-de-ds
 ## Features
 
 - DS-style launcher interface
-- Multiple colour themes and light/dark presentation support
+- Multiple accent colours and Light, Dark or clock-based Auto theme
 - Customisable launcher assets through DS Style Customiser
 - List, List + Art, horizontal carousel, and vertical carousel file views
 - Title and box-art thumbnail modes
 - Favourite and recent game support
 - Multi-language launcher text, including Chinese and Thai
 - Bundled text and Markdown viewer with light and dark modes
-- Optional folder artwork for supported emulated systems
+- Included title, box and console-folder artwork in the standard installation
 - UI sounds
 - Smooth carousel animations enabled by default, adjustable side-preview sizes and a launch pulse
-- Optional browser wrapping and defensive save-file checks
+- Wrap-around browsing and menus enabled by default, with defensive file checks
 - Runtime settings stored in readable `SYSTEM/SETTINGS.TXT`
 
 ## Building
@@ -66,6 +72,7 @@ For normal users, the recommended route is **DS Style Customiser**, which create
 - SimpleLight custom kernel by Sterophonick
 - DS Style custom kernel by FrankieT19
 - Contributions by Merkin
+- Contributions by timdmackey
 - Thai language support by aidiadayo
 - Case-sensitive `HZK12.h` include fix by Kekun
 - FatFs by ChaN, as used by the upstream kernel

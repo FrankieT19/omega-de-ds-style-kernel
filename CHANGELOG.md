@@ -1,14 +1,20 @@
 # Changelog
 
-## DS Style v7.5
+## DS Style v8.0
 
-- Added smooth carousel animations, enabled by default, with small or equal-size side previews and an option to turn animations off.
-- Added a selection pulse before directly launching from an animated carousel.
-- Completed square artwork borders in animated carousel views.
-- Refreshed the startup screen and emulated-system icons, contributed by Merkin.
-- Added an optional Wrap list setting for cycling between the first and last browser entries.
-- Added defensive save and real-time-save file checks so incomplete SD-card reads or writes are reported instead of being treated as successful.
-- Improved SD-card error handling, cheat-file bounds checking, and filename/path validation.
+- Added smooth animated horizontal and vertical carousels, enabled by default, with adjustable side-art size and a direct-launch selection pulse.
+- Refined the Start screen with pale selection-corner highlights and responsive easing animations.
+- Refined menu sounds, square-framed pop-ups, startup transitions and theme-matched launch fades.
+- Added a transparent loading ring centred on the selected artwork while preparing a game.
+- Simplified Settings with contextual View options, Auto theme (dark from 20:00 to 08:00), and Open SYSTEM for file management.
+- Made clean list names standard and kept the Start screen available independently of the Boot to choice.
+- Enabled wrap-around browsing by default, including settings and pop-up menus; saved Off preferences remain unchanged.
+- Made double-tap Select add or remove favourites without a confirmation popup.
+- Refreshed splash screens and system icons, with contributions by Merkin.
+- Added defensive save and real-time-save I/O checks, SD-card error handling, cheat bounds checking and filename/path validation.
+- Prevented fragmented-file tables from overwriting adjacent data when their capacity is exceeded.
+- Included artwork in the standard SYSTEM folder instead of a separate optional-extras folder.
+- Updated in-kernel guidance, language support, Customiser compatibility, manager and user guide.
 
 ## DS Style v7.4
 

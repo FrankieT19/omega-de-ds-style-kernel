@@ -20,6 +20,7 @@
 
 
 #include <string.h>
+#include <gba_base.h>
 #include "ff.h"			/* Declarations of FatFs API */
 #include "diskio.h"		/* Declarations of device I/O functions */
 
@@ -518,9 +519,9 @@ static const BYTE LfnOfs[] = {1,3,5,7,9,14,16,18,20,22,24,28,30};	/* FAT: Offset
 
 #if FF_USE_LFN == 1		/* LFN enabled with static working buffer */
 #if FF_FS_EXFAT
-static BYTE	DirBuf[MAXDIRB(FF_MAX_LFN)];	/* Directory entry block scratchpad buffer */
+static BYTE	DirBuf[MAXDIRB(FF_MAX_LFN)] EWRAM_BSS;	/* Directory entry block scratchpad buffer */
 #endif
-static WCHAR LfnBuf[FF_MAX_LFN + 1];		/* LFN working buffer */
+static WCHAR LfnBuf[FF_MAX_LFN + 1] EWRAM_BSS;		/* LFN working buffer */
 #define DEF_NAMBUF
 #define INIT_NAMBUF(fs)
 #define FREE_NAMBUF()

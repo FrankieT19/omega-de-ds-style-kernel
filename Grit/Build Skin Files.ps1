@@ -8,6 +8,8 @@ $source = Join-Path $root "source"
 $assetHeader = Join-Path $source "launcher_theme_assets.h"
 Add-Type -AssemblyName System.Drawing
 $topBarHeight = 19
+$gritExecutable = "C:\devkitPro\tools\bin\grit.exe"
+if (!(Test-Path -LiteralPath $gritExecutable)) { $gritExecutable = Join-Path $gritDir "grit.exe" }
 
 function Path-Exists($path) {
     return Test-Path -LiteralPath $path
@@ -143,9 +145,9 @@ function Convert-ThemeFolder($spec) {
         try {
             Save-CompatibleBmp $bmp.FullName $tempBmp $topStripOnly
             $gritInput = $tempBmp
-            & (Join-Path $gritDir "grit.exe") $gritInput -gu8 -gb -gB16 -ftc -s "gImage_${input}_$($spec.Suffix)___"
+            & $gritExecutable $gritInput -gu8 -gb -gB16 -ftc -s "gImage_${input}_$($spec.Suffix)___"
             if ($LASTEXITCODE -ne 0) {
-                & (Join-Path $gritDir "grit.exe") $bmp.FullName -gu8 -gb -gB16 -ftc -s "gImage_${input}_$($spec.Suffix)___"
+                & $gritExecutable $bmp.FullName -gu8 -gb -gB16 -ftc -s "gImage_${input}_$($spec.Suffix)___"
                 if ($LASTEXITCODE -ne 0) {
                     throw "grit failed for $($bmp.FullName)"
                 }
@@ -179,7 +181,7 @@ function Convert-SplashImage() {
     Push-Location -LiteralPath $gritDir
     try {
         Save-CompatibleBmp $png $tempBmp $false
-        & (Join-Path $gritDir "grit.exe") $tempBmp -gu8 -gb -gB16 -ftc -s "gImage_splash___"
+        & $gritExecutable $tempBmp -gu8 -gb -gB16 -ftc -s "gImage_splash___"
         if ($LASTEXITCODE -ne 0) {
             throw "grit failed for $png"
         }
@@ -191,6 +193,7 @@ function Convert-SplashImage() {
         $text = Get-Content -LiteralPath $cFile -Raw
         $text = $text.Replace("___Bitmap", "").Replace("___", "")
         Set-Content -LiteralPath $hFile -Value $text -NoNewline -Encoding ASCII
+        & (Join-Path $gritDir "Pack Splash.ps1")
         Remove-Item -LiteralPath $cFile -Force
         $localH = Join-Path $gritDir "SPLASH.h"
         if (Path-Exists $localH) { Remove-Item -LiteralPath $localH -Force }

@@ -641,8 +641,10 @@ void DEBUG_printf(const char *format, ...)
     }
 }
 //---------------------------------------------------------------------------------
+extern u32 Launcher_DrawLaunchProgress(const char *str) __attribute__((weak));
 void ShowbootProgress(char *str)
 {
+    if(Launcher_DrawLaunchProgress && Launcher_DrawLaunchProgress(str)) return;
     u16 str_glyphs = DrawText12VisibleLength(str);
     Clear(0,160-15,240,15,gl_color_cheat_black,1);
 	DrawHZText12(gl_loading_game,0,(240-DrawText12VisibleLength(gl_loading_game)*6)/2,72,0x7FFF,1);

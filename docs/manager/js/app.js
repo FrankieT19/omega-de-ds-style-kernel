@@ -40,7 +40,7 @@ const state = {
     viewMode: "Horizontal",
     animations: "On",
     sideSize: "Small",
-    wrapList: "Off",
+    wrapList: "On",
     listArt: "Bottom",
     thumbnails: "Title",
     artBorder: "Off",
@@ -48,8 +48,8 @@ const state = {
     verticalSide: "Center",
     horizontalSide: "Center",
     hideSystemFiles: "On",
-    listFolders: "Off",
-    cleanList: "Off",
+    listFolders: "On",
+    cleanList: "On",
     clock: "24 hour",
     sounds: "On",
     quickStart: "Start",
@@ -130,7 +130,6 @@ function renderPersonalisation() {
   $("#setup-name").value = preferences.name;
   $("#setup-colour").value = preferences.colour;
   $("#setup-language").value = preferences.language;
-  $("#setup-start-screen").checked = preferences.startScreen === "On";
   $("#setup-start-source").value = preferences.startSource;
   $("#setup-boot").value = preferences.boot;
   $("#setup-view-mode").value = preferences.viewMode;
@@ -143,9 +142,7 @@ function renderPersonalisation() {
   $("#setup-rounded").value = preferences.roundedCorners;
   $("#setup-vertical-side").value = preferences.verticalSide;
   $("#setup-horizontal-side").value = preferences.horizontalSide;
-  $("#setup-hide-system").checked = preferences.hideSystemFiles === "On";
   $("#setup-list-folders").checked = preferences.listFolders === "On";
-  $("#setup-clean-list").checked = preferences.cleanList === "On";
   $("#setup-sounds").checked = preferences.sounds === "On";
   $("#setup-quick-start").value = preferences.quickStart;
   $("#setup-colour-swatch").style.background = COLOUR_SWATCHES[preferences.colour] || COLOUR_SWATCHES["Pale Blue"];
@@ -168,7 +165,7 @@ function markPersonalisationDirty(preference = null) {
 
 function refreshPersonalisationUi(preference = null) {
   const preferences = state.personalisation;
-  $("#setup-start-source").disabled = preferences.startScreen === "Off";
+  $("#setup-start-source").disabled = false;
   $("#setup-list-art-field").hidden = preferences.viewMode !== "List + art";
   $("#setup-side-size").disabled = preferences.animations === "Off";
   if (preference) launcherPreview?.showPreference(preference);
@@ -712,12 +709,9 @@ for (const [selector, preference] of Object.entries(setupSelectBindings)) {
   });
 }
 const setupToggleBindings = {
-  "#setup-start-screen": "startScreen",
   "#setup-animations": "animations",
   "#setup-wrap-list": "wrapList",
-  "#setup-hide-system": "hideSystemFiles",
   "#setup-list-folders": "listFolders",
-  "#setup-clean-list": "cleanList",
   "#setup-sounds": "sounds",
 };
 for (const [selector, preference] of Object.entries(setupToggleBindings)) {

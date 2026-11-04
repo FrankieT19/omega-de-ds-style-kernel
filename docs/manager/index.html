@@ -143,6 +143,7 @@
                     <div class="setup-segmented" data-setup-control="theme">
                       <button class="is-active" type="button" data-value="Light" aria-pressed="true"><i data-lucide="sun"></i> Light</button>
                       <button type="button" data-value="Dark" aria-pressed="false"><i data-lucide="moon"></i> Dark</button>
+                      <button type="button" data-value="Auto" aria-pressed="false"><i data-lucide="clock"></i> Auto</button>
                     </div>
                   </fieldset>
                   <label class="setup-field">
@@ -172,10 +173,6 @@
                       <option value="Last game">Last game</option><option value="Recents">Recently played</option><option value="Favourites">Favourites</option>
                     </select>
                   </label>
-                  <label class="setup-field setup-toggle">
-                    <span class="toggle-copy"><strong>Start screen</strong><small>Show the launcher home screen.</small></span>
-                    <input id="setup-start-screen" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span>
-                  </label>
                   <label class="setup-field"><span>Start screen game</span><select id="setup-start-source"><option>Last played</option><option>Favourites</option></select></label>
                   <label class="setup-field"><span>View mode</span><select id="setup-view-mode"><option>List</option><option>List + art</option><option>Horizontal</option><option>Vertical</option></select></label>
                   <label class="setup-field setup-toggle">
@@ -183,20 +180,12 @@
                     <input id="setup-animations" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span>
                   </label>
                   <label class="setup-field setup-toggle">
-                    <span class="toggle-copy"><strong>Wrap list</strong><small>Continue browsing past the first or last entry.</small></span>
-                    <input id="setup-wrap-list" type="checkbox"><span class="toggle-track" aria-hidden="true"><i></i></span>
+                    <span class="toggle-copy"><strong>Wrap around</strong><small>Continue past the first or last entry in browsers and menus.</small></span>
+                    <input id="setup-wrap-list" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span>
                   </label>
                   <label class="setup-field setup-toggle">
                     <span class="toggle-copy"><strong>List folders</strong><small>Use list view for folders without games.</small></span>
-                    <input id="setup-list-folders" type="checkbox"><span class="toggle-track" aria-hidden="true"><i></i></span>
-                  </label>
-                  <label class="setup-field setup-toggle">
-                    <span class="toggle-copy"><strong>Clean list</strong><small>Hide extensions and right-side file details.</small></span>
-                    <input id="setup-clean-list" type="checkbox"><span class="toggle-track" aria-hidden="true"><i></i></span>
-                  </label>
-                  <label class="setup-field setup-toggle">
-                    <span class="toggle-copy"><strong>Hide system files</strong><small>Keep support files out of the root browser.</small></span>
-                    <input id="setup-hide-system" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span>
+                    <input id="setup-list-folders" type="checkbox" checked><span class="toggle-track" aria-hidden="true"><i></i></span>
                   </label>
                   <label class="setup-field"><span>Quick start button</span><select id="setup-quick-start"><option>Start</option><option>Select</option><option>L</option><option>A</option><option>B</option></select></label>
                 </div>

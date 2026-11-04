@@ -1,3 +1,8 @@
+function isDarkTheme(preferences) {
+  const hour = new Date().getHours();
+  return preferences.theme === "Dark" || (preferences.theme === "Auto" && (hour >= 20 || hour < 8));
+}
+
 const ASSET_ROOT = new URL("../assets/preview/", import.meta.url);
 
 const COLOUR_FOLDERS = {
@@ -230,7 +235,7 @@ export class LauncherPreview {
       const scene = this.effectiveScene(preferences);
       const mode = this.previewMode(preferences);
       const backgroundName = scene === "start" ? "start" : this.backgroundForMode(mode);
-      const themeFolder = preferences.theme === "Dark" ? "dark" : "light";
+      const themeFolder = isDarkTheme(preferences) ? "dark" : "light";
       const colourFolder = COLOUR_FOLDERS[preferences.colour] || "pale_blue";
       const assets = await Promise.all([
         this.loadImage(`backgrounds/${themeFolder}/${backgroundName}.png`),
@@ -302,7 +307,7 @@ export class LauncherPreview {
 
   palette(preferences) {
     return {
-      bodyText: preferences.theme === "Dark" ? "#ffffff" : "#000000",
+      bodyText: isDarkTheme(preferences) ? "#ffffff" : "#000000",
       topbarText: "#ffffff",
       selectedText: "#ffffff",
       accent: rgb5(ACCENT_RGB5[preferences.colour] || ACCENT_RGB5["Pale Blue"]),
@@ -361,7 +366,7 @@ export class LauncherPreview {
       this.translated(preferences, "DSTEXT_NOR_FLASH", "NOR Flash"),
       START_LAYOUT.norText[0], START_LAYOUT.norText[1], START_LAYOUT.norText[2], "center", palette.bodyText,
     );
-    this.drawSelectionCorners(START_LAYOUT.lastBox, palette.accent);
+    this.drawSelectionCorners(START_LAYOUT.lastBox, palette.accent, ACCENT_RGB5[preferences.colour]);
   }
 
   drawBrowse(preferences, mode) {
@@ -588,15 +593,15 @@ export class LauncherPreview {
     pixels.forEach(([offsetX, offsetY, pixelWidth, pixelHeight]) => context.fillRect(x + offsetX, y + offsetY, pixelWidth, pixelHeight));
   }
 
-  drawSelectionCorners([x, y, width, height], colour) {
+  drawSelectionCorners([x, y, width, height], colour, accent = [10, 14, 17]) {
     const context = this.context;
+    const rectangles = [];
+    [[x, y], [x + width - 9, y], [x, y + height - 3], [x + width - 9, y + height - 3]].forEach(([cx, cy]) => rectangles.push([cx, cy, 9, 3]));
+    [[x, y], [x + width - 3, y], [x, y + height - 9], [x + width - 3, y + height - 9]].forEach(([cx, cy]) => rectangles.push([cx, cy, 3, 9]));
+    context.fillStyle = rgb5(accent.map((channel) => 31 - ((31 - channel) >> 2)));
+    rectangles.forEach(([cx, cy, w, h]) => context.fillRect(cx - 1, cy - 1, w + 2, h + 2));
     context.fillStyle = colour;
-    [[x, y], [x + width - 9, y], [x, y + height - 3], [x + width - 9, y + height - 3]].forEach(([cornerX, cornerY]) => {
-      context.fillRect(cornerX, cornerY, 9, 3);
-    });
-    [[x, y], [x + width - 3, y], [x, y + height - 9], [x + width - 3, y + height - 9]].forEach(([cornerX, cornerY]) => {
-      context.fillRect(cornerX, cornerY, 3, 9);
-    });
+    rectangles.forEach(([cx, cy, w, h]) => context.fillRect(cx, cy, w, h));
   }
 
   drawHeart(x, y, colour) {
