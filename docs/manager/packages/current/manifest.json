@@ -311,15 +311,15 @@
         "omega_de": {
           "source": "styles/omega_de/analogue.bin",
           "target": "SYSTEM/KERNELS/Analogue Style v8.0.bin",
-          "size": 2042216,
-          "sha256": "4c3a52654ef812deac93bb5e993dc249396d89b86a95b6af33452447f9ba819a",
+          "size": 2005592,
+          "sha256": "4a0b477621162bc088b6e9fabe9c7421fbb7a3f44320da13d4f313a541adfae9",
           "policy": "replace"
         },
         "original": {
           "source": "styles/original/analogue.bin",
           "target": "SYSTEM/KERNELS/Analogue Style v8.0.bin",
-          "size": 2029792,
-          "sha256": "13105979aeab1be714b9b6838f7e19b463c7bb6783aac014611586f8a0328c07",
+          "size": 1993160,
+          "sha256": "f1a34db63f940d3fe45a071c27412cd3477637fed061585eb46859792ffdce1e",
           "policy": "replace"
         }
       }
@@ -331,15 +331,15 @@
         "omega_de": {
           "source": "styles/omega_de/simple.bin",
           "target": "SYSTEM/KERNELS/Simple Style v8.0.bin",
-          "size": 2541352,
-          "sha256": "6c9580dfccd2d13668f486a3ead8db3a87331e9b4f12c4786d70bd81743c38ff",
+          "size": 2540336,
+          "sha256": "c6f06e56c369800c3c30938fb7cc5f3ff3b5eaf718d39ce5fce0e183615ef32f",
           "policy": "replace"
         },
         "original": {
           "source": "styles/original/simple.bin",
           "target": "SYSTEM/KERNELS/Simple Style v8.0.bin",
-          "size": 2030520,
-          "sha256": "1c4cecaa1bdddeb16b05755b0664b51e515bcf2995745f0da27eccfd862ac375",
+          "size": 2029928,
+          "sha256": "fd388a0938a41a7fac6884831e4deb474486511f68fd05edb0ae55635a2c3716",
           "policy": "replace"
         }
       }
