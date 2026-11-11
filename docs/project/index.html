@@ -27,6 +27,10 @@
       box-sizing: border-box;
     }
 
+    @media (prefers-reduced-motion: no-preference) {
+      html { scroll-behavior: smooth; }
+    }
+
     body {
       margin: 0;
       background: var(--paper);
@@ -218,10 +222,6 @@
       gap: 54px;
       align-items: end;
       margin-bottom: 50px;
-    }
-
-    .section-inner [id] {
-      scroll-margin-top: 24px;
     }
 
     .section-heading h2,
@@ -871,9 +871,9 @@
       </div>
     </section>
 
-    <section class="section features">
+    <section class="section features" id="features">
       <div class="section-inner">
-        <div class="section-heading" id="features">
+        <div class="section-heading">
           <h2>Designed for everyday play.</h2>
           <p>
             A faithful DS-inspired interface, thoughtful shortcuts, flexible artwork,
@@ -951,9 +951,9 @@
       </div>
     </section>
 
-    <section class="section tools">
+    <section class="section tools" id="tools">
       <div class="section-inner">
-        <div class="section-heading" id="tools">
+        <div class="section-heading">
           <h2>Your tools.<br>Your version.</h2>
           <p>
             DS Style includes ready-to-use artwork with the standard install. These optional tools make
@@ -1005,9 +1005,9 @@
       </div>
     </section>
 
-    <section class="section themes">
+    <section class="section themes" id="themes">
       <div class="section-inner">
-        <div class="section-heading" id="themes">
+        <div class="section-heading">
           <h2>Try a different style.</h2>
           <p>
             These themes show how far DS Style can be reshaped with the
@@ -1097,9 +1097,9 @@
       </div>
     </section>
 
-    <section class="section rgsp-port">
+    <section class="section rgsp-port" id="rg-sp">
       <div class="section-inner port-layout">
-        <div class="port-copy" id="rg-sp">
+        <div class="port-copy">
           <p class="eyebrow">Anbernic RG SP</p>
           <h2>DS Style for RG SP.</h2>
           <p>
@@ -1117,9 +1117,9 @@
       </div>
     </section>
 
-    <section class="section downloads">
+    <section class="section downloads" id="downloads">
       <div class="section-inner">
-        <div class="download-heading" id="downloads">
+        <div class="download-heading">
           <h2>Choose your cartridge.</h2>
           <p>
             Choose the ZIP for your cartridge. Copy the contents of its <strong>SD Card</strong>
@@ -1157,9 +1157,9 @@
       </div>
     </section>
 
-    <section class="section resources">
+    <section class="section resources" id="resources">
       <div class="section-inner resource-grid">
-        <div id="resources">
+        <div>
           <h2>Guides, discussion, and source.</h2>
           <p>
             DS Style is open source and free to modify. Community themes, artwork,
