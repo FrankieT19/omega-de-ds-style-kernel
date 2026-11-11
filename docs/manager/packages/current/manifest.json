@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "8.0",
+  "version": "8.1",
   "directories": [
     "SYSTEM/BACKUP/SAVER",
     "SYSTEM/CHEAT",
@@ -291,15 +291,15 @@
     "omega_de": {
       "source": "kernels/ezkernelnew.bin",
       "target": "ezkernelnew.bin",
-      "size": 2032312,
-      "sha256": "1fd8058252da8be203ebd634b158e487f15b7802f6339ae67c1f040f1ddcafd4",
+      "size": 2038380,
+      "sha256": "32427b5fd1f28ae18227dae2add824caa2b389b4cb183e60c1c52be001f4cba2",
       "policy": "replace"
     },
     "original": {
       "source": "kernels/ezkernel.bin",
       "target": "ezkernel.bin",
-      "size": 2029984,
-      "sha256": "d1344d102ec8a3d92e521b4dbec8c74c81530ca538f65b3ba8ee88f2cf4ebd15",
+      "size": 2035924,
+      "sha256": "ef01ee600fc0b4fd6590a45dacc4531b84ebc74b0d80f3eb8d0052778a535c3e",
       "policy": "replace"
     }
   },
@@ -310,16 +310,16 @@
       "models": {
         "omega_de": {
           "source": "styles/omega_de/analogue.bin",
-          "target": "SYSTEM/KERNELS/Analogue Style v8.0.bin",
-          "size": 2005592,
-          "sha256": "4a0b477621162bc088b6e9fabe9c7421fbb7a3f44320da13d4f313a541adfae9",
+          "target": "SYSTEM/KERNELS/Analogue Style v8.1.bin",
+          "size": 2011980,
+          "sha256": "30fab4100c85208f7cafc75420076119bf1b638c58e415f4c09a872aff4eb918",
           "policy": "replace"
         },
         "original": {
           "source": "styles/original/analogue.bin",
-          "target": "SYSTEM/KERNELS/Analogue Style v8.0.bin",
-          "size": 1993160,
-          "sha256": "f1a34db63f940d3fe45a071c27412cd3477637fed061585eb46859792ffdce1e",
+          "target": "SYSTEM/KERNELS/Analogue Style v8.1.bin",
+          "size": 1999452,
+          "sha256": "65f7bcfbae71e90ce91eb5feb7b9c5d10f58fb8fd1f401be48cbf8b30dc22c24",
           "policy": "replace"
         }
       }
@@ -330,16 +330,16 @@
       "models": {
         "omega_de": {
           "source": "styles/omega_de/simple.bin",
-          "target": "SYSTEM/KERNELS/Simple Style v8.0.bin",
-          "size": 2540336,
-          "sha256": "c6f06e56c369800c3c30938fb7cc5f3ff3b5eaf718d39ce5fce0e183615ef32f",
+          "target": "SYSTEM/KERNELS/Simple Style v8.1.bin",
+          "size": 2546700,
+          "sha256": "83ffcea49d32ca9f4d09becc2f7c9b1b3f368c69fe74e82c7574324a2606161c",
           "policy": "replace"
         },
         "original": {
           "source": "styles/original/simple.bin",
-          "target": "SYSTEM/KERNELS/Simple Style v8.0.bin",
-          "size": 2029928,
-          "sha256": "fd388a0938a41a7fac6884831e4deb474486511f68fd05edb0ae55635a2c3716",
+          "target": "SYSTEM/KERNELS/Simple Style v8.1.bin",
+          "size": 2036172,
+          "sha256": "85eea7d051ea329101444a424332eb812e4bc448bd82881d20b6ba11360e0875",
           "policy": "replace"
         }
       }

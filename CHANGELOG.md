@@ -1,5 +1,13 @@
 # Changelog
 
+## DS Style v8.1
+
+- Added a redesigned in-game add-on menu with Light and Dark palettes.
+- Press Start + Select to open the menu, or hold Select to exit. The old configurable add-on and sleep hotkey settings have been removed.
+- Exit game returns to the original screen and selection. The launcher stays covered until it is ready, and holding Select through the transition no longer changes the browser view.
+- Moved pending save work behind the startup splash.
+- Updated GB/GBC emulation to Jagoomba Color v0.5 with matching menu and exit controls and no decorative borders.
+
 ## DS Style v8.0
 
 - Added smooth animated horizontal and vertical carousels, enabled by default, with adjustable side-art size and a direct-launch selection pulse.

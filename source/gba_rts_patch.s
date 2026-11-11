@@ -1,6 +1,22 @@
 @;--------------------------------------------------------------------
-	.section   	.iwram,"ax",%progbits
+	@ The kernel only copies this blob into game ROM. Keep its template in ROM.
+	.section .text.slot_gba_addon,"ax",%progbits
 
+/* Palette is resolved once when the menu opens, including for NOR games. */
+.macro DS_MENU_COLOUR out, pair, scratch
+    adrl \scratch,spend_0x80
+    ldr \scratch,[\scratch]
+    ldrh \scratch,[\scratch,#0x3e]
+    adrl \out,\pair
+    add \out,\out,\scratch,lsl #1
+    ldrh \out,[\out]
+.endm
+	.include "slot_hold_reset.inc"
+	.include "slot_return_mark.inc"
+	.global Slot_RTS_HoldEnabled
+	.global Slot_RTS_Background,Slot_RTS_Panel,Slot_RTS_Ink
+	.global Slot_MenuFont,Slot_MarkReturn
+	.global ingamemenu_now
 	.global  RTS_ReplaceIRQ_start
 	.global  RTS_ReplaceIRQ_end
 	.global  RTS_Return_address_L
@@ -87,6 +103,10 @@ RTS_ReplaceIRQ_start:
 	MOV             R0, #0x4000000
 	ADR             R1, RTS_irq
 	STR             R1, [R0,#-4] @; 0x3FFFFFC = RTS_irq;
+	adr r1,spend_0x80
+	ldr r1,[r1]
+	mov r2,#0
+	str r2,[r1,#0x7c]
 	LDR             R0, =0x12345678
 	BX              R0
 	.align
@@ -98,14 +118,11 @@ spend_0x80:
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 RTS_irq:
 	LDR			R1, [R0,#0x200]
-	TST			R1, #0x10000
-	TSTEQ		R1, #0x10000000
-	LDREQ		PC, [R0,#-0xC]			@;old_interrupt_handler
-
-	ldr 		r2,[r0,#REG_P1]
+	ldr	r2,[r0,#REG_P1]
 	bic 		r2,r2,#0xFF000000
 	bic 		r2,r2,#0x00FF0000
 
+	SLOT_HOLD_TICK spend_0x80, Slot_RTS_HoldEnabled, reset_now
 	@;check ingamemenu
 	adr 		r3,RTS_Reset_key
 	ldr 		r3,[r3]
@@ -124,6 +141,10 @@ RTS_irq:
 	@;----------------------
 	@;check sleep
 check_sleep:
+	TST			R1, #0x10000
+	TSTEQ		R1, #0x10000000
+	LDREQ		PC, [R0,#-0xC]			@;old_interrupt_handler
+
 	adr 		r3,RTS_Sleep_key
 	ldr 		r3,[r3]
 	cmp 		r2,r3
@@ -152,65 +173,71 @@ nocheat:
 	ldr 		pc,[r0,#-(0x04000000-0x03FFFFF4)] @;to normal IRQ routine
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-reset_now:
-	adr r1,reset_code
-	adr r3,reset_end
-	mov r2,#0x02000000
-copy_loop:
-	ldr r0,[r1],#4
-	str r0,[r2],#4
-	cmp r1,r3
-	blt copy_loop
-	mov r0,#0x02000000
-	add r0,r0,#1
-	bx r0
-@;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	.include "slot_gba_return.inc"
+Slot_RTS_HoldEnabled:
+	.word 1
 RTS_Sleep_key:
 	.word 0xFB @;L+R+select
 RTS_Reset_key:
 	.word 0xF7 @;L+R+Start
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DSStyle_ReturnDark:
+    stmfd sp!,{r4,lr}
+    mov r0,#0x30
+    bl SetRampage
+    ldr r1,=0x0e00ff00
+    ldrb r2,[r1]
+    ldrb r3,[r1,#1]
+    orr r2,r2,r3,lsl #8
+    ldrb r3,[r1,#2]
+    orr r2,r2,r3,lsl #16
+    ldrb r3,[r1,#3]
+    orr r2,r2,r3,lsl #24
+    ldr r3,=0x52544c53
+    cmp r2,r3
+    ldreqb r4,[r1,#120]
+    movne r4,#0
+    mov r0,#0
+    bl SetRampage
+    and r0,r4,#2
+    mov r0,r0,lsr #1
+    ldmfd sp!,{r4,pc}
+
+DSStyle_LoadMenuColours:
+    stmfd sp!,{r4,lr}
+    mov r0,#0x30
+    bl SetRampage
+    ldr r1,=0x0e00fef0
+    ldrb r2,[r1]
+    ldrb r3,[r1,#1]
+    orr r2,r2,r3,lsl #8
+    ldr r3,=0x4453
+    cmp r2,r3
+    ldreqb r2,[r1,#2]
+    ldreqb r3,[r1,#3]
+    orreq r2,r2,r3,lsl #8
+    movne r2,#0x4500
+    orrne r2,r2,#0xca
+    ldreqb r3,[r1,#4]
+    ldreqb r4,[r1,#5]
+    orreq r3,r3,r4,lsl #8
+    ldrne r3,=0x7fff
+    adrl r4,spend_0x80
+    ldr r4,[r4]
+    strh r2,[r4,#0x38]
+    strh r3,[r4,#0x3a]
+    mov r0,#0
+    bl SetRampage
+    ldmfd sp!,{r4,pc}
+    .ltorg
+Slot_MarkReturn:
+	stmfd sp!,{r4-r6,lr}
+	SLOT_MARK_RETURN
+	ldmfd sp!,{r4-r6,pc}
 	.align
-	.thumb
-reset_code:
-	mov r0,#0x20
-	lsl r3,r0,#22 @;#0x8000000 r3
-	lsl r0,r0,#12 @;#0x0020000
-	add r4,r3,r0  @;#0x8020000 r4
-	add r5,r4,r0  @;#0x8040000 r5
-	lsl r1,r0,#8  @;#0x2000000
-	add r2,r3,r1  @;#0xa000000
-	lsr r1,r3,#4  @;#0x0800000
-	sub r6,r2,r1  @;#0x9800000
-	lsr r1,r1,#4  @;#0x0080000
-	add r6,r6,r1  @;#0x9880000 r6
-	sub r2,r2,r0  @;#0x9fe0000 r2
-	sub r7,r2,r0  @;#0x9fc0000 r7
-
-	mov r0,#210
-	lsl r0,r0,#8  @;0xd200 r0
-	mov r1,#21
-	lsl r1,r1,#8  @;0x1500 r1
-
-	strh r0,[r2]
-	strh r1,[r3]
-	strh r0,[r4]
-	strh r1,[r5]
-
-	lsr r0,r3,#12 @;#0x0008000 r0
-	add r0,#2 		@;#0x0008002 r0
-
-	strh r0,[r6]
-	strh r1,[r7]
-
-	lsl r1,r0,#11 @;#0x4000000
-	sub r1,r1,#8  @;#0x3FFFFFA
-	mov r0,#0xfc  @;#252 r0
-	str r0,[r1]   @;#0x3FFFFFA (mirror of #0x3007FFA
-	swi 0x01
-	swi 0x00
-	.align
-reset_end:
+Slot_ReturnRequestWords:
+	.word 0x5443454a,0xabbcbab5
+	.ltorg
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	.arm
 sleep_now:
@@ -319,19 +346,6 @@ RTS_Wakeup_key:
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	.arm
 @;------------------------------------------------------
-@;------------------------------------------------------
-clean_screen:
-	stmfd	sp!,{r0-r3}
-	mov		r2,#0x6000000
-	add		r3,r2,#0x12C00
-	mov		r0,#0
-clearLCD:
-	str		r0,[r2],#+4
-	cmp		r2,r3
-	blt		clearLCD
-
-	ldmfd	sp!,{r0-r3}
-	bx		lr
 @;------------------------------------------------------
 SetRampage:
 	ldr 	r1,=0xD200
@@ -465,6 +479,15 @@ restore2_IO:        @; IOaddress, offset
 ingamemenu_now:
 	stmfd	sp!,{r0-r12,lr}
 
+    mov r7,#0x04000000
+    add r1,r7,#0x200
+    ldrh r2,[r1,#8]
+    adrl r3,spend_0x80
+    ldr r3,[r3]
+    strh r2,[r3,#0x3c]
+    mov r2,#0
+    strh r2,[r1,#8]
+
 	mov 	r7,#0x4000000
 	add 	r1,r7,#REG_SOUND1CNT_L
 	adrl	r11, spend_0x80
@@ -493,6 +516,10 @@ loopbak:
 	ldrh 	r3,[r7,#REG_SOUNDCNT_X]  @;bak
 	stmfd	sp!,{r3}
 
+	ldrh r2,[r7,#0x50]
+	strh r2,[r11]
+	mov r2,#0
+	strh r2,[r7,#0x50]
 	ldrh  r6,[r7]     @;Displaly Control
 	stmfd	sp!,{r6}
 
@@ -514,104 +541,183 @@ loopbak:
 	ldr  	r6,=0x403 		@;MODE_3 | BG2_ENABLE
 	strh 	r6,[r7]
 	@;mov 	r2,#0
-	strh 	r3,[r7,#208]  @;IME =0 Disable
+	@ IME was disabled before touching DMA/video state.
 
 	strh 	r3,[r7,#REG_SOUNDCNT_X] @;sound off
 
 	bl 		backup_LCD
-	bl 		clean_screen
+    bl DSStyle_ReturnDark
+    adrl r1,spend_0x80
+    ldr r1,[r1]
+    strh r0,[r1,#0x3e]
+    bl DSStyle_LoadMenuColours
 
-@; start
-	mov		r11,#0
+
+    mov r11,#0
+    bl Slot_MenuPanel
+    adrl r0,spend_0x80
+    ldr r0,[r0]
+    mvn r1,#0
+    str r1,[r0,#0x2c] @ Previous selection; unused gap before saved system SP.
 begin_show:
-	mov		r12,#0
-	@;cmp		r11,#0
-	@;movlt	r11,#0
-
-	adrl  r8,ingameMENU
-	mov		r9,#40		 @;Y
-	mov		r10,#86    @;X
-
-showAll:
-	adrl  r7,Cheat_count
-	ldr		r7,[r7]
-	cmp 	r7,#0x0
-	beq   no_cheat
-	cmp		r11,#0
-	movlt	r11,#4
-	cmp		r11,#5
-	@;movge	r11,#4
-	moveq	r11,#0
-	ldrb	r0,[r8],#+1
-	cmp		r0,#0xA5
-	beq		waitSeletc
-	b  		showMENU
-no_cheat:
-	cmp		r11,#0
-	movlt	r11,#2
-	cmp		r11,#3
-	@;movge	r11,#2
-	moveq	r11,#0
-	ldrb	r0,[r8],#+1
-	cmp		r0,#0x43 @;'C'
-	beq		waitSeletc
-
-showMENU:
-	cmp		r0,#0
-	addeq	r9,#16
-	moveq	r10,#86
-	addeq	r12,#1
-	beq		showAll
-	mov		r1,r10
-	add		r2,r9,#0
-	cmp		r12,r11
-	ldreq		r3,=0x6A80 @;select
-	ldrne		r3,=0x7FFF
-	bl		printchar    @; r0 ch， r1, X  ， r2, Y , r3 color
-
-	add		r10,#8
-	b			showAll
-
+    bl Slot_MenuVBlank
+    adrl r7,Cheat_count
+    ldr r7,[r7]
+    cmp r7,#0
+    moveq r6,#4
+    movne r6,#5
+    cmp r11,#0
+    sublt r11,r6,#1
+    cmp r11,r6
+    movge r11,#0
+    mov r12,#0
+    cmp r6,#4
+    moveq r9,#58
+    movne r9,#51
+menu_row:
+    adrl r0,spend_0x80
+    ldr r0,[r0]
+    ldr r0,[r0,#0x2c]
+    cmn r0,#1
+    beq menu_draw_row
+    cmp r12,r0
+    beq menu_draw_row
+    cmp r12,r11
+    bne menu_next_row
+menu_draw_row:
+    mov r0,#42
+    mov r1,r9
+    mov r2,#156
+    mov r3,#13
+    DS_MENU_COLOUR r4, Slot_RTS_Panel, r5
+    cmp r12,r11
+    DS_MENU_COLOUR r8, DS_PanelLine, r5
+    cmp r12,r11
+    bne menu_row_fill
+    adrl r5,spend_0x80
+    ldr r5,[r5]
+    ldrh r4,[r5,#0x38]
+    mov r8,r4
+menu_row_fill:
+    bl Slot_MenuStripedRect
+    adrl r8,Slot_MenuLabels
+    ldr r0,[r8,r12,lsl #2]
+    add r8,r8,r0
+    cmp r12,#3
+    bne menu_text_start
+    adrl r7,Cheat_count
+    ldr r7,[r7]
+    cmp r7,#0
+    beq menu_return_label
+    adrl r7,CheatONOFF
+    ldr r7,[r7]
+    ldr r7,[r7]
+    cmp r7,#1
+    bne menu_text_start
+    adrl r8,s_cheatON
+    b menu_text_start
+menu_return_label:
+    adrl r8,s_reset
+menu_text_start:
+    mov r10,#47
+menu_character:
+    ldrb r0,[r8],#1
+    cmp r0,#0
+    beq menu_next_row
+    mov r1,r10
+    mov r2,r9
+    DS_MENU_COLOUR r3, Slot_RTS_Ink, r5
+    cmp r12,r11
+    bne menu_ink_ready
+    adrl r5,spend_0x80
+    ldr r5,[r5]
+    ldrh r3,[r5,#0x3a]
+menu_ink_ready:
+    cmp r12,#1
+    beq menu_state_ink
+    cmp r12,#2
+    bne menu_print
+menu_state_ink:
+    adrl r7,RTS_switch
+    ldr r7,[r7]
+    cmp r7,#0
+    ldreq r3,=0x4210
+menu_print:
+    bl printchar
+    add r10,r10,#6
+    b menu_character
+menu_next_row:
+    add r9,r9,#14
+    add r12,r12,#1
+    adrl r7,Cheat_count
+    ldr r7,[r7]
+    cmp r7,#0
+    moveq r7,#4
+    movne r7,#5
+    cmp r12,r7
+    blt menu_row
+    adrl r0,spend_0x80
+    ldr r0,[r0]
+    str r11,[r0,#0x2c]
 waitSeletc:
-	ldr		r0,=0x3FF		@;No key press
-	ldr		r8,=0x4000130
-	ldrh	r9,[r8]
-	cmp		r9,r0
-	beq		waitSeletc
+    ldr r0,=0x3ff
+    ldr r8,=0x4000130
+    ldrh r9,[r8]
+    cmp r9,r0
+    beq waitSeletc
 pressdown:
-	mov		r12,r9
-	ldrh	r9,[r8]
-	cmp		r9,r0
-	bne		pressdown
-
-	ldr		r0,=0x3BF		;@up
-	cmp		r12,r0
-	subeq	r11,#1
-	beq		begin_show
-	ldr		r0,=0x37F		;@down
-	cmp		r12,r0
-	addeq	r11,#1
-	beq		begin_show
-	ldr		r0,=0x3FE		;@A
-	cmp		r12,r0
-	beq		A_pressed
-	ldr		r0,=0x3FD		;@B
-	cmp		r12,r0
-	moveq	r11,#5
-	beq		b_pressed_quit
-	b		waitSeletc
+    mov r12,r9
+    ldrh r9,[r8]
+    cmp r9,r0
+    bne pressdown
+    ldr r0,=0x3bf
+    cmp r12,r0
+    subeq r11,r11,#1
+    beq begin_show
+    ldr r0,=0x37f
+    cmp r12,r0
+    addeq r11,r11,#1
+    beq begin_show
+    ldr r0,=0x3fd
+    cmp r12,r0
+    beq b_pressed_quit
+    ldr r0,=0x3fe
+    cmp r12,r0
+    bne waitSeletc
 A_pressed:
-	cmp			r11,#0
-	beq			reset_now
-	cmp			r11,#1
-	beq			call_Save
-	cmp			r11,#2
-	beq			call_Load
-	cmp			r11,#3
-	beq			call_CheatON
-	cmp			r11,#4
-	beq			call_CheatOFF
-	@;-------------------------------------
+    cmp r11,#0
+    beq b_pressed_quit
+    cmp r11,#1
+    beq menu_save
+    cmp r11,#2
+    beq menu_load
+    adrl r7,Cheat_count
+    ldr r7,[r7]
+    cmp r7,#0
+    beq reset_now
+    cmp r11,#4
+    beq reset_now
+    adrl r2,CheatONOFF
+    ldr r2,[r2]
+    ldr r3,[r2]
+    cmp r3,#1
+    moveq r3,#0
+    movne r3,#1
+    str r3,[r2]
+    b begin_show
+menu_save:
+    adrl r7,RTS_switch
+    ldr r7,[r7]
+    cmp r7,#1
+    beq call_Save
+    b begin_show
+menu_load:
+    adrl r7,RTS_switch
+    ldr r7,[r7]
+    cmp r7,#1
+    beq call_Load
+    b begin_show
+    .ltorg
 @;ingamemenu_exit:
 b_pressed_quit:
 	ldmfd	sp!,{r6}
@@ -619,10 +725,15 @@ b_pressed_quit:
 	strh 	r6,[r7] @;re Displaly Control
 	bl 		restore_LCD
 save_exit:
+	adrl r0,spend_0x80
+	ldr r0,[r0]
+	ldrh r2,[r0,#0x7a]
+	mov r7,#0x4000000
+	strh r2,[r7,#0x50]
 
 	mov		r7,#0x4000000
 	mov 	r2,#1
-	strh 	r2,[r7,#208]
+	@ Restore the original IME only after all state and banking are ready.
 
 	ldmfd	sp!,{r3}
 	strh 	r3,[r7,#REG_SOUNDCNT_X]
@@ -659,6 +770,13 @@ save_exit:
 	mov 	r0,#0x00
 	bl 		SetRampage
 
+
+    adrl r0,spend_0x80
+    ldr r0,[r0]
+    ldrh r2,[r0,#0x3c]
+    mov r1,#0x04000000
+    add r1,r1,#0x200
+    strh r2,[r1,#8]
 	ldmfd	sp!,{r0-r12,PC}
 	.ltorg
 	@;===================================================
@@ -764,6 +882,19 @@ wram_2000000:
 	mov r2,#0x370
 	bl 	WriteSram
 
+
+    adrl r1,spend_0x80
+    ldr r1,[r1]
+    ldrh r2,[r1,#0x3c]
+    ldr r0,=0x0e009208
+    strb r2,[r0]
+    mov r2,r2,lsr #8
+    strb r2,[r0,#1]
+    ldrh r2,[r1,#0x7a]
+    ldr r0,=0x0e009050
+    strb r2,[r0]
+    mov r2,r2,lsr #8
+    strb r2,[r0,#1]
 	@;FLAG
 	ldr r0,=0x0E00FFF0
 	adrl r1,S_RTS_FLAG
@@ -857,7 +988,7 @@ wram_2000000_Load:
 	mov r10,#0x4000000
 	LDR r11,=0x0E009000
 
-	adr r9,register_list
+	adrl r9,register_list
 register_list_loop:
 	ldrh r2,[r9],#2
 	cmp r2 ,#0xFF00
@@ -995,6 +1126,91 @@ draw_plot:
 	STRH    R2, [R3]
 	BX			LR
 		@;===================================================
+
+@ Native-font settings-style panel. No game IRQ stack allocations beyond LR.
+Slot_MenuPanel:
+    stmfd sp!,{lr}
+    mov r0,#0
+    mov r1,#0
+    mov r2,#240
+    mov r3,#160
+    DS_MENU_COLOUR r4, Slot_RTS_Background, r5
+    bl Slot_MenuRect
+    mov r0,#36
+    mov r1,#25
+    mov r2,#168
+    mov r3,#110
+    DS_MENU_COLOUR r4, DS_PanelOutline, r5
+    bl Slot_MenuRect
+    mov r0,#37
+    mov r1,#26
+    mov r2,#166
+    mov r3,#108
+    DS_MENU_COLOUR r4, Slot_RTS_Panel, r5
+    DS_MENU_COLOUR r8, DS_PanelLine, r5
+    bl Slot_MenuStripedRect
+    adrl r0,Slot_MenuTitle
+    mov r1,#47
+    mov r2,#35
+    DS_MENU_COLOUR r3, Slot_RTS_Ink, r5
+    bl Slot_MenuText
+    ldmfd sp!,{pc}
+@ Poll VCOUNT: game IRQs are disabled while the menu owns the display.
+Slot_MenuVBlank:
+    ldr r0,=0x04000006
+Slot_MenuWaitVisible:
+    ldrh r1,[r0]
+    cmp r1,#160
+    bhs Slot_MenuWaitVisible
+Slot_MenuWaitBlank:
+    ldrh r1,[r0]
+    cmp r1,#160
+    blo Slot_MenuWaitBlank
+    bx lr
+Slot_MenuRect:
+    mov r8,r4
+Slot_MenuStripedRect:
+    mov r5,#240
+    mla r5,r1,r5,r0
+    mov r5,r5,lsl #1
+    add r5,r5,#0x06000000
+    rsb r7,r2,#240
+    mov r7,r7,lsl #1
+    sub r1,r1,#25 @ Stripe phase relative to the popup origin
+Slot_MenuRectRow:
+    mov r6,r2
+    tst r1,#3
+    moveq r0,r8
+    movne r0,r4
+    add r1,r1,#1
+Slot_MenuRectPixel:
+    strh r0,[r5],#2
+    subs r6,r6,#1
+    bne Slot_MenuRectPixel
+    add r5,r5,r7
+    subs r3,r3,#1
+    bne Slot_MenuRectRow
+    bx lr
+Slot_MenuText:
+    stmfd sp!,{r8-r11,lr}
+    mov r8,r0
+    mov r10,r1
+    mov r11,r2
+    mov r9,r3
+Slot_MenuTextLoop:
+    ldrb r0,[r8],#1
+    cmp r0,#0
+    beq Slot_MenuTextEnd
+    mov r1,r10
+    mov r2,r11
+    mov r3,r9
+    bl printchar
+    add r10,r10,#6
+    b Slot_MenuTextLoop
+Slot_MenuTextEnd:
+    ldmfd sp!,{r8-r11,pc}
+    .ltorg
+
 printchar:	@; r0 打印的字符， r1, X  ， r2, Y , r3 颜色
 	STMFD   SP!, {R8-R11,LR}
 	MOV     R8, R1
@@ -1002,9 +1218,10 @@ printchar:	@; r0 打印的字符， r1, X  ， r2, Y , r3 颜色
 	MOV     R9, R3
 	MOV     R10, #0x80
 	ADRL     R4, ASCII
-	SUB     R0, R0, #0x41
-	ADD     R4, R4, R0,LSL#4
-	ADD     R7, R4, #0x10
+	SUB R0,R0,#32
+	ADD R0,R0,R0,LSL#1
+	ADD R4,R4,R0,LSL#2
+	ADD R7,R4,#12
 
 loc_A0DD7C:
 	MOV     R5, #0
@@ -1016,7 +1233,7 @@ loc_A0DD80:
 	ADDNE   R0, R5, R8
 	BLNE    draw_plot
 	ADD     R5, R5, #1
-	CMP     R5, #8
+	CMP     R5, #6
 	BNE     loc_A0DD80
 	ADD     R4, R4, #1
 	CMP     R4, R7
@@ -1039,100 +1256,30 @@ register_list:
 	.align
 @;------------------------------------------------
 ASCII:
-	.byte		0x00,0x00,0x10,0x38,0x6C,0xC6,0xC6,0xFE  @;// -A-
-	.byte		0xC6,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xFC,0x66,0x66,0x66,0x7C,0x66  @;// -B-
-	.byte		0x66,0x66,0x66,0xFC,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0x3C,0x66,0xC2,0xC0,0xC0,0xC0  @;// -C-
-	.byte		0xC0,0xC2,0x66,0x3C,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xF8,0x6C,0x66,0x66,0x66,0x66  @; // -D-
-	.byte		0x66,0x66,0x6C,0xF8,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xFE,0x66,0x62,0x68,0x78,0x68  @;// -E-
-	.byte		0x60,0x62,0x66,0xFE,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xFE,0x66,0x62,0x68,0x78,0x68  @;// -F-
-	.byte		0x60,0x60,0x60,0xF0,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0x3C,0x66,0xC2,0xC0,0xC0,0xDE  @;// -G-
-	.byte		0xC6,0xC6,0x66,0x3A,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xC6,0xC6,0xC6,0xC6,0xFE,0xC6  @;// -H-
-	.byte		0xC6,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0x3C,0x18,0x18,0x18,0x18,0x18  @;// -I-
-	.byte		0x18,0x18,0x18,0x3C,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0x1E,0x0C,0x0C,0x0C,0x0C,0x0C  @;// -J-
-	.byte		0xCC,0xCC,0xCC,0x78,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xE6,0x66,0x6C,0x6C,0x78,0x78  @;// -K-
-	.byte		0x6C,0x66,0x66,0xE6,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xF0,0x60,0x60,0x60,0x60,0x60  @;// -L-
-	.byte		0x60,0x62,0x66,0xFE,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xC6,0xEE,0xFE,0xFE,0xD6,0xC6  @;// -M-
-	.byte		0xC6,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xC6,0xE6,0xF6,0xFE,0xDE,0xCE  @;// -N-
-	.byte		0xC6,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0x38,0x6C,0xC6,0xC6,0xC6,0xC6  @;// -O-
-	.byte		0xC6,0xC6,0x6C,0x38,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xFC,0x66,0x66,0x66,0x7C,0x60  @;// -P-
-	.byte		0x60,0x60,0x60,0xF0,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0x7C,0xC6,0xC6,0xC6,0xC6,0xC6  @;// -Q-
-	.byte		0xC6,0xD6,0xDE,0x7C,0x0C,0x0E,0x00,0x00
-
-	.byte		0x00,0x00,0xFC,0x66,0x66,0x66,0x7C,0x6C  @;// -R-
-	.byte		0x66,0x66,0x66,0xE6,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0x7C,0xC6,0xC6,0x60,0x38,0x0C  @;// -S-
-	.byte		0x06,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0x7E,0x7E,0x5A,0x18,0x18,0x18  @;// -T-
-	.byte		0x18,0x18,0x18,0x3C,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6  @;// -U-
-	.byte		0xC6,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6 @;// -V-
-	.byte		0xC6,0x6C,0x38,0x10,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xD6 @;// -W-
-	.byte		0xD6,0xFE,0x6C,0x6C,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xC6,0xC6,0x6C,0x6C,0x38,0x38  @;// -X-
-	.byte		0x6C,0x6C,0xC6,0xC6,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0x66,0x66,0x66,0x66,0x3C,0x18  @;// -Y-
-	.byte		0x18,0x18,0x18,0x3C,0x00,0x00,0x00,0x00
-
-	.byte		0x00,0x00,0xFE,0xC6,0x86,0x0C,0x18,0x30  @;// -Z- 0x5A
-	.byte		0x60,0xC2,0xC6,0xFE,0x00,0x00,0x00,0x00
-
+Slot_MenuFont:
+	.include "slot_menu_font.inc"
 	.align
-ingameMENU:
-s_reset:
- 	.byte  'R','E','S','E','T',0x0
-s_save:
- 	.byte  'S','A','V','E',0x0
-s_load:
- 	.byte  'L','O','A','D',0x0
-s_cheatON:
- 	.byte  'C','H','E','A','T','O','N',0x0
-s_cheatOFF:
- 	.byte  'C','H','E','A','T','O','F','F',0x0
-	.byte  0xA5  @;end
+
+Slot_MenuLabels:
+    .word s_resume-Slot_MenuLabels,s_save-Slot_MenuLabels,s_load-Slot_MenuLabels
+    .word s_cheatOFF-Slot_MenuLabels,s_reset-Slot_MenuLabels
+Slot_MenuTitle: .asciz "DS Style"
+s_resume: .asciz "Resume"
+s_reset: .asciz "Exit game"
+s_save: .asciz "Save state"
+s_load: .asciz "Load state"
+s_cheatON: .asciz "Cheats: On"
+s_cheatOFF: .asciz "Cheats: Off"
+    .align
+Slot_RTS_Background: .hword 0x56b5,0x0000
+Slot_RTS_Panel: .hword 0x7bde,0x1084
+Slot_RTS_Ink: .hword 0x0000,0x7fff
+DS_PanelOutline: .hword 0x0000,0x3def
+DS_PanelLine: .hword 0x77bd,0x14a5
+
 	.align
 S_RTS_FLAG:
- 	.byte  'E','Z','-','O','m','e','g','a','R','T','C','F','I','L','E','.'
+	.ascii "DSStyle81RTSFILE"
 	.align
 s_badRTS:
  	.byte  'R','T','S','F','I','L','E','D','A','M','A','G','E','D',0x00

@@ -286,7 +286,7 @@ u32 Loadfile2NOR(TCHAR *filename, u32 NORaddress,u16 have_patch,u8 SAVEMODE)
 
 
 		tmpNorFS.filesize = fileneedsize;
-		tmpNorFS.have_patch = have_patch;
+		tmpNorFS.have_patch = have_patch ? 2 : 0;
 		tmpNorFS.have_RTS = gl_rts_on;
 		tmpNorFS.is_64MBrom = flag_64MBrom;
 		tmpNorFS.savemode = SAVEMODE;

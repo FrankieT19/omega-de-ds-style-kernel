@@ -63,7 +63,7 @@ void GBApatch_Cleanrom_NOR(u32* address,u32 offset);
 void GBApatch_NOR(u32* address,int filesize,u32 offset);
 u32  Check_pat(TCHAR* gamefilename);
 void Make_pat_file(char* filename);
-u32 Check_RTS(TCHAR* gamefilename);
+u32 Check_RTS(TCHAR* gamefilename, u32 new_addon);
 u8 Check_mde_file(TCHAR* gamefilename);
 u8 Make_mde_file(TCHAR* gamefilename,u8 Save_num);
 

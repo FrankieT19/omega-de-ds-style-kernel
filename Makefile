@@ -1,3 +1,5 @@
+.DELETE_ON_ERROR:
+DS_STYLE_PYTHON ?= python
 #---------------------------------------------------------------------------------
 .SUFFIXES:
 #---------------------------------------------------------------------------------
@@ -42,7 +44,7 @@ CFLAGS	+=	$(INCLUDE)
 
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
-ASFLAGS	:=	-g $(ARCH)
+ASFLAGS	:=	-g $(ARCH) -Wa,-I$(dir $(OUTPUT))source
 LDFLAGS	=	-g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 #---------------------------------------------------------------------------------
@@ -133,6 +135,13 @@ else
 #---------------------------------------------------------------------------------
 
 $(OUTPUT).gba	:	$(OUTPUT).elf
+ifneq ($(DS_STYLE_RAW),1)
+$(OUTPUT).gba: $(dir $(OUTPUT))boot-entry.s $(dir $(OUTPUT))v81_boot_entry.py
+	$(OBJCOPY) -O binary $< $@
+	gbafix $@ -t$(GAME_TITLE) -c$(GAME_CODE) -m$(MAKER_CODE)
+	$(DS_STYLE_PYTHON) "$(dir $(OUTPUT))v81_boot_entry.py" "$@" "$(DEVKITARM)/bin"
+endif
+
 
 $(OUTPUT).elf	:	$(OFILES)
 

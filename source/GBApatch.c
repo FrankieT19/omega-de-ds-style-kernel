@@ -293,9 +293,9 @@ void SetTrimSize(u8* buffer,u32 romsize,u32 iSize,u32 mode,BYTE saveMODE)
 
 	u32  PATCH_LENGTH;
 
-	if((gl_rts_on==1)/* || (gl_cheat_on==1)*/ )
+	if(gl_rts_on || gl_reset_on)
 	{
-		PATCH_LENGTH = 0x1000;
+		PATCH_LENGTH = 0x2000;
 	}
 	else
 	{
@@ -472,7 +472,7 @@ void Patch_RTS_Cheat(u32 *Data)
   u32 RTS_Reset_key_offset = (u8*)RTS_Reset_key - p_patch_start;
  	u32 RTS_Sleep_key_offset = (u8*)RTS_Sleep_key - p_patch_start;
 
-  *(vu32*)(patchbuffer+RTS_Reset_key_offset) = RTS_reset_key_val&0x3FF;
+  *(vu32*)(patchbuffer+RTS_Reset_key_offset) = 0x3F3;
   if(gl_sleep_on !=1){
     *(vu32*)(patchbuffer+RTS_Sleep_key_offset) = 0;
   }
@@ -626,11 +626,7 @@ void GBApatch_PSRAM(u32* address,int filesize)//Only once
 	//Check_Fire_Emblem();
 	Patch_somegame(address);
 
-	if( (gl_rts_on==1) && (gl_cheat_on == 0)  && (gl_reset_on == 0)  && (gl_sleep_on == 0)  ) {
-		spend_address = Get_spend_address(address);
-		Patch_RTS_only(address);
-	}
-	else if((gl_rts_on==1) ||  ((gl_cheat_on==1)&& (gl_cheat_count>0) ) )
+	if((gl_reset_on==1) || (gl_rts_on==1) ||  ((gl_cheat_on==1)&& (gl_cheat_count>0) ) )
 	{
 		spend_address = Get_spend_address(address);
 		//DEBUG_printf("spend_address =%x",spend_address);
@@ -675,10 +671,7 @@ void GBApatch_NOR(u32* address,int filesize,u32 offset)
 	PatchDragonBallZ(address);
 	//Check_Fire_Emblem();
 
-	if( (gl_rts_on==1) && (gl_cheat_on == 0)  && (gl_reset_on == 0)  && (gl_sleep_on == 0)  ) {
-		Patch_RTS_only(address);
-	}
-	else if((gl_rts_on==1) ||  ((gl_cheat_on==1)&& (gl_cheat_count>0) ) )
+	if((gl_reset_on==1) || (gl_rts_on==1) ||  ((gl_cheat_on==1)&& (gl_cheat_count>0) ) )
 	{
 		Patch_RTS_Cheat(address);
 	}
@@ -746,7 +739,7 @@ u32 Check_pat(TCHAR* gamefilename)
 
 	TCHAR patnamebuf[100];
 	make_pat_name(patnamebuf,gamefilename);
-	res=f_chdir("/SYSTEM/PATCH");
+	res=f_chdir("/SYSTEM/PATCH/DS81");
 	if(res == FR_OK)
 	{
 		res = f_open(&gfile,patnamebuf, FA_READ);
@@ -794,7 +787,8 @@ void Make_pat_file(TCHAR* gamefilename)
 	u32 w_buffer[16];
 
 	res = f_mkdir("/SYSTEM/PATCH");
-	res=f_chdir("/SYSTEM/PATCH");
+    f_mkdir("/SYSTEM/PATCH/DS81");
+	res=f_chdir("/SYSTEM/PATCH/DS81");
 
 	memset(w_buffer, 0x00, sizeof(w_buffer));
 
@@ -918,7 +912,7 @@ u8 Make_mde_file(TCHAR* gamefilename,u8 Save_num)
 	return res;
 }
 //------------------------------------------------------------------
-u32 Check_RTS(TCHAR* gamefilename)
+u32 Check_RTS(TCHAR* gamefilename, u32 new_addon)
 {
 	//UINT  ret;
 	//u32 find_the_patfile;
@@ -938,7 +932,8 @@ u32 Check_RTS(TCHAR* gamefilename)
 	rtsnamebuf[len-1] = 's';
 
 	res = f_mkdir("/SYSTEM/RTS");
-	res=f_chdir("/SYSTEM/RTS");
+	if(new_addon) f_mkdir("/SYSTEM/RTS/DS81");
+	res=f_chdir(new_addon ? "/SYSTEM/RTS/DS81" : "/SYSTEM/RTS");
 	if(res != FR_OK){
 		return 0;
 	}

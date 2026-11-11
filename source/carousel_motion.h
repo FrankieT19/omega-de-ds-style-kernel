@@ -364,12 +364,14 @@ static void IWRAM_CODE ARM_CODE __attribute__((noinline, optimize("O2"))) Launch
 
 static void Launcher_MotionPollInput(u16 *previous)
 {
-    u16 down;
+    u16 down, held, return_mask;
     scanKeys();
-    down = keysDown();
-    launcher_motion_released |= keysUp();
+    held = keysHeld();
+    return_mask = Launcher_ReturnInputMask(held);
+    down = keysDown() & ~return_mask;
+    launcher_motion_released |= keysUp() & ~return_mask;
     if(down && launcher_motion_input_count < 4) launcher_motion_input[launcher_motion_input_count++] = down;
-    *previous = keysHeld();
+    *previous = held & ~return_mask;
 }
 
 static u16 Launcher_MotionTakeInput(void)
