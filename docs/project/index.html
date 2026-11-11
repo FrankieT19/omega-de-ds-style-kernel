@@ -27,10 +27,6 @@
       box-sizing: border-box;
     }
 
-    html {
-      scroll-behavior: smooth;
-    }
-
     body {
       margin: 0;
       background: var(--paper);
@@ -224,6 +220,10 @@
       margin-bottom: 50px;
     }
 
+    .section-inner [id] {
+      scroll-margin-top: 24px;
+    }
+
     .section-heading h2,
     .download-heading h2 {
       margin: 0;
@@ -296,6 +296,7 @@
 
     .gallery-image {
       width: 100%;
+      height: auto;
       display: block;
     }
 
@@ -438,6 +439,7 @@
     }
 
     .theme-shot {
+      position: relative;
       min-width: 0;
       min-height: 0;
       padding: 0;
@@ -458,6 +460,8 @@
     }
 
     .theme-shot img {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       min-height: 0;
@@ -535,6 +539,7 @@
     }
 
     .port-photo {
+      position: relative;
       aspect-ratio: 3 / 4;
       margin: 0;
       overflow: hidden;
@@ -544,6 +549,8 @@
     }
 
     .port-photo img {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -849,7 +856,7 @@
   <main id="main">
     <section class="hero">
       <div class="hero-content">
-        <img class="hero-logo" src="assets/Logo.png" alt="DS Style">
+        <img class="hero-logo" src="assets/Logo.png" width="105" height="45" alt="DS Style">
         <p class="eyebrow">For EZ-Flash Omega and Omega Definitive Edition</p>
         <h1>A familiar new home for your Game Boy Advance.</h1>
         <p class="hero-copy">
@@ -864,9 +871,9 @@
       </div>
     </section>
 
-    <section class="section features" id="features">
+    <section class="section features">
       <div class="section-inner">
-        <div class="section-heading">
+        <div class="section-heading" id="features">
           <h2>Designed for everyday play.</h2>
           <p>
             A faithful DS-inspired interface, thoughtful shortcuts, flexible artwork,
@@ -940,13 +947,13 @@
             for a personal touch.
           </p>
         </div>
-        <img class="gallery-image" src="assets/combinedoverview.png" alt="Six DS Style launcher layouts shown on a Game Boy Advance" loading="lazy">
+        <img class="gallery-image" src="assets/combinedoverview.png" width="2160" height="1440" alt="Six DS Style launcher layouts shown on a Game Boy Advance" loading="lazy">
       </div>
     </section>
 
-    <section class="section tools" id="tools">
+    <section class="section tools">
       <div class="section-inner">
-        <div class="section-heading">
+        <div class="section-heading" id="tools">
           <h2>Your tools.<br>Your version.</h2>
           <p>
             DS Style includes ready-to-use artwork with the standard install. These optional tools make
@@ -969,7 +976,7 @@
         <div class="tool-grid">
           <article class="tool">
             <div class="tool-media">
-              <img src="assets/DS%20Style%20Customiser.png" alt="DS Style Customiser window" loading="lazy">
+              <img src="assets/DS%20Style%20Customiser.png" width="1180" height="730" alt="DS Style Customiser window" loading="lazy">
             </div>
             <div class="tool-body">
               <h3>DS Style Customiser</h3>
@@ -983,7 +990,7 @@
 
           <article class="tool">
             <div class="tool-media">
-              <img src="assets/DS%20Style%20Thumbnail%20Scraper.png" alt="DS Style Thumbnail Scraper window" loading="lazy">
+              <img src="assets/DS%20Style%20Thumbnail%20Scraper.png" width="1180" height="860" alt="DS Style Thumbnail Scraper window" loading="lazy">
             </div>
             <div class="tool-body">
               <h3>Thumbnail Scraper</h3>
@@ -998,9 +1005,9 @@
       </div>
     </section>
 
-    <section class="section themes" id="themes">
+    <section class="section themes">
       <div class="section-inner">
-        <div class="section-heading">
+        <div class="section-heading" id="themes">
           <h2>Try a different style.</h2>
           <p>
             These themes show how far DS Style can be reshaped with the
@@ -1021,16 +1028,16 @@
             </div>
             <div class="theme-gallery" aria-label="Analogue Style gallery">
               <button class="theme-shot theme-primary" type="button" aria-label="Show Analogue Style start screen">
-                <img src="assets/themes/analogue-1.jpg" alt="Analogue Style start screen on an Analogue Pocket" loading="lazy">
+                <img src="assets/themes/analogue-1.jpg" width="1000" height="1333" alt="Analogue Style start screen on an Analogue Pocket" loading="lazy">
               </button>
               <button class="theme-shot" type="button" aria-label="Show Analogue Style list view">
-                <img src="assets/themes/analogue-2.jpg" alt="Analogue Style list view" loading="lazy">
+                <img src="assets/themes/analogue-2.jpg" width="1000" height="1334" alt="Analogue Style list view" loading="lazy">
               </button>
               <button class="theme-shot" type="button" aria-label="Show Analogue Style horizontal carousel">
-                <img src="assets/themes/analogue-3.jpg" alt="Analogue Style horizontal carousel" loading="lazy">
+                <img src="assets/themes/analogue-3.jpg" width="1000" height="1333" alt="Analogue Style horizontal carousel" loading="lazy">
               </button>
               <button class="theme-shot" type="button" aria-label="Show Analogue Style vertical carousel">
-                <img src="assets/themes/analogue-4.jpg" alt="Analogue Style vertical carousel" loading="lazy">
+                <img src="assets/themes/analogue-4.jpg" width="1000" height="1333" alt="Analogue Style vertical carousel" loading="lazy">
               </button>
             </div>
           </article>
@@ -1046,16 +1053,16 @@
             </div>
             <div class="theme-gallery" aria-label="Simple Style gallery">
               <button class="theme-shot theme-primary" type="button" aria-label="Show Simple Style horizontal carousel">
-                <img src="assets/themes/simple-4.jpg" alt="Simple Style horizontal carousel" loading="lazy">
+                <img src="assets/themes/simple-4.jpg" width="1000" height="1333" alt="Simple Style horizontal carousel" loading="lazy">
               </button>
               <button class="theme-shot" type="button" aria-label="Show Simple Style start screen">
-                <img src="assets/themes/simple-1.jpg" alt="Simple Style start screen on a Game Boy Advance SP" loading="lazy">
+                <img src="assets/themes/simple-1.jpg" width="1000" height="1333" alt="Simple Style start screen on a Game Boy Advance SP" loading="lazy">
               </button>
               <button class="theme-shot" type="button" aria-label="Show Simple Style list view">
-                <img src="assets/themes/simple-2.jpg" alt="Simple Style list view" loading="lazy">
+                <img src="assets/themes/simple-2.jpg" width="1000" height="1333" alt="Simple Style list view" loading="lazy">
               </button>
               <button class="theme-shot" type="button" aria-label="Show Simple Style vertical carousel">
-                <img src="assets/themes/simple-3.jpg" alt="Simple Style vertical carousel" loading="lazy">
+                <img src="assets/themes/simple-3.jpg" width="1000" height="1333" alt="Simple Style vertical carousel" loading="lazy">
               </button>
             </div>
           </article>
@@ -1090,9 +1097,9 @@
       </div>
     </section>
 
-    <section class="section rgsp-port" id="rg-sp">
+    <section class="section rgsp-port">
       <div class="section-inner port-layout">
-        <div class="port-copy">
+        <div class="port-copy" id="rg-sp">
           <p class="eyebrow">Anbernic RG SP</p>
           <h2>DS Style for RG SP.</h2>
           <p>
@@ -1105,27 +1112,27 @@
           </div>
         </div>
         <figure class="port-photo">
-          <img src="assets/rg-sp-ds-style.jpg" alt="Anbernic RG SP running DS Style" loading="lazy">
+          <img src="assets/rg-sp-ds-style.jpg" width="1000" height="1333" alt="Anbernic RG SP running DS Style" loading="lazy">
         </figure>
       </div>
     </section>
 
-    <section class="section downloads" id="downloads">
+    <section class="section downloads">
       <div class="section-inner">
-        <div class="download-heading">
+        <div class="download-heading" id="downloads">
           <h2>Choose your cartridge.</h2>
           <p>
-            The original Omega and Omega Definitive Edition use different update files.
-            Download the release made specifically for your cartridge.
+            Choose the ZIP for your cartridge. Copy the contents of its <strong>SD Card</strong>
+            folder to the root of your card.
           </p>
         </div>
 
         <aside class="compatibility-notice" aria-labelledby="omega-de-compatibility">
           <h3 id="omega-de-compatibility">Omega DE compatibility</h3>
           <p>
-            This release supports Omega Definitive Edition Rev.A and Rev.B. The newer
-            Omega Definitive Edition B has a blue circuit board marked <strong>EZODE-B</strong>
-            and needs a <a href="https://github.com/FrankieT19/omega-blue-ds-style-kernel/releases/tag/v8.1-blue-test.5"
+            The standard Omega DE download supports Rev A and Rev B. If your cartridge
+            has a blue circuit board marked <strong>EZODE-B</strong>, use the
+            <a href="https://github.com/FrankieT19/omega-blue-ds-style-kernel/releases/tag/v8.1-blue-test.5"
               target="_blank" rel="noopener noreferrer">separate experimental build</a>.
           </p>
         </aside>
@@ -1150,9 +1157,9 @@
       </div>
     </section>
 
-    <section class="section resources" id="resources">
+    <section class="section resources">
       <div class="section-inner resource-grid">
-        <div>
+        <div id="resources">
           <h2>Guides, discussion, and source.</h2>
           <p>
             DS Style is open source and free to modify. Community themes, artwork,

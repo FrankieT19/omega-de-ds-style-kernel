@@ -1,1 +1,0 @@
-Upstream: [Jagoomba Color v0.5](https://github.com/EvilJagaGenius/jagoombacolor/tree/2a77825e04b7fcef968c2e5f97cb238296a1ebb5). Run `python build_emulator.py --target omega` (or `--target omega-de`). The integration is applied in a separate build directory; the bundled upstream files and generated kernel header are not changed.
