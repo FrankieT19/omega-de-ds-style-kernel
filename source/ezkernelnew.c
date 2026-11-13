@@ -10666,11 +10666,69 @@ static void Launcher_ModeBCycle(int dir)
     }
 }
 
+
+static u16 ds_exit_button = KEY_SELECT;
+static u16 ds_menu_first = KEY_START;
+static u16 ds_menu_second = KEY_SELECT;
+u16 DSStyle_MenuButtons(void) { return ds_menu_first | ds_menu_second; }
+u16 DSStyle_ExitButton(void) { return ds_exit_button; }
+
+static const char *const ds_button_names[] =
+    {"A", "B", "Select", "Start", "Right", "Left", "Up", "Down", "R", "L"};
+
+static const char *DSStyle_ButtonName(u16 mask)
+{
+    for(u32 i = 0; i < 10; i++)
+        if(mask == (1u << i)) return ds_button_names[i];
+    return "";
+}
+
+static u16 DSStyle_ReadButton(const char *name, u16 fallback)
+{
+    char value[16];
+    if(Launcher_SettingsReadValue(name, value, sizeof(value)))
+        for(u32 i = 0; i < 10; i++)
+            if(!strcasecmp(value, ds_button_names[i])) return 1u << i;
+    return fallback;
+}
+
+static u32 DSStyle_ValidPair(u16 a, u16 b)
+{
+    u16 both = a | b;
+    return a != b && both != (KEY_LEFT | KEY_RIGHT) && both != (KEY_UP | KEY_DOWN);
+}
+
+static void DSStyle_ReadHotkeys(void)
+{
+    ds_exit_button = DSStyle_ReadButton("Hold to exit", KEY_SELECT);
+    ds_menu_first = DSStyle_ReadButton("Menu button 1", KEY_START);
+    ds_menu_second = DSStyle_ReadButton("Menu button 2", KEY_SELECT);
+    if(!DSStyle_ValidPair(ds_menu_first, ds_menu_second))
+    {
+        ds_menu_first = KEY_START;
+        ds_menu_second = KEY_SELECT;
+    }
+}
+
+static void DSStyle_NextButton(u16 *binding, u16 other, int direction)
+{
+    u16 key = *binding;
+    do
+        key = direction < 0 ? (key == 1 ? KEY_L : key >> 1) :
+                             (key == KEY_L ? 1 : key << 1);
+    while(other && !DSStyle_ValidPair(key, other));
+    *binding = key;
+    Launcher_SaveUnifiedSettings();
+}
+
 typedef enum
 {
     ADDON_SETTING_RTS = 0,
     ADDON_SETTING_SLEEP,
     ADDON_SETTING_CHEAT,
+    ADDON_SETTING_EXIT,
+    ADDON_SETTING_MENU_FIRST,
+    ADDON_SETTING_MENU_SECOND,
     ADDON_SETTING_TOTAL
 } LauncherAddonSettingItem;
 
@@ -10684,19 +10742,31 @@ static void Launcher_AddonSettingsGetLine(u32 item, char *out, u32 out_size)
         case ADDON_SETTING_RTS: label = DSTEXT_ADDON_RTS; value = Launcher_OnOffText(gl_rts_on); break;
         case ADDON_SETTING_SLEEP: label = DSTEXT_ADDON_SLEEP; value = Launcher_OnOffText(gl_sleep_on); break;
         case ADDON_SETTING_CHEAT: label = DSTEXT_ADDON_CHEAT; value = Launcher_OnOffText(gl_cheat_on); break;
+        case ADDON_SETTING_EXIT:
+            snprintf(out, out_size, "%s: %s", Launcher_SettingsText(SETTINGS_TEXT_HOLD_EXIT), DSStyle_ButtonName(ds_exit_button));
+            return;
+        case ADDON_SETTING_MENU_FIRST:
+        case ADDON_SETTING_MENU_SECOND:
+            snprintf(out, out_size, "%s %u: %s", Launcher_SettingsText(SETTINGS_TEXT_MENU_BUTTON),
+                     (unsigned)(item == ADDON_SETTING_MENU_FIRST ? 1 : 2),
+                     DSStyle_ButtonName(item == ADDON_SETTING_MENU_FIRST ? ds_menu_first : ds_menu_second));
+            return;
         default: break;
     }
 
     snprintf(out, out_size, "%-11s %s", label, value);
 }
 
-static void Launcher_AddonSettingsToggle(u32 item)
+static void Launcher_AddonSettingsToggle(u32 item, int direction)
 {
     switch(item)
     {
         case ADDON_SETTING_RTS: gl_rts_on ^= 1; break;
         case ADDON_SETTING_SLEEP: gl_sleep_on ^= 1; break;
         case ADDON_SETTING_CHEAT: gl_cheat_on ^= 1; break;
+        case ADDON_SETTING_EXIT: DSStyle_NextButton(&ds_exit_button, 0, direction); return;
+        case ADDON_SETTING_MENU_FIRST: DSStyle_NextButton(&ds_menu_first, ds_menu_second, direction); return;
+        case ADDON_SETTING_MENU_SECOND: DSStyle_NextButton(&ds_menu_second, ds_menu_first, direction); return;
         default: break;
     }
     Launcher_SaveSettingsInfo();
@@ -10734,8 +10804,9 @@ static void Launcher_LedSettingsGetLine(u32 item, char *out, u32 out_size)
     snprintf(out, out_size, "%-11s %s", label, value);
 }
 
-static void Launcher_LedSettingsToggle(u32 item)
+static void Launcher_LedSettingsToggle(u32 item, int direction)
 {
+    (void)direction;
     switch(item)
     {
         case LED_SETTING_MASTER: gl_led_open_sel ^= 1; break;
@@ -10750,7 +10821,7 @@ static void Launcher_LedSettingsToggle(u32 item)
     Launcher_SaveSettingsInfo();
 }
 
-static void Launcher_SettingsPopupToggleEx(const char *title, u32 total, void (*get_line)(u32,char*,u32), void (*toggle_item)(u32), u32 row_y0)
+static void Launcher_SettingsPopupToggleEx(const char *title, u32 total, void (*get_line)(u32,char*,u32), void (*toggle_item)(u32,int), u32 row_y0)
 {
     const u32 visible = 7;
     u32 selected = 0;
@@ -10836,14 +10907,14 @@ static void Launcher_SettingsPopupToggleEx(const char *title, u32 total, void (*
             else if(keysdown & (KEY_A | KEY_RIGHT | KEY_LEFT | KEY_START))
             {
                 UIAudio_PlaySfx(UI_SFX_ACCEPT);
-                toggle_item(selected);
+                toggle_item(selected, keysdown & KEY_LEFT ? -1 : 1);
                 Launcher_SettingsDrawPopupRowEx(selected, selected, top, get_line, row_y0);
             }
         }
     }
 }
 
-static void Launcher_SettingsPopupToggle(const char *title, u32 total, void (*get_line)(u32,char*,u32), void (*toggle_item)(u32))
+static void Launcher_SettingsPopupToggle(const char *title, u32 total, void (*get_line)(u32,char*,u32), void (*toggle_item)(u32,int))
 {
     Launcher_SettingsPopupToggleEx(title, total, get_line, toggle_item, 50);
 }
@@ -10977,6 +11048,9 @@ static void Launcher_SaveUnifiedSettings(void)
         f_printf(&f, "\n# Options: English (UK), English (US), Espa\303\261ol, Fran\303\247ais, Portugu\303\252s, Deutsch, T\303\274rk\303\247e, Italiano, Nederlands, Svenska, Suomi, Chinese\n");
         f_printf(&f, "Language = %s\n", Launcher_LanguageName());
         f_printf(&f, "\n# Options: Start, Select, L, A, B\n");
+        f_printf(&f, "Hold to exit = %s\n", DSStyle_ButtonName(ds_exit_button));
+        f_printf(&f, "Menu button 1 = %s\n", DSStyle_ButtonName(ds_menu_first));
+        f_printf(&f, "Menu button 2 = %s\n", DSStyle_ButtonName(ds_menu_second));
         f_printf(&f, "Quick start hotkey = %s\n", Launcher_KeyName((u8)gl_auto_start_key));
         f_printf(&f, "\n# Options: Clean, Addon\n");
         f_printf(&f, "Last launch mode = %s\n", (launcher_last_launch_mode == LAST_LAUNCH_MODE_ADDON) ? "Addon" : "Clean");
@@ -12072,6 +12146,11 @@ static void Launcher_ShowHelpOnline(void)
 
 static void Launcher_DrawHelpControls(void)
 {
+    char menu[40], hold[40];
+    snprintf(menu, sizeof(menu), "%s: %s + %s", Launcher_SettingsText(SETTINGS_TEXT_MENU_BUTTON),
+             DSStyle_ButtonName(ds_menu_first), DSStyle_ButtonName(ds_menu_second));
+    snprintf(hold, sizeof(hold), "%s: %s (3 s)", Launcher_SettingsText(SETTINGS_TEXT_HOLD_EXIT),
+             DSStyle_ButtonName(ds_exit_button));
     const char *lines[] =
     {
         DSTEXT_CONTROL_A,
@@ -12084,8 +12163,8 @@ static void Launcher_DrawHelpControls(void)
         DSTEXT_CONTROL_QUICK_HOTKEY,
         DSTEXT_CONTROL_QUICK_ACTION,
         "In game: GBA Addon / GB / GBC",
-        "Start + Select: Open menu",
-        "Hold Select 3 sec: Exit game"
+        menu,
+        hold
     };
     Launcher_ShowHelpTextPages(DSTEXT_CONTROLS_TITLE, lines, sizeof(lines) / sizeof(lines[0]));
 }
@@ -12230,12 +12309,12 @@ static void Launcher_ShowHelpTopic(u32 topic)
         "- Boot mode chooses Clean,",
         "  Addon or Menu by default.",
         "In-game options",
-        "- Sleep hotkey chooses the",
-        "  in-game sleep command.",
-        "- Start + Select opens the",
-        "  menu (GBA Addon, GB/GBC).",
-        "- Hold Select for 3 seconds",
-        "  to exit to the launcher.",
+        "- Set Hold to exit and both",
+        "  menu buttons in Addon",
+        "  settings (GBA Addon, GB/GBC).",
+        "- Press both menu buttons,",
+        "  or hold the exit button",
+        "  for about 3 seconds.",
         "- Enable BIOS shows the GBA",
         "  intro before a game starts.",
         "- Backup saves keeps copies",
@@ -14192,7 +14271,7 @@ int main(void) {
 	}
 	scanKeys();
 	startup_keys_held = keysHeld();
-	launcher_return_select_held = ds_return_pending && (startup_keys_held & KEY_SELECT);
+	launcher_return_held = ds_return_pending ? startup_keys_held : 0;
 	startup_quicklaunch_pending = 0;
 	if(ds_return_pending) launcher_splash_fade_pending = 0;
 	else Launcher_RevealSplash();
@@ -14221,6 +14300,7 @@ int main(void) {
 	Launcher_ReadListFoldersSetting();
 	Launcher_ReadWrapAroundSetting();
 	Launcher_ReadMotionSettings();
+	DSStyle_ReadHotkeys();
 	Launcher_ReadClockFormatSetting();
 	Launcher_ReadViewModeSetting();
 	Launcher_ReadListArtPositionSetting();

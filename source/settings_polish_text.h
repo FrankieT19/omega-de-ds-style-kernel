@@ -3,26 +3,27 @@
 #define DS_STYLE_SETTINGS_POLISH_TEXT_H
 enum { SETTINGS_TEXT_SYSTEM, SETTINGS_TEXT_ART_POSITION, SETTINGS_TEXT_VIEW_OPTIONS,
        SETTINGS_TEXT_AUTO, SETTINGS_TEXT_FEATURED, SETTINGS_TEXT_WRAP,
-       SETTINGS_TEXT_START_SCREEN, SETTINGS_TEXT_EXCEPT_START };
-static const struct { u16 language; const char *labels[8]; } launcher_settings_labels[] = {
-    {0xE1E1, {"Open SYSTEM", "Art position", "View options", "Auto", "Featured games", "Wrap around", "Start screen", "No Start screen"}},
-    {0xE101, {"Open SYSTEM", "Art position", "View options", "Auto", "Featured games", "Wrap around", "Start screen", "No Start screen"}},
-    {0xE102, {"Abrir SYSTEM", "Posici\303\263n arte", "Opc. de vista", "Auto", "Juegos inicio", "Naveg. c\303\255clica", "Pantalla inicio", "Sin inicio"}},
-    {0xE103, {"Ouvrir SYSTEM", "Position image", "Options vue", "Auto", "Jeux affich\303\251s", "Boucle", "\303\211cran accueil", "Sauf accueil"}},
-    {0xE104, {"Abrir SYSTEM", "Posi\303\247\303\243o da art", "Op\303\247\303\265es vista", "Auto", "Jogos iniciais", "Naveg. c\303\255clica", "Ecr\303\243 inicial", "Sem in\303\255cio"}},
-    {0xE105, {"SYSTEM \303\266ffnen", "Bildposition", "Ansichtsoption", "Auto", "Startspiele", "Endloslauf", "Startbildschirm", "Ohne Startbild"}},
-    {0xE106, {"SYSTEM'i a\303\247", "Resim konumu", "G\303\266r\303\274n\303\274m ayar\304\261", "Otomatik", "\303\226ne \303\247\304\261kanlar", "D\303\266ng\303\274", "Ba\305\237lang\304\261\303\247 ekran\304\261", "Ba\305\237lang\304\261\303\247 hari\303\247"}},
-    {0xE107, {"Apri SYSTEM", "Posizione arte", "Opzioni vista", "Auto", "Giochi avvio", "Scorr. ciclico", "Schermata avvio", "Escluso avvio"}},
-    {0xE108, {"Open SYSTEM", "Beeldpositie", "Weergaveopties", "Auto", "Startspellen", "Doorlopen", "Startscherm", "Zonder start"}},
-    {0xE109, {"\303\226ppna SYSTEM", "Bildplacering", "Vyalternativ", "Auto", "Startspel", "Rulla runt", "Startsk\303\244rm", "Utom startsk\303\244rm"}},
-    {0xE10A, {"Avaa SYSTEM", "Kuvan sijainti", "N\303\244kym\303\244aset.", "Autom.", "Aloituspelit", "Kiertoselaus", "Aloitusn\303\244ytt\303\266", "Ei aloituksessa"}},
-    {0xE2E2, {"\264\362\277\252SYSTEM", "\315\274\306\254\316\273\326\303", "\312\323\315\274\321\241\317\356", "\327\324\266\257", "\312\327\322\263\323\316\317\267", "\321\255\273\267\344\257\300\300", "\277\252\312\274\273\255\303\346", "\277\252\312\274\273\255\303\346\263\375\315\342"}},
-    {0x0E01, {"\340\271\200\340\270\233\340\270\264\340\270\224 SYSTEM", "\340\270\225\340\270\263\340\271\201\340\270\253\340\270\231\340\271\210\340\270\207\340\270\240\340\270\262\340\270\236", "\340\270\225\340\270\261\340\270\247\340\271\200\340\270\245\340\270\267\340\270\255\340\270\201\340\270\241\340\270\270\340\270\241\340\270\241\340\270\255\340\270\207", "\340\270\255\340\270\261\340\270\225\340\271\202\340\270\231\340\270\241\340\270\261\340\270\225\340\270\264", "\340\271\200\340\270\201\340\270\241\340\270\253\340\270\231\340\271\211\340\270\262\340\271\201\340\270\243\340\270\201", "\340\270\247\340\270\231\340\270\243\340\270\262\340\270\242\340\270\201\340\270\262\340\270\243", "\340\270\253\340\270\231\340\271\211\340\270\262\340\271\200\340\270\243\340\270\264\340\271\210\340\270\241\340\270\225\340\271\211\340\270\231", "\340\270\242\340\270\201\340\271\200\340\270\247\340\271\211\340\270\231\340\270\253\340\270\231\340\271\211\340\270\262\340\271\201\340\270\243\340\270\201"}},
+       SETTINGS_TEXT_START_SCREEN, SETTINGS_TEXT_EXCEPT_START,
+       SETTINGS_TEXT_HOLD_EXIT, SETTINGS_TEXT_MENU_BUTTON };
+static const struct { u16 language; const char *labels[10]; } launcher_settings_labels[] = {
+    {0xE1E1, {"Open SYSTEM", "Art position", "View options", "Auto", "Featured games", "Wrap around", "Start screen", "No Start screen", "Hold to exit", "Menu button"}},
+    {0xE101, {"Open SYSTEM", "Art position", "View options", "Auto", "Featured games", "Wrap around", "Start screen", "No Start screen", "Hold to exit", "Menu button"}},
+    {0xE102, {"Abrir SYSTEM", "Posici\303\263n arte", "Opc. de vista", "Auto", "Juegos inicio", "Naveg. c\303\255clica", "Pantalla inicio", "Sin inicio", "Mant. salir", "Bot\303\263n men\303\272"}},
+    {0xE103, {"Ouvrir SYSTEM", "Position image", "Options vue", "Auto", "Jeux affich\303\251s", "Boucle", "\303\211cran accueil", "Sauf accueil", "Maint. sortie", "Touche menu"}},
+    {0xE104, {"Abrir SYSTEM", "Posi\303\247\303\243o da art", "Op\303\247\303\265es vista", "Auto", "Jogos iniciais", "Naveg. c\303\255clica", "Ecr\303\243 inicial", "Sem in\303\255cio", "Seg. sair", "Bot\303\243o menu"}},
+    {0xE105, {"SYSTEM \303\266ffnen", "Bildposition", "Ansichtsoption", "Auto", "Startspiele", "Endloslauf", "Startbildschirm", "Ohne Startbild", "Halten: Ende", "Men\303\274taste"}},
+    {0xE106, {"SYSTEM'i a\303\247", "Resim konumu", "G\303\266r\303\274n\303\274m ayar\304\261", "Otomatik", "\303\226ne \303\247\304\261kanlar", "D\303\266ng\303\274", "Ba\305\237lang\304\261\303\247 ekran\304\261", "Ba\305\237lang\304\261\303\247 hari\303\247", "\303\207\304\261k\304\261\305\237: bas\304\261l\304\261", "Men\303\274 tu\305\237u"}},
+    {0xE107, {"Apri SYSTEM", "Posizione arte", "Opzioni vista", "Auto", "Giochi avvio", "Scorr. ciclico", "Schermata avvio", "Escluso avvio", "Tieni: esci", "Tasto menu"}},
+    {0xE108, {"Open SYSTEM", "Beeldpositie", "Weergaveopties", "Auto", "Startspellen", "Doorlopen", "Startscherm", "Zonder start", "Houd: stop", "Menuknop"}},
+    {0xE109, {"\303\226ppna SYSTEM", "Bildplacering", "Vyalternativ", "Auto", "Startspel", "Rulla runt", "Startsk\303\244rm", "Utom startsk\303\244rm", "H\303\245ll: avsluta", "Menyknapp"}},
+    {0xE10A, {"Avaa SYSTEM", "Kuvan sijainti", "N\303\244kym\303\244aset.", "Autom.", "Aloituspelit", "Kiertoselaus", "Aloitusn\303\244ytt\303\266", "Ei aloituksessa", "Pid\303\244: poistu", "Valikkonappi"}},
+    {0xE2E2, {"\264\362\277\252SYSTEM", "\315\274\306\254\316\273\326\303", "\312\323\315\274\321\241\317\356", "\327\324\266\257", "\312\327\322\263\323\316\317\267", "\321\255\273\267\344\257\300\300", "\277\252\312\274\273\255\303\346", "\277\252\312\274\273\255\303\346\263\375\315\342", "\263\244\260\264\315\313\263\366", "\262\313\265\245\274\374"}},
+    {0x0E01, {"\340\271\200\340\270\233\340\270\264\340\270\224 SYSTEM", "\340\270\225\340\270\263\340\271\201\340\270\253\340\270\231\340\271\210\340\270\207\340\270\240\340\270\262\340\270\236", "\340\270\225\340\270\261\340\270\247\340\271\200\340\270\245\340\270\267\340\270\255\340\270\201\340\270\241\340\270\270\340\270\241\340\270\241\340\270\255\340\270\207", "\340\270\255\340\270\261\340\270\225\340\271\202\340\270\231\340\270\241\340\270\261\340\270\225\340\270\264", "\340\271\200\340\270\201\340\270\241\340\270\253\340\270\231\340\271\211\340\270\262\340\271\201\340\270\243\340\270\201", "\340\270\247\340\270\231\340\270\243\340\270\262\340\270\242\340\270\201\340\270\262\340\270\243", "\340\270\253\340\270\231\340\271\211\340\270\262\340\271\200\340\270\243\340\270\264\340\271\210\340\270\241\340\270\225\340\271\211\340\270\231", "\340\270\242\340\270\201\340\271\200\340\270\247\340\271\211\340\270\231\340\270\253\340\270\231\340\271\211\340\270\262\340\271\201\340\270\243\340\270\201", "\340\270\201\340\270\224\340\270\204\340\271\211\340\270\262\340\270\207\340\270\255\340\270\255\340\270\201", "\340\270\233\340\270\270\340\271\210\340\270\241\340\271\200\340\270\241\340\270\231\340\270\271"}},
 };
 static const char *Launcher_SettingsText(u32 key)
 {
     u32 i;
-    if(key>=8) return "";
+    if(key>=10) return "";
     for(i=0;i<sizeof(launcher_settings_labels)/sizeof(launcher_settings_labels[0]);i++)
         if(launcher_settings_labels[i].language==gl_select_lang) return launcher_settings_labels[i].labels[key];
     return launcher_settings_labels[0].labels[key];

@@ -472,7 +472,10 @@ void Patch_RTS_Cheat(u32 *Data)
   u32 RTS_Reset_key_offset = (u8*)RTS_Reset_key - p_patch_start;
  	u32 RTS_Sleep_key_offset = (u8*)RTS_Sleep_key - p_patch_start;
 
-  *(vu32*)(patchbuffer+RTS_Reset_key_offset) = 0x3F3;
+  extern u16 DSStyle_MenuButtons(void), DSStyle_ExitButton(void);
+  extern const u8 Slot_RTS_HoldEnabled[];
+  *(vu32*)(patchbuffer+RTS_Reset_key_offset) = 0x3ff ^ DSStyle_MenuButtons();
+  *(vu32*)(patchbuffer+(Slot_RTS_HoldEnabled-p_patch_start)) = DSStyle_ExitButton();
   if(gl_sleep_on !=1){
     *(vu32*)(patchbuffer+RTS_Sleep_key_offset) = 0;
   }

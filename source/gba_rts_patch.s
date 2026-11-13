@@ -126,7 +126,8 @@ RTS_irq:
 	@;check ingamemenu
 	adr 		r3,RTS_Reset_key
 	ldr 		r3,[r3]
-	cmp 		r2,r3
+	bic r3,r2,r3
+	lsls r3,r3,#22
 	bne			check_sleep
 	@;----------------------
 	adrl		r12, spend_0x80
@@ -175,11 +176,11 @@ nocheat:
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	.include "slot_gba_return.inc"
 Slot_RTS_HoldEnabled:
-	.word 1
+	.word 4
 RTS_Sleep_key:
 	.word 0xFB @;L+R+select
 RTS_Reset_key:
-	.word 0xF7 @;L+R+Start
+	.word 0x3f3
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DSStyle_ReturnDark:
     stmfd sp!,{r4,lr}
@@ -658,7 +659,16 @@ menu_next_row:
     blt menu_row
     adrl r0,spend_0x80
     ldr r0,[r0]
+    ldr r1,[r0,#0x2c]
     str r11,[r0,#0x2c]
+    cmn r1,#1
+    bne waitSeletc
+    ldr r0,=0x3ff
+    ldr r8,=0x4000130
+wait_menu_release:
+    ldrh r9,[r8]
+    cmp r9,r0
+    bne wait_menu_release
 waitSeletc:
     ldr r0,=0x3ff
     ldr r8,=0x4000130

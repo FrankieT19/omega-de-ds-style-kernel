@@ -54,7 +54,9 @@ static void DSStyle_CaptureReturn(PAGE_NUM page, u32 offset, u32 row)
 
 static void DSStyle_ArmReturn(unsigned platform, const char *filename)
 {
-    unsigned options = SLOT_RETURN_HOLD_ENABLED;
+    unsigned options = SLOT_RETURN_HOLD_ENABLED |
+        ((unsigned)DSStyle_ExitButton() << DS_RETURN_EXIT_SHIFT) |
+        ((unsigned)DSStyle_MenuButtons() << DS_RETURN_MENU_SHIFT);
     u16 menu_palette[] = {0x4453, gl_color_selectBG_sd, gl_color_selected};
     if(launcher_dark_mode || (launcher_custom_theme_mode && LAUNCHER_CUSTOM_THEME_DARK_STYLE))
         options |= DS_RETURN_DARK;

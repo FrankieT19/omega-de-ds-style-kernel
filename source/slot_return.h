@@ -11,6 +11,10 @@
 #define SLOT_RETURN_COOKIE_MAGIC 0x53574a45u
 #define SLOT_RETURN_HOLD_ENABLED 1u
 #define DS_RETURN_DARK 2u
+#define DS_RETURN_EXIT_SHIFT 2u
+#define DS_RETURN_MENU_SHIFT 12u
+#define DS_RETURN_KEY_MASK 0x3ffu
+#define DS_RETURN_OPTION_MASK 0x3fffffu
 typedef struct {
     uint32_t magic,checksum,requested,requested_inverse,platform;
     char filename[100];
@@ -29,7 +33,7 @@ static unsigned Slot_ReturnValid(const SlotReturnRecord *record)
 {
     unsigned i;
     if(record->magic!=SLOT_RETURN_MAGIC || record->platform>=3 ||
-       (record->options&~(SLOT_RETURN_HOLD_ENABLED | DS_RETURN_DARK)) || record->reserved ||
+       (record->options&~DS_RETURN_OPTION_MASK) || record->reserved ||
        record->requested!=SLOT_RETURN_REQUEST || record->requested_inverse!=~SLOT_RETURN_REQUEST ||
        !record->filename[0] || record->filename[99] || record->checksum!=Slot_ReturnChecksum(record))return 0;
     for(i=0;record->filename[i];i++)if(record->filename[i]=='/' || record->filename[i]=='\\' ||

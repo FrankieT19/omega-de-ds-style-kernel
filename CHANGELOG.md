@@ -1,5 +1,9 @@
 # Changelog
 
+## DS Style v8.2
+
+- Added rebindable in-game menu and hold-to-exit shortcuts for GBA add-ons and GB/GBC games.
+
 ## DS Style v8.1
 
 - Added a redesigned in-game add-on menu with Light and Dark palettes.

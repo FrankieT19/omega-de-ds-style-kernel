@@ -4,13 +4,16 @@
 .macro SLOT_HOLD_TICK scratch, enabled, reset_target
     adrl r12,\scratch
     ldr r12,[r12]
-    tst r2,#4
-    bne .Lhold_clear\@
-    tst r2,#8
-    beq .Lhold_clear\@
     adrl r3,\enabled
     ldr r3,[r3]
     cmp r3,#0
+    beq .Lhold_clear\@
+    tst r2,r3
+    bne .Lhold_clear\@
+    adrl r3,RTS_Reset_key
+    ldr r3,[r3]
+    bic r3,r2,r3
+    lsls r3,r3,#22
     beq .Lhold_clear\@
     stmfd sp!,{r1,r4-r5}
     ldr r4,[r12,#0x7c]
